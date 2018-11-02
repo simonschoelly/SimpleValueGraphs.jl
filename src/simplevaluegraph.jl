@@ -4,12 +4,11 @@
 #  ======================================================
 
 mutable struct SimpleValueGraph{T<:Integer, U} <: AbstractSimpleValueGraph{T, U}
-    ne::Integer
+    ne::Int
     fadjlist::Vector{Vector{T}}
     value_fadjlist::Vector{Vector{U}}
 end
 
-SimpleValueGraph(nv::Integer) = SimpleValueGraph(nv::Integer, default_value_type)
 
 function SimpleValueGraph(nv::T, ::Type{U}) where {T<:Integer, U} 
     fadjlist = Vector{Vector{T}}(undef, nv)
@@ -20,6 +19,9 @@ function SimpleValueGraph(nv::T, ::Type{U}) where {T<:Integer, U}
     end
     SimpleValueGraph(0, fadjlist, value_fadjlist)
 end
+
+SimpleValueGraph(nv::Integer) = SimpleValueGraph(nv::Integer, default_value_type)
+SimpleValueGraph{T, U}(n::T) where {T, U} = SimpleValueGraph(n, U)
 
 SimpleValueGraph(g::SimpleGraph) = SimpleValueGraph(g, default_value_type)
 
@@ -32,7 +34,7 @@ function SimpleValueGraph(g::SimpleGraph{T}, ::Type{U}) where {T, U}
         len = length(fadjlist[u])
         list = Vector{U}(undef, len)
         for i in Base.OneTo(len) 
-            list[i] = default_value(SimpleValueGraph{T, U})
+            list[i] = default_value(U)
         end
         value_fadjlist[u] = list
     end
@@ -43,7 +45,7 @@ end
 # Interface
 # =========================================================
 
-function add_edge!(g::SimpleValueGraph{T, U}, s::T, d::T, value::U) where {T, U}
+function add_edge!(g::SimpleValueGraph{T, U}, s::T, d::T, value::U=default_value(U)) where {T, U}
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
     @inbounds list = g.fadjlist[s]
@@ -72,7 +74,7 @@ function add_edge!(g::SimpleValueGraph{T, U}, s::T, d::T, value::U) where {T, U}
 end
 
 add_edge!(g::SimpleValueGraph, e::SimpleEdge) =
-                add_edge!(g, src(e), dst(e), default_value(g))
+                add_edge!(g, src(e), dst(e))
 add_edge!(g::SimpleValueGraph, e::SimpleEdge, u) =
                 add_edge!(g, src(e), dst(e), u)
 add_edge!(g::SimpleValueGraph, e::SimpleValueEdge) =
@@ -94,6 +96,9 @@ rem_edge!(g::SimpleValueGraph, e::SimpleEdge) =
                 rem_edge!(g, src(e), dst(e))
 rem_edge!(g::SimpleValueGraph, e::SimpleValueEdge) =
                 rem_edge!(g, src(e), dst(e))
+
+
+# TODO rem_vertex!, rem_vertices!
 
 
 function has_edge(g::SimpleValueGraph{T, U}, s::T, d::T) where {T, U}
@@ -172,6 +177,13 @@ nv(g::SimpleValueGraph) = length(g.fadjlist)
 ne(g::SimpleValueGraph) = g.ne
 
 zero(G::SimpleValueGraph{T}) where {T} = SimpleValueGraph(zero(T)) 
+
+function add_vertex!(g::SimpleValueGraph{T, U}) where {T, U}
+    (nv(g) + one(T) <= nv(g)) && return false # overflow
+    push!(g.fadjlist, T[])
+    push!(g.value_fadjlist, U[])
+    return true
+end
 
 # ====================================================================
 # Iterators

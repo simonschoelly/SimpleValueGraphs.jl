@@ -14,3 +14,5 @@ reverse(e::SimpleValueEdge) = SimpleValueEdge(e.dst, e.src, e.value)
 
 show(io::IO, e::SimpleValueEdge) = print(io, "Edge $(e.src) => $(e.dst) with value $(e.value)")
 
+Tuple(e::SimpleValueEdge) = (e.src, e.dst, e.value)
+
