@@ -83,13 +83,21 @@ add_edge!(g::SimpleValueGraph, e::SimpleValueEdge) =
 function rem_edge!(g::SimpleValueGraph{T, U}, s::T, d::T) where {T, U}
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
-    @inbounds list_s = g.fadjlist[s]
-    @inbounds list_d = g.fadjlist[d]
-    if length(list_s) > length(list_d)
-        d = s
-        list_s = list_d
-    end
-    return LightGraphs.insorted(d, list_s)
+    @inbounds list = g.fadjlist[s]
+    index = searchsortedfirst(list, d)
+    @inbounds (index <= length(list) && list[index] == d) || return false
+    deleteat!(list, index)
+    deleteat!(g.value_fadjlist[s], index)
+
+    g.ne -= 1
+    s == d && return true # self-loop
+
+    @inbounds list = g.fadjlist[d]
+    index = searchsortedfirst(list, s)
+    deleteat!(list, index)
+    deleteat!(g.value_fadjlist[d], index)
+
+    return true
 end
 
 rem_edge!(g::SimpleValueGraph, e::SimpleEdge) =
@@ -149,14 +157,10 @@ function get_value(g::SimpleValueGraph{T, U}, s::T, d::T, default=Base.zero(U)) 
     return default    
 end
 
-eltype(::SimpleValueGraph{T, U}) where {T, U} = T
-edgetype(::SimpleValueGraph{T, U}) where {T, U} = SimpleValueEdge{T, U}
 
 is_directed(::Type{<:SimpleValueGraph}) = false
 is_directed(g::SimpleValueGraph) where {T, U} = false
 
-vertices(g::SimpleValueGraph) = Base.OneTo(nv(g))
-has_vertex(g::SimpleValueGraph, v) = v ∈ vertices(g) 
 
 outneighbors(g::SimpleValueGraph{T, U}, v::T) where {T, U} = g.fadjlist[v]
 inneighbors(g::SimpleValueGraph{T, U}, v::T) where {T, U} = outneighbors(g, v) 
@@ -171,12 +175,6 @@ all_edgevals(g::SimpleValueGraph{T, U}, v::T) where {T, U} =
     outedgevals(g, v)
 
 
-edges(g::SimpleValueGraph) = SimpleValueEdgeIter(g)
-
-nv(g::SimpleValueGraph) = length(g.fadjlist)
-ne(g::SimpleValueGraph) = g.ne
-
-zero(G::SimpleValueGraph{T}) where {T} = SimpleValueGraph(zero(T)) 
 
 function add_vertex!(g::SimpleValueGraph{T, U}) where {T, U}
     (nv(g) + one(T) <= nv(g)) && return false # overflow
@@ -189,22 +187,8 @@ end
 # Iterators
 # ====================================================================
 
-struct SimpleValueEdgeIter{G} <: AbstractEdgeIter 
-    g::G
-end
 
-#=
-function iterate(iter::SimpleValueEdgeIter)
-    T = eltype(iter.g)
-    return iterate(iter, (one(T), )
-end
-=#
-
-length(iter::SimpleValueEdgeIter) = ne(iter.g)
-eltype(::Type{SimpleValueEdgeIter{SimpleValueGraph{T, U}}}) where {T, U} = 
-        SimpleValueEdge{T, U}
-
-function iterate(iter::SimpleValueEdgeIter, state=(one(eltype(iter.g)), 1) )
+function iterate(iter::SimpleValueEdgeIter{<:SimpleValueGraph}, state=(one(eltype(iter.g)), 1) )
     g = iter.g
     fadjlist = g.fadjlist
     n = nv(g)
@@ -226,25 +210,4 @@ function iterate(iter::SimpleValueEdgeIter, state=(one(eltype(iter.g)), 1) )
     return e, (u, i + 1)
 end
 
-# =============
-# weight matrix
-# =====================
 
-struct SimpleValueMatrix{T, U} <: AbstractMatrix{U}
-    g::SimpleValueGraph{T, U}
-end
-
-weights(g::SimpleValueGraph) = SimpleValueMatrix(g)
-
-function getindex(A::SimpleValueMatrix{T, U}, s::T, d::T) where {T, U}
-    return get_value(A.g, s, d)
-end
-
-function size(A::SimpleValueMatrix) 
-    n = nv(A.g)
-    return (n, n)
-end
-
-function replace_in_print_matrix(A::SimpleValueMatrix{T, U}, s::T, d::T, str::AbstractString) where {T<:Integer, U}
-    has_edge(A.g, s, d) ? str : Base.replace_with_centered_mark(str)
-end

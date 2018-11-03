@@ -20,6 +20,8 @@ import LightGraphs:
 export AbstractSimpleValueGraph, SimpleValueGraph, SimpleValueDiGraph, SimpleValueEdge,
     outedgevals, inedgevals, edgevals, all_edgevals, get_value, map_edge_vals! #, kruskal_mst_modified
 
+# ===== AbstractSimpleValueGraph ==========
+
 abstract type AbstractSimpleValueGraph{T<:Integer, U} <: AbstractGraph{T} end
 
 const default_value_type = Float64
@@ -29,11 +31,40 @@ value_type(g::AbstractSimpleValueGraph{T, U}) where {T, U} = U
 default_value(U) = oneunit(U)
 default_value(::Type{Nothing}) = nothing
 
+
+eltype(::AbstractSimpleValueGraph{T, U}) where {T, U} = T
+edgetype(::AbstractSimpleValueGraph{T, U}) where {T, U} = SimpleValueEdge{T, U}
+
+edges(g::AbstractSimpleValueGraph) = SimpleValueEdgeIter(g)
+
+nv(g::AbstractSimpleValueGraph) = length(g.fadjlist)
+ne(g::AbstractSimpleValueGraph) = g.ne
+
+zero(G::AbstractSimpleValueGraph{T}) where {T} = G(zero(T))
+
+vertices(g::AbstractSimpleValueGraph) = Base.OneTo(nv(g))
+has_vertex(g::AbstractSimpleValueGraph, v) = v ∈ vertices(g)
+
+struct SimpleValueEdgeIter{G<:AbstractSimpleValueGraph} <: AbstractEdgeIter
+    g::G
+end
+
+length(iter::SimpleValueEdgeIter) = ne(iter.g)
+eltype(::Type{SimpleValueEdgeIter{<:AbstractSimpleValueGraph{T, U}}}) where {T, U} =
+        SimpleValueEdge{T, U}
+
+
+# ==== Includes ===========================
+
+
 include("simplevalueedge.jl")
 include("simplevaluegraph.jl")
 include("simplevaluedigraph.jl")
+include("matrices.jl")
 
 include("operators.jl")
 # include("modified_functions.jl")
+
+
 
 end # module
