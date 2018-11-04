@@ -53,6 +53,10 @@ length(iter::SimpleValueEdgeIter) = ne(iter.g)
 eltype(::Type{SimpleValueEdgeIter{<:AbstractSimpleValueGraph{T, U}}}) where {T, U} =
         SimpleValueEdge{T, U}
 
+function show(io::IO, g::AbstractSimpleValueGraph)
+    dir = is_directed(g) ? "directed" : "undirected"
+    println(io, "{$(nv(g)), $(ne(g))} $dir $(eltype(g)) SimpleValueGraph with values of type $(eltype(g))")
+end
 
 # ==== Includes ===========================
 

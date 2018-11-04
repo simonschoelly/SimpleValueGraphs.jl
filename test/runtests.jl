@@ -309,9 +309,8 @@ end
 @testset "non_backtracking_matrix" begin
     # TODO this functions and non_backtracking_randomwalk do not work yet
 end
-
+=#
 @testset "num_self_loops" begin
-    # TODO there seem to be some errors
     g = graph_with_randvals(testgraphA())
     @test num_self_loops(g) == 0
     add_edge!(g, 3, 3)
@@ -320,6 +319,7 @@ end
     @test num_self_loops(g) == 2
 end
 
+#=
 @testset "outdegree" begin
     g = erdos_renyi(20, 30)
     h = graph_with_randvals(g)
