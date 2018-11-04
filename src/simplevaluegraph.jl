@@ -157,6 +157,23 @@ function get_value(g::SimpleValueGraph{T, U}, s::T, d::T, default=Base.zero(U)) 
     return default    
 end
 
+# TODO rest methods for set_value!
+function set_value!(g::SimpleValueGraph{T, U}, s::T, d::T, value::U) where {T, U}
+     verts = vertices(g)
+    (s in verts && d in verts) || return false
+    @inbounds list = g.fadjlist[s]
+    index = searchsortedfirst(list, d)
+    @inbounds index <= length(list) && list[index] == d || return false
+    @inbounds g.value_fadjlist[s][index] = value
+
+    @inbounds list = g.fadjlist[d]
+    index = searchsortedfirst(list, s)
+    @inbounds g.value_fadjlist[d][index] = value
+
+    return true
+end
+
+
 
 is_directed(::Type{<:SimpleValueGraph}) = false
 is_directed(g::SimpleValueGraph) where {T, U} = false

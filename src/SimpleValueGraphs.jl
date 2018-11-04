@@ -18,15 +18,13 @@ import LightGraphs:
      
 
 export AbstractSimpleValueGraph, SimpleValueGraph, SimpleValueDiGraph, SimpleValueEdge,
-    outedgevals, inedgevals, edgevals, all_edgevals, get_value, map_edge_vals! #, kruskal_mst_modified
+    outedgevals, inedgevals, edgevals, all_edgevals, get_value, set_value!, map_edge_vals! #, kruskal_mst_modified
 
 # ===== AbstractSimpleValueGraph ==========
 
 abstract type AbstractSimpleValueGraph{T<:Integer, U} <: AbstractGraph{T} end
 
 const default_value_type = Float64
-#default_value(g::AbstractSimpleValueGraph{T, U}) where {T, U} = default_value(U)
-#default_value(::Type{<:AbstractSimpleValueGraph{T, U}}) where {T, U} = oneunit(U)
 value_type(g::AbstractSimpleValueGraph{T, U}) where {T, U} = U
 default_value(U) = oneunit(U)
 default_value(::Type{Nothing}) = nothing
