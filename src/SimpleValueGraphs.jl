@@ -65,6 +65,7 @@ include("matrices.jl")
 include("operators.jl")
 # include("modified_functions.jl")
 
+include("export.jl")
 
 
 end # module

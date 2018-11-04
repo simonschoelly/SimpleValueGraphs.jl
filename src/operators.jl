@@ -58,4 +58,22 @@ function map_edge_vals!(f::Function, g::SimpleValueGraph)
     end
 end
 
+function map_edge_vals!(f::Function, g::SimpleValueDiGraph)
+    T = eltype(g)
+    n = nv(g)
+    fadjlist = g.fadjlist
+    value_fadjlist = g.value_fadjlist
+    for i = 1:n
+        list_i = fadjlist[i]
+        len = length(list_i)
+        index = 1
+        while index <= len
+            j = list_i[index]
+            new_val = f(T(j), T(i), value_fadjlist[i][index])
+            value_fadjlist[i][index] = new_val
+
+            index += 1
+        end
+    end
+end
 
