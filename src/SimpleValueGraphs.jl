@@ -22,23 +22,30 @@ export AbstractSimpleValueGraph, SimpleValueGraph, SimpleValueDiGraph, SimpleVal
 
 # ===== AbstractSimpleValueGraph ==========
 
-abstract type AbstractSimpleValueGraph{T<:Integer, U} <: AbstractGraph{T} end
-
-const default_value_type = Float64
-value_type(g::AbstractSimpleValueGraph{T, U}) where {T, U} = U
-default_value(U) = oneunit(U)
-default_value(::Type{Nothing}) = nothing
+abstract type AbstractSimpleValueGraph{V<:Integer, E_VAL} <: AbstractGraph{V} end
 
 
-eltype(::AbstractSimpleValueGraph{T, U}) where {T, U} = T
-edgetype(::AbstractSimpleValueGraph{T, U}) where {T, U} = SimpleValueEdge{T, U}
+const TupleOrNamedTuple = Union{Tuple, NamedTuple} # TODO maybe somewhere else?
+
+const default_edge_val_type = Float64
+edge_val_type(g::AbstractSimpleValueGraph{V, E_VAL}) where {V, E_VAL} = E_VAL
+default_edge_val(E_VAL) = oneunit(E_VAL)
+default_edge_val(::Type{Nothing}) = nothing
+default_edge_val(T::Type{<:TupleOrNamedTuple}) = T( default_edge_val(U) for U in T.types )
+
+default_zero_edge_val(E_VAL) = zero(E_VAL)
+default_zero_edge_val(T::Type{<:TupleOrNamedTuple}) = T( default_zero_edge_val(U) for U in T.types )
+
+
+eltype(::AbstractSimpleValueGraph{V}) where {V} = V
+edgetype(::AbstractSimpleValueGraph{V, E_VAL}) where {V, E_VAL} = SimpleValueEdge{V, E_VAL}
 
 edges(g::AbstractSimpleValueGraph) = SimpleValueEdgeIter(g)
 
 nv(g::AbstractSimpleValueGraph) = length(g.fadjlist)
 ne(g::AbstractSimpleValueGraph) = g.ne
 
-zero(G::AbstractSimpleValueGraph{T}) where {T} = G(zero(T))
+zero(G::AbstractSimpleValueGraph{V}) where {V} = G(zero(V))
 
 vertices(g::AbstractSimpleValueGraph) = Base.OneTo(nv(g))
 has_vertex(g::AbstractSimpleValueGraph, v) = v ∈ vertices(g)
@@ -48,8 +55,8 @@ struct SimpleValueEdgeIter{G<:AbstractSimpleValueGraph} <: AbstractEdgeIter
 end
 
 length(iter::SimpleValueEdgeIter) = ne(iter.g)
-eltype(::Type{SimpleValueEdgeIter{<:AbstractSimpleValueGraph{T, U}}}) where {T, U} =
-        SimpleValueEdge{T, U}
+eltype(::Type{SimpleValueEdgeIter{<:AbstractSimpleValueGraph{V, E_VAL}}}) where {V, E_VAL} =
+        SimpleValueEdge{V, E_VAL}
 
 function show(io::IO, g::AbstractSimpleValueGraph)
     dir = is_directed(g) ? "directed" : "undirected"
@@ -58,7 +65,7 @@ end
 
 # ==== Includes ===========================
 
-
+include("utils.jl")
 include("simplevalueedge.jl")
 include("simplevaluegraph.jl")
 include("simplevaluedigraph.jl")
