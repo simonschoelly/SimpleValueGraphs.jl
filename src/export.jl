@@ -13,7 +13,7 @@ function show(io::IO, m::MIME"text/vnd.graphviz", g::AbstractSimpleValueGraph)
     edge_symbol = is_directed(g) ? "->" : "--"
     println(io, "$graph_symbol {")
     for e in edges(g)
-        s, d, v = src(e), dst(e), edgeval(e)
+        s, d, v = src(e), dst(e), edge_val(e)
         println(io, "$s $edge_symbol $d [value = \"$(graphviz_identifier(v))\"];")
     end
     println(io, "}")

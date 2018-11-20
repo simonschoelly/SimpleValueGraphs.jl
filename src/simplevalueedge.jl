@@ -8,7 +8,7 @@ end
 
 src(e::SimpleValueEdge) = e.src
 dst(e::SimpleValueEdge) = e.dst
-edgeval(e::SimpleValueEdge) = e.value 
+edge_val(e::SimpleValueEdge) = e.value
 
 reverse(e::SimpleValueEdge) = SimpleValueEdge(e.dst, e.src, e.value)
 

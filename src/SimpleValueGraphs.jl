@@ -18,7 +18,7 @@ import LightGraphs:
      
 
 export AbstractSimpleValueGraph, SimpleValueGraph, SimpleValueDiGraph, SimpleValueEdge,
-    outedgevals, inedgevals, edgevals, all_edgevals, get_value, set_value!, map_edge_vals! #, kruskal_mst_modified
+    outedgevals, inedgevals, default_edge_val, edge_val_type, edge_val, edgevals, all_edgevals, get_value, set_value!, map_edge_vals! #, kruskal_mst_modified
 
 # ===== AbstractSimpleValueGraph ==========
 
@@ -42,7 +42,7 @@ edgetype(::AbstractSimpleValueGraph{V, E_VAL}) where {V, E_VAL} = SimpleValueEdg
 
 edges(g::AbstractSimpleValueGraph) = SimpleValueEdgeIter(g)
 
-nv(g::AbstractSimpleValueGraph) = length(g.fadjlist)
+nv(g::AbstractSimpleValueGraph) = eltype(g)(length(g.fadjlist))
 ne(g::AbstractSimpleValueGraph) = g.ne
 
 zero(G::AbstractSimpleValueGraph{V}) where {V} = G(zero(V))

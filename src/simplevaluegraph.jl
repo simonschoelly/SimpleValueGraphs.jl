@@ -32,15 +32,12 @@ function SimpleValueGraph(g::SimpleGraph{V}, ::Type{E_VAL}) where {V, E_VAL}
     n = nv(g)
     ne_ = ne(g)
     fadjlist = deepcopy(g.fadjlist)
-    edge_vals = Adjlist{E_VAL}(n)
+    edge_vals = Vector{Vector{E_VAL}}(undef, n)
     for u in Base.OneTo(n)
         len = length(fadjlist[u])
-        for i in Base.OneTo(len) 
-            list[i] = default_edge_val(E_VAL)
-        end
-        edge_vals[u] = list
+        edge_vals[u] = [default_edge_val(E_VAL) for _ in Base.OneTo(len)]
     end
-    SimpleValueGraph(ne_, fadjlist, edge_vals)
+    SimpleValueGraph{V, E_VAL, typeof(edge_vals)}(ne_, fadjlist, edge_vals)
 end
 
 
@@ -104,16 +101,15 @@ function add_edge!(g::SimpleValueGraph{V, E_VAL},
     s == d && return true # selfloop
 
     @inbounds list = g.fadjlist[d]
-    @inbounds val_list = g.edge_vals[d]
     index = searchsortedfirst(list, s)
     insert!(list, index, s)
-    insert_value_for_index!(g, s, index, value)
+    insert_value_for_index!(g, d, index, value)
     return true # edge successfully added
 end
 
 add_edge!(g::SimpleValueGraph, e::SimpleEdge)      = add_edge!(g, src(e), dst(e))
 add_edge!(g::SimpleValueGraph, e::SimpleEdge, u)   = add_edge!(g, src(e), dst(e), u)
-add_edge!(g::SimpleValueGraph, e::SimpleValueEdge) = add_edge!(g, src(e), dst(e), edgeval(e))
+add_edge!(g::SimpleValueGraph, e::SimpleValueEdge) = add_edge!(g, src(e), dst(e), edge_val(e))
 
 # TODO maybe move somewhere else
 function delete_value_for_index!(g::SimpleValueGraph{V, E_VAL},
@@ -198,7 +194,7 @@ end
 
 has_edge(g::SimpleValueGraph, e::SimpleEdge)      = has_edge(g, src(e), dst(e))
 has_edge(g::SimpleValueGraph, e::SimpleEdge, u)   = has_edge(g, src(e), dst(e), u)
-has_edge(g::SimpleValueGraph, e::SimpleValueEdge) = has_edge(g, src(e), dst(e), edgeval(e))
+has_edge(g::SimpleValueGraph, e::SimpleValueEdge) = has_edge(g, src(e), dst(e), edge_val(e))
 
 # TODO rest methods for get_value
 function get_value(g::SimpleValueGraph{T, U}, s::T, d::T, default=default_zero_edge_val(U)) where {T, U}
@@ -234,7 +230,7 @@ end
 
 # TODO maybe move this function somewhere else
 set_value!(g::SimpleValueGraph, e::SimpleEdge, u)   = set_value!(g, src(e), dst(e), u)
-set_value!(g::SimpleValueGraph, e::SimpleValueEdge) = set_value!(g, src(e), dst(e), edgeval(e))
+set_value!(g::SimpleValueGraph, e::SimpleValueEdge) = set_value!(g, src(e), dst(e), edge_val(e))
 
 
 is_directed(::Type{<:SimpleValueGraph})       = false
@@ -277,12 +273,13 @@ end
 function iterate(iter::SimpleValueEdgeIter{<:SimpleValueGraph}, state=(one(eltype(iter.g)), 1) )
     g = iter.g
     fadjlist = g.fadjlist
-    n = nv(g)
-    u, i = state
+    V = eltype(g)
+    n::V = nv(g)
+    u::V, i = state
 
     @inbounds while u < n
         if i > length(fadjlist[u])
-            u += 1
+            u += V(1)
             i = searchsortedfirst(fadjlist[u], u)
             continue
         end

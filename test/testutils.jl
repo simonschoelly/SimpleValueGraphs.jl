@@ -1,4 +1,82 @@
 # TODO this should contain helper functions for testing
+using InteractiveUtils: subtypes
+
+const test_vertex_types = subtypes(Signed) ∪ subtypes(Unsigned)
+#
+# TODO needs more different types, also tuples and named tuples, unitful units
+const test_edge_value_types = [Rational{Int}, Float16, Float64, BigFloat, Int, UInt8]
+
+function make_testgraphs(G::Type{SimpleGraph}; kwargs...)
+    return Channel(c -> _make_testgraphs(c, G, kwargs...))
+end
+
+function _make_testgraphs(c::Channel, ::Type{SimpleGraph}; kwargs...)
+    for V in test_vertex_types
+        g = SimpleGraph{V}(0)
+        info = """type: $(typeof(g))
+                  0-graph"""
+        put!(c, (graph=g, info=info))
+    end
+    for V in test_vertex_types
+        g = SimpleGraph{V}(1)
+        info = """type: $(typeof(g))
+                  1-graph"""
+        put!(c, (graph=g, info=info))
+    end
+    for V in test_vertex_types
+        g = SimpleGraph{V}(1)
+        add_edge!(g, 1, 1)
+        info = """type: $(typeof(g))
+                  1-graph with self-loop"""
+        put!(c, (graph=g, info=info))
+    end
+    for V in test_vertex_types
+        g = SimpleGraph{V}(2)
+        info = """type: $(typeof(g))
+                  2-vertex-graph, no edges"""
+        put!(c, (graph=g, info=info))
+    end
+    for V in test_vertex_types
+        g = SimpleGraph{V}(2)
+        add_edge!(g, 1, 2)
+        info = """type: $(typeof(g))
+                  2-vertex-graph, 1 edge"""
+        put!(c, (graph=g, info=info))
+    end
+    for V in test_vertex_types
+        g = SimpleGraph{V}(2)
+        add_edge!(g, 2, 2)
+        info = """type: $(typeof(g))
+                  2-vertex-graph, no edge, 1 self-loop"""
+        put!(c, (graph=g, info=info))
+    end
+    for V in test_vertex_types
+        g = SimpleGraph{V}(2)
+        add_edge!(g, 2, 2)
+        info = """type: $(typeof(g))
+                  2-vertex-graph, no edge, 2 self-loops"""
+        put!(c, (graph=g, info=info))
+    end
+    for V in test_vertex_types
+        g = SimpleGraph{V}(2)
+        add_edge!(g, 1, 2)
+        add_edge!(g, 1, 1)
+        info = """type: $(typeof(g))
+                  2-vertex-graph, 1 edge, 1 self-loop"""
+        put!(c, (graph=g, info=info))
+    end
+    for V in test_vertex_types
+        g = SimpleGraph{V}(2)
+        add_edge!(g, 1, 2)
+        add_edge!(g, 1, 1)
+        add_edge!(g, 2, 2)
+        info = """type: $(typeof(g))
+                  2-vertex-graph, 1 edge, 2 self-loops"""
+        put!(c, (graph=g, info=info))
+    end
+
+
+end
 
 
 function testgraphA()
