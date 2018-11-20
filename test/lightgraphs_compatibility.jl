@@ -81,12 +81,14 @@ end
     Base.print_matrix(stdout, weights(g2))
     # TODO cartesian product does not yet consider weights
 end
+=#
 
 @testset "common_neighbors" begin
     g = testgraphA()
     @test common_neighbors(g, 1, 2) == [4,5,6,7]
 end
 
+#=
 @testset "connected_components" begin
     g = testgraphA()
     @test length(connected_components(blockdiag(g,g))) == 2
