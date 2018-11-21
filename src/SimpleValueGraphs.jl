@@ -3,6 +3,8 @@ module SimpleValueGraphs
 using LightGraphs
 using LightGraphs.SimpleGraphs: AbstractSimpleGraph, AbstractSimpleEdge, SimpleEdge
 
+using Base: OneTo
+
 import Base: eltype, show, reverse, iterate, length, replace_in_print_matrix, getindex, size, zero, Tuple
 import SparseArrays: blockdiag
 import LightGraphs:
@@ -60,7 +62,7 @@ eltype(::Type{SimpleValueEdgeIter{<:AbstractSimpleValueGraph{V, E_VAL}}}) where 
 
 function show(io::IO, g::AbstractSimpleValueGraph)
     dir = is_directed(g) ? "directed" : "undirected"
-    println(io, "{$(nv(g)), $(ne(g))} $dir $(eltype(g)) SimpleValueGraph with values of type $(eltype(g))")
+    println(io, "{$(nv(g)), $(ne(g))} $dir $(eltype(g)) SimpleValueGraph with edge values of type $(edge_val_type(g))")
 end
 
 # ==== Includes ===========================

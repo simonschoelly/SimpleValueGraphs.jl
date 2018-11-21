@@ -4,7 +4,7 @@ using InteractiveUtils: subtypes
 const test_vertex_types = subtypes(Signed) ∪ subtypes(Unsigned)
 #
 # TODO needs more different types, also tuples and named tuples, unitful units
-const test_edge_value_types = [Rational{Int}, Float16, Float64, BigFloat, Int, UInt8]
+const test_edge_value_types = [Rational{Int}, Float16, Float64, BigFloat, Int, UInt8, Tuple{Int, Int}]
 
 function make_testgraphs(G::Type{SimpleGraph}; kwargs...)
     return Channel(c -> _make_testgraphs(c, G, kwargs...))

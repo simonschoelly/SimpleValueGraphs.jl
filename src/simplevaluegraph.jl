@@ -16,30 +16,56 @@ create_edge_val_list(nv, E_VAL::Type) = Adjlist{E_VAL}(nv)
 create_edge_val_list(nv, E_VAL::Type{<:Tuple}) = Tuple(Adjlist{T}(nv) for T in E_VAL.parameters)
 create_edge_val_list(nv, E_VAL::Type{<:NamedTuple}) = NamedTuple{Tuple(E_VAL.names)}(Adjlist{T}(nv) for T in E_VAL.types)
 
-function SimpleValueGraph(nv::V, E_VAL::Type) where {V<:Integer}
+function SimpleValueGraph(nv::V, E_VAL::Type=default_edge_val_type) where {V<:Integer}
     fadjlist = Adjlist{V}(nv)
     edge_vals = create_edge_val_list(nv, E_VAL)
     return SimpleValueGraph{V, E_VAL, typeof(edge_vals)}(0, fadjlist, edge_vals)
 end
 
-SimpleValueGraph(nv::Integer) = SimpleValueGraph(nv::Integer, default_edge_val_type)
 SimpleValueGraph{V, E_VAL}(n::V) where {V, E_VAL} = SimpleValueGraph(n, E_VAL)
 
-SimpleValueGraph(g::SimpleGraph) = SimpleValueGraph(g, default_edge_val_type)
 
 # TODO rewrite for tuples and named tuples
-function SimpleValueGraph(g::SimpleGraph{V}, ::Type{E_VAL}) where {V, E_VAL}
+function SimpleValueGraph(g::SimpleGraph{V}, E_VAL::Type=default_edge_val_type) where {V}
     n = nv(g)
-    ne_ = ne(g)
     fadjlist = deepcopy(g.fadjlist)
     edge_vals = Vector{Vector{E_VAL}}(undef, n)
     for u in Base.OneTo(n)
         len = length(fadjlist[u])
-        edge_vals[u] = [default_edge_val(E_VAL) for _ in Base.OneTo(len)]
+        edge_vals[u] = [default_edge_val(E_VAL) for _ in OneTo(len)]
     end
-    SimpleValueGraph{V, E_VAL, typeof(edge_vals)}(ne_, fadjlist, edge_vals)
+    SimpleValueGraph{V, E_VAL, typeof(edge_vals)}(ne(g), fadjlist, edge_vals)
 end
 
+# TODO already similar name in use
+edge_vals_type(::Val{E_VAL}) where {E_VAL <: Type} = Adjlist{E_VAL}
+
+@generated function edge_vals_type(::Val{E_VAL}) where {E_VAL <:Tuple}
+    println("test")
+    R = Tuple{( Adjlist{T} for T in E_VAL.types )...}
+    return :($R)
+end
+
+@generated function edge_vals_type(::Val{E_VAL}) where {E_VAL <:NamedTuple}
+    println("hello")
+    R = NamedTuple{ Tuple(E_VAL.names), Tuple{( Adjlist{T} for T in E_VAL.types )...}}
+    return :($R)
+end
+
+# TODO this function has some issues with typesafety
+function SimpleValueGraph(g::SimpleGraph, E_VAL::Type{<:TupleOrNamedTuple})
+    n = nv(g)
+    V = eltype(g)
+    fadjlist = deepcopy(g.fadjlist) # TODO deepcopy seems not be typesave
+    E_VAL_C = edge_vals_type(Val(E_VAL))
+    edge_vals = E_VAL_C(T(undef, n) for T in E_VAL_C.types)
+    for (i, T) in enumerate(E_VAL.types)
+        for u in Base.OneTo(n)
+            edge_vals[i][u] = T[default_edge_val(E_VAL.types[i]) for _ in OneTo(length(fadjlist[u]))]
+        end
+    end
+    SimpleValueGraph{V, E_VAL, E_VAL_C}(ne(g), fadjlist, edge_vals)
+end
 
 
 # =========================================================
