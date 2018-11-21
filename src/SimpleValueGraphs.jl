@@ -20,7 +20,8 @@ import LightGraphs:
      
 
 export AbstractSimpleValueGraph, SimpleValueGraph, SimpleValueDiGraph, SimpleValueEdge,
-    outedgevals, inedgevals, default_edge_val, edge_val_type, edge_val, edgevals, all_edgevals, get_value, set_value!, map_edge_vals! #, kruskal_mst_modified
+    get_edgeval, set_edgeval!,
+    outedgevals, inedgevals, default_edge_val, edge_val_type, edge_val, edgevals, all_edgevals, map_edge_vals! #, kruskal_mst_modified
 
 # ===== AbstractSimpleValueGraph ==========
 

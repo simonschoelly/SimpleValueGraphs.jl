@@ -2,14 +2,29 @@
 # weight matrix
 # =====================
 
-struct SimpleValueMatrix{V, E_VAL, G <: AbstractSimpleValueGraph{V, E_VAL}} <: AbstractMatrix{E_VAL}
+# TODO would probably be better if the matrix stores the adjacency list instead of the key
+# TODO These methods are not typestable
+
+struct SimpleValueMatrix{E_VAL, K, G <: AbstractSimpleValueGraph} <: AbstractMatrix{E_VAL}
+    key::K
     g::G
 end
 
-weights(g::AbstractSimpleValueGraph) = SimpleValueMatrix(g)
+function weights(g::AbstractSimpleValueGraph{V, E_VAL}) where {V, E_VAL}
+    SimpleValueMatrix{E_VAL, Nothing, typeof(g)}(nothing, g)
+end
 
-function getindex(A::SimpleValueMatrix{V}, s::V, d::V) where {V <: Integer}
-    return get_value(A.g, s, d)
+function weights(g::AbstractSimpleValueGraph, key)
+    E_VAL = eltype(eltype(g.edge_vals[key]))
+    SimpleValueMatrix{E_VAL, typeof(key), typeof(g)}(key, g)
+end
+
+function getindex(A::SimpleValueMatrix{E_VAL, Nothing}, s::Integer, d::Integer) where {E_VAL}
+    return get_edgeval(A.g, s, d)
+end
+
+function getindex(A::SimpleValueMatrix, s::Integer, d::Integer)
+    return get_edgeval(A.g, s, d, A.key)
 end
 
 function size(A::SimpleValueMatrix) 
@@ -17,6 +32,6 @@ function size(A::SimpleValueMatrix)
     return (n, n)
 end
 
-function replace_in_print_matrix(A::SimpleValueMatrix{V}, s::V, d::V, str::AbstractString) where {V<:Integer}
+function replace_in_print_matrix(A::SimpleValueMatrix, s::Integer, d::Integer, str::AbstractString)
     has_edge(A.g, s, d) ? str : Base.replace_with_centered_mark(str)
 end
