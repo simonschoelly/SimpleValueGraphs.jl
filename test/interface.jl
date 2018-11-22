@@ -41,10 +41,10 @@ end
 @testset "rem_edge!" begin
     for (V, E_VAL) in product(test_vertex_types, test_edge_value_types)
         n = 5
-        m = 25
+        k = 25
         gs = CompleteGraph(V(n))
         gv = SimpleValueGraph(gs, E_VAL)
-        for i = 1:m
+        for i = 1:k
             u = rand(1:n)
             v = rand(1:n)
             rem_edge!(gs, u, v)
@@ -52,6 +52,23 @@ end
             @test ne(gs) == ne(gv)
             @test !has_edge(gv, u, v)
             @test get_edgeval(gv, u, v) == nothing
+        end
+    end
+end
+
+@testset "get_edgeval & set_edgeval!" begin
+    for (V, E_VAL) in product(test_vertex_types, test_edge_value_types)
+        n = 5
+        m = 6
+        k = 10
+        gs = erdos_renyi(V(5), 6)
+        gv = SimpleValueGraph(gs, E_VAL)
+        for i = 1:k
+            u = rand(1:n)
+            v = rand(1:n)
+            w = rand_sample(E_VAL)
+            set_edgeval!(gv, u, v, w)
+            @test get_edgeval(gv, u, v) == (has_edge(gs, u, v) ? w : nothing)
         end
     end
 end
