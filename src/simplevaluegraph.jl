@@ -28,7 +28,7 @@ function SimpleValueGraph(nv::V, E_VAL::Type=default_edge_val_type) where {V<:In
     return SimpleValueGraph{V, E_VAL, typeof(edge_vals)}(0, fadjlist, edge_vals)
 end
 
-SimpleValueGraph{V, E_VAL}(n::V) where {V, E_VAL} = SimpleValueGraph(n, E_VAL)
+SimpleValueGraph{V, E_VAL}(n::Integer) where {V, E_VAL} = SimpleValueGraph(V(n), E_VAL)
 
 
 # TODO rewrite for tuples and named tuples
@@ -76,7 +76,10 @@ end
 # =========================================================
 
 # TODO maybe move somewhere else
-function set_value_for_index!(g::SimpleValueGraph, s::Integer, index::Integer, value)
+function set_value_for_index!(g::SimpleValueGraph{V, E_VAL, <: Adjlist},
+                              s::Integer,
+                              index::Integer,
+                              value) where {V, E_VAL}
     @inbounds g.edge_vals[s][index] = value
     return nothing
 end
@@ -95,37 +98,39 @@ end
 
 
 # TODO maybe move somewhere else
-function insert_value_for_index!(g::SimpleValueGraph{V, E_VAL},
-                                 s::V,
+function insert_value_for_index!(g::SimpleValueGraph{V, E_VAL, <: Adjlist},
+                                 s::Integer,
                                  index::Integer,
-                                 value::E_VAL) where {V, E_VAL}
+                                 value) where {V, E_VAL}
     @inbounds insert!(g.edge_vals[s], index, value)
     return nothing
 end
 
-function insert_value_for_index!(g::SimpleValueGraph{V, E_VAL},
-                                 s::V,
+function insert_value_for_index!(g::SimpleValueGraph{V, E_VAL, <: TupleOrNamedTuple},
+                                 s::Integer,
                                  index::Integer,
                                  value::E_VAL) where {V, E_VAL <: TupleOrNamedTuple}
     @inbounds for i in eachindex(value)
-        insert!(g.edgevals[i][s], index, value[i])
+        insert!(g.edge_vals[i][s], index, value[i])
     end
     return nothing
 end
 
 
 function add_edge!(g::SimpleValueGraph{V, E_VAL},
-                   s::V,
-                   d::V,
-                   value::E_VAL=default_edge_val(E_VAL)) where {V, E_VAL}
+                   s::Integer,
+                   d::Integer,
+                   value=default_edge_val(E_VAL)) where {V, E_VAL}
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
     @inbounds list = g.fadjlist[s]
     index = searchsortedfirst(list, d)
     @inbounds if index <= length(list) && list[index] == d
         # edge already there, replace value, but return false
-        index = searchsortedfirst(g.fadjlist[d], s)
         set_value_for_index!(g, s, index, value)
+        # TODO maybe shortcircuit if it is a self-loop
+        index = searchsortedfirst(g.fadjlist[d], s)
+        set_value_for_index!(g, d, index, value)
         return false
     end
 
@@ -192,7 +197,7 @@ rem_edge!(g::SimpleValueGraph, e::SimpleValueEdge) = rem_edge!(g, src(e), dst(e)
 # TODO rem_vertex!, rem_vertices!
 
 
-function has_edge(g::SimpleValueGraph{T}, s::T, d::T) where {T}
+function has_edge(g::SimpleValueGraph, s::Integer, d::Integer)
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
     @inbounds list_s = g.fadjlist[s]
@@ -205,11 +210,11 @@ function has_edge(g::SimpleValueGraph{T}, s::T, d::T) where {T}
 end
 
 # TODO maybe move this function somewhere else
-function value_for_index(g::SimpleValueGraph{V, E_VAL}, s::V, index::Integer) where {V, E_VAL}
+function value_for_index(g::SimpleValueGraph{V, E_VAL}, s::Integer, index::Integer) where {V, E_VAL}
     @inbounds return g.edge_vals[s][index]
 end
 
-function value_for_index(g::SimpleValueGraph{V, E_VAL}, s::V, index::Integer) where {V, E_VAL <: TupleOrNamedTuple}
+function value_for_index(g::SimpleValueGraph{V, E_VAL}, s::Integer, index::Integer) where {V, E_VAL <: TupleOrNamedTuple}
     @inbounds return E_VAL( adjlist[s][index] for adjlist in g.edge_vals )
 end
 
@@ -218,7 +223,7 @@ function value_for_index(g::SimpleValueGraph{V, E_VAL}, s::V, index::Integer, ke
     @inbounds return adjlist[s][index]
 end
 
-function has_edge(g::SimpleValueGraph{T, U}, s::T, d::T, value::U) where {T, U}
+function has_edge(g::SimpleValueGraph, s::Integer, d::Integer, value)
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
     @inbounds list_s = g.fadjlist[s]
@@ -228,7 +233,7 @@ function has_edge(g::SimpleValueGraph{T, U}, s::T, d::T, value::U) where {T, U}
         list_s = list_d
     end
     index = searchsortedfirst(list_s, d)
-    @inbounds return (index <= length(list_s) && list_s[index] == d && val_for_index(g, s, index) == value)
+    @inbounds return (index <= length(list_s) && list_s[index] == d && value_for_index(g, s, index) == value)
 end
 
 

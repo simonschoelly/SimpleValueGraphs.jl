@@ -17,6 +17,26 @@ using Base.Iterators: product
         end
     end
 end
+
+@testset "add_edge!" begin
+    for (V, E_VAL) in product(test_vertex_types, test_edge_value_types)
+        n = 5
+        m = 25
+        gs = SimpleGraph{V}(n)
+        gv = SimpleValueGraph{V, E_VAL}(n)
+        for i = 1:m
+            u = rand(1:n)
+            v = rand(1:n)
+            w = rand_sample(E_VAL)
+            add_edge!(gs, u, v)
+            add_edge!(gv, u, v, w)
+            @test ne(gs) == ne(gv)
+            @test has_edge(gv, u, v)
+            @test has_edge(gv, u, v, w)
+            @test get_edgeval(gv, u, v) == w
+        end
+    end
+end
     
 
 end # testset Interface

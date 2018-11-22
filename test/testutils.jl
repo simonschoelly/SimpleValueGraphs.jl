@@ -10,6 +10,27 @@ function make_testgraphs(G::Type{SimpleGraph}; kwargs...)
     return Channel(c -> _make_testgraphs(c, G, kwargs...))
 end
 
+# Similar to `rand` but for more types.
+# We do not want type piracy, so we need this.
+function rand_sample(::Type{<:Rational{T}}) where {T}
+    # TODO do we want to avoid division by zero?
+    return rand(T) // rand(T)
+end
+
+rand_sample(T::Type) = rand(T)
+
+function rand_sample(T::Type, dims...)
+    result = Array{T}(dims)
+    for i in eachindex(result)
+        result[i] = rand_sample(T)
+    end
+    return result
+end
+
+function rand_sample(T::Type{<:Tuple})
+    return T(rand_sample(TT) for TT in T.types)
+end
+
 function _make_testgraphs(c::Channel, ::Type{SimpleGraph}; kwargs...)
     for V in test_vertex_types
         g = SimpleGraph{V}(0)
