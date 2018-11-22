@@ -38,5 +38,22 @@ end
     end
 end
     
+@testset "rem_edge!" begin
+    for (V, E_VAL) in product(test_vertex_types, test_edge_value_types)
+        n = 5
+        m = 25
+        gs = CompleteGraph(V(n))
+        gv = SimpleValueGraph(gs, E_VAL)
+        for i = 1:m
+            u = rand(1:n)
+            v = rand(1:n)
+            rem_edge!(gs, u, v)
+            rem_edge!(gv, u, v)
+            @test ne(gs) == ne(gv)
+            @test !has_edge(gv, u, v)
+            @test get_edgeval(gv, u, v) == nothing
+        end
+    end
+end
 
 end # testset Interface

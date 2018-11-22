@@ -152,24 +152,24 @@ add_edge!(g::SimpleValueGraph, e::SimpleEdge, u)   = add_edge!(g, src(e), dst(e)
 add_edge!(g::SimpleValueGraph, e::SimpleValueEdge) = add_edge!(g, src(e), dst(e), edge_val(e))
 
 # TODO maybe move somewhere else
-function delete_value_for_index!(g::SimpleValueGraph{V, E_VAL},
-                                 s::V,
+function delete_value_for_index!(g::SimpleValueGraph{V, E_VAL, <: Adjlist},
+                                 s::Integer,
                                  index::Integer) where {V, E_VAL}
     @inbounds deleteat!(g.edge_vals[s], index)
     return nothing
 end
 
 function delete_value_for_index!(g::SimpleValueGraph{V, E_VAL},
-                                 s::V,
+                                 s::Integer,
                                  index::Integer) where {V, E_VAL <: TupleOrNamedTuple}
-    @inbounds for i in eachindex(value)
-        deleteat!(g.edge_vals[i][s], index)
+    @inbounds for list in g.edge_vals
+        deleteat!(list[s], index)
     end
     return nothing
 end
 
 
-function rem_edge!(g::SimpleValueGraph{T, U}, s::T, d::T) where {T, U}
+function rem_edge!(g::SimpleValueGraph, s::Integer, d::Integer)
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
     @inbounds list = g.fadjlist[s]
@@ -177,7 +177,6 @@ function rem_edge!(g::SimpleValueGraph{T, U}, s::T, d::T) where {T, U}
     @inbounds (index <= length(list) && list[index] == d) || return false
     deleteat!(list, index)
     delete_value_for_index!(g, s, index)
-    deleteat!(g.edge_vals[s], index)
 
     g.ne -= 1
     s == d && return true # self-loop
@@ -185,7 +184,7 @@ function rem_edge!(g::SimpleValueGraph{T, U}, s::T, d::T) where {T, U}
     @inbounds list = g.fadjlist[d]
     index = searchsortedfirst(list, s)
     deleteat!(list, index)
-    delete_value_for_index!(g, s, index)
+    delete_value_for_index!(g, d, index)
 
     return true
 end
