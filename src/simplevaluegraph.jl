@@ -10,8 +10,6 @@ const EdgeValContainer{T} = Union{Nothing,
                                   NamedTuple{S, <: Tuple{Vararg{Adjlist}}} where S
                                  }
 
-# const EdgeValContainer{T} = Union{Nothing, Adjlist{T}, Tuple, NamedTuple}
-
 mutable struct SimpleValueGraph{V<:Integer, E_VAL, E_VAL_C <: EdgeValContainer} <: AbstractSimpleValueGraph{V, E_VAL}
     ne::Int
     fadjlist::Adjlist{V}
@@ -311,21 +309,35 @@ set_value!(g::SimpleValueGraph, e::SimpleEdge, u)   = set_value!(g, src(e), dst(
 set_value!(g::SimpleValueGraph, e::SimpleValueEdge) = set_value!(g, src(e), dst(e), edge_val(e))
 
 
-is_directed(::Type{<:SimpleValueGraph})       = false
-is_directed(g::SimpleValueGraph) where {T, U} = false
+is_directed(::Type{<:SimpleValueGraph}) = false
+is_directed(g::SimpleValueGraph)        = false
 
 
-outneighbors(g::SimpleValueGraph{T, U}, v::T) where {T, U} = g.fadjlist[v]
-inneighbors(g::SimpleValueGraph{T, U}, v::T) where {T, U} = outneighbors(g, v) 
+outneighbors(g::SimpleValueGraph, v::Integer) = g.fadjlist[v]
+inneighbors(g::SimpleValueGraph,  v::Integer) = outneighbors(g, v)
 
-outedgevals(g::SimpleValueGraph{T, U}, v::T) where {T, U} =
+outedgevals(g::SimpleValueGraph{V, E_VAL, <: Adjlist}, v::Integer) where {V, E_VAL} =
     g.edge_vals[v]
-inedgevals(g::SimpleValueGraph{T, U}, v::T) where {T, U} =
-    outedgevals(g, v)
-# edgevals(g::SimpleValueGraph{T, U}, v::T) where {T, U} =
-    #outedgevals(g, v)
-all_edgevals(g::SimpleValueGraph{T, U}, v::T) where {T, U} =
-    outedgevals(g, v)
+inedgevals(g::SimpleValueGraph, v::Integer) = outedgevals(g, v)
+all_edgevals(g::SimpleValueGraph, v::Integer) = outedgevals(g, v)
+# edgevals(g::SimpleValueGraph, v::Integer)= outedgevals(g, v)
+
+# TODO implement these with iterators instead of generators
+outedgevals(g::SimpleValueGraph{V, E_VAL, <: Tuple}, v::Integer) where {V, E_VAL} =
+    ( Tuple( adjlist[v][i] for adjlist in g.edge_vals ) for i in OneTo(length(g.fadjlist[v])) )
+outedgevals(g::SimpleValueGraph{V, E_VAL, T}, v::Integer) where {V, E_VAL, T <: NamedTuple} =
+    ( NamedTuple{Tuple(T.names)}( adjlist[v][i] for adjlist in g.edge_vals ) for i in OneTo(length(g.fadjlist[v])) )
+
+
+outedgevals(g::SimpleValueGraph{V, E_VAL, <: TupleOrNamedTuple}, v::Integer, key) where {V, E_VAL} =
+    g.edge_vals[key][v]
+inedgevals(g::SimpleValueGraph{V, E_VAL, <: TupleOrNamedTuple}, v::Integer, key) where {V, E_VAL} =
+    outedgevals(g, v, key)
+all_edgevals(g::SimpleValueGraph{V, E_VAL, <: TupleOrNamedTuple}, v::Integer, key) where {V, E_VAL} =
+    outedgevals(g, v, key)
+
+
+
 
 
 
