@@ -1,14 +1,20 @@
 using Base.Iterators: product
+using LinearAlgebra: issymmetric
+import SimpleValueGraphs.TupleOrNamedTuple
+
+pbar = Progress(6, 0.2)
 
 @testset "Interface" begin
 
+
+
 @testset "From SimpleGraph" begin
-    for ((gs, info), E_VAL) in product(make_testgraphs(SimpleGraph), test_edge_value_types)
+    for ((gs, info), E_VAL) in product(make_testgraphs(SimpleGraph), test_edgeval_types)
         gv = SimpleValueGraph(gs, E_VAL)
         @test eltype(gs) == eltype(gv)
-        @test edge_val_type(gv) == E_VAL
+        @test edgeval_type(gv) == E_VAL
         @test all(edges(gv)) do e
-            edge_val(e) == default_edge_val(E_VAL)
+            val(e) == default_edgeval(E_VAL)
         end
         @test nv(gs) == nv(gv)
         @test ne(gs) == ne(gv)
@@ -18,8 +24,10 @@ using Base.Iterators: product
     end
 end
 
+next!(pbar)
+
 @testset "add_edge!" begin
-    for (V, E_VAL) in product(test_vertex_types, test_edge_value_types)
+    for (V, E_VAL) in product(test_vertex_types, test_edgeval_types)
         n = 5
         m = 25
         gs = SimpleGraph{V}(n)
@@ -37,9 +45,11 @@ end
         end
     end
 end
+
+next!(pbar)
     
 @testset "rem_edge!" begin
-    for (V, E_VAL) in product(test_vertex_types, test_edge_value_types)
+    for (V, E_VAL) in product(test_vertex_types, test_edgeval_types)
         n = 5
         k = 25
         gs = CompleteGraph(V(n))
@@ -56,8 +66,10 @@ end
     end
 end
 
+next!(pbar)
+
 @testset "get_edgeval & set_edgeval!" begin
-    for (V, E_VAL) in product(test_vertex_types, test_edge_value_types)
+    for (V, E_VAL) in product(test_vertex_types, test_edgeval_types)
         n = 5
         m = 6
         k = 10
@@ -72,5 +84,44 @@ end
         end
     end
 end
+
+next!(pbar)
+
+# TODO this should be in a file test/operators.jl
+@testset "map_edgevals!" begin
+    for (V, E_VAL) in product(test_vertex_types, test_edgeval_types)
+        g = SimpleValueGraph(CycleGraph(V(5)), E_VAL)
+        u = rand(vertices(g))
+        w1 = rand_sample(E_VAL)
+        w2 = rand_sample(E_VAL)
+        map_edgevals!(g) do s, d, value
+            return u ∈ (s, d) ? w1 : w2
+        end
+        @test all(edges(g)) do e
+            return val(e) == (u ∈ (src(e), dst(e)) ? w1 : w2)
+        end
+    end
+end
+
+next!(pbar)
+
+# TODO this should be in a file test/operators.jl
+@testset "map_edgevals! with key" begin
+    for (V, E_VAL) in product(test_vertex_types, filter(T -> T <: TupleOrNamedTuple, test_edgeval_types))
+        g = SimpleValueGraph(CycleGraph(V(5)), E_VAL)
+        u = rand(vertices(g))
+        key = rand(1:length(E_VAL.parameters))
+        w1 = rand_sample(E_VAL)[key]
+        w2 = rand_sample(E_VAL)[key]
+        map_edgevals!(g, key) do s, d, value
+            return u ∈ (s, d) ? w1 : w2
+        end
+        @test all(edges(g)) do e
+            return val(e)[key] == (u ∈ (src(e), dst(e)) ? w1 : w2)
+        end
+    end
+end
+
+next!(pbar)
 
 end # testset Interface

@@ -13,59 +13,67 @@ const EdgeValContainer{T} = Union{Nothing,
 mutable struct SimpleValueGraph{V<:Integer, E_VAL, E_VAL_C <: EdgeValContainer} <: AbstractSimpleValueGraph{V, E_VAL}
     ne::Int
     fadjlist::Adjlist{V}
-    edge_vals::E_VAL_C
+    edgevals::E_VAL_C
 end
 
-create_edge_val_list(nv, E_VAL::Type) = Adjlist{E_VAL}(nv)
-create_edge_val_list(nv, E_VAL::Type{<:Tuple}) = Tuple(Adjlist{T}(nv) for T in E_VAL.parameters)
-create_edge_val_list(nv, E_VAL::Type{<:NamedTuple}) = NamedTuple{Tuple(E_VAL.names)}(Adjlist{T}(nv) for T in E_VAL.types)
+create_edgeval_list(nv, E_VAL::Type) = Adjlist{E_VAL}(nv)
+create_edgeval_list(nv, E_VAL::Type{<:Tuple}) = Tuple(Adjlist{T}(nv) for T in E_VAL.parameters)
+create_edgeval_list(nv, E_VAL::Type{<:NamedTuple}) = NamedTuple{Tuple(E_VAL.names)}(Adjlist{T}(nv) for T in E_VAL.types)
 
-function SimpleValueGraph(nv::V, E_VAL::Type=default_edge_val_type) where {V<:Integer}
+function SimpleValueGraph(nv::V, E_VAL::Type=default_edgeval_type) where {V<:Integer}
     fadjlist = Adjlist{V}(nv)
-    edge_vals = create_edge_val_list(nv, E_VAL)
-    return SimpleValueGraph{V, E_VAL, typeof(edge_vals)}(0, fadjlist, edge_vals)
+    edgevals = create_edgeval_list(nv, E_VAL)
+    return SimpleValueGraph{V, E_VAL, typeof(edgevals)}(0, fadjlist, edgevals)
 end
 
-SimpleValueGraph{V, E_VAL}(n::Integer) where {V, E_VAL} = SimpleValueGraph(V(n), E_VAL)
+SimpleValueGraph{V}(nv::Integer, E_VAL::Type=default_edgeval_type) where {V} = SimpleValueGraph(V(nv), E_VAL)
+SimpleValueGraph{V, E_VAL}(nv::Integer) where {V, E_VAL} = SimpleValueGraph(V(nv), E_VAL)
 
 
 # TODO rewrite for tuples and named tuples
-function SimpleValueGraph(g::SimpleGraph{V}, E_VAL::Type=default_edge_val_type) where {V}
+# TODO weights are not symmetric
+function SimpleValueGraph(g::SimpleGraph{V},
+                          E_VAL::Type=default_edgeval_type,
+                          edgeval_initializer = () -> default_edgeval(E_VAL)) where {V}
     n = nv(g)
     fadjlist = deepcopy(g.fadjlist)
-    edge_vals = Vector{Vector{E_VAL}}(undef, n)
+    edgevals = Vector{Vector{E_VAL}}(undef, n)
     for u in Base.OneTo(n)
         len = length(fadjlist[u])
-        edge_vals[u] = [default_edge_val(E_VAL) for _ in OneTo(len)]
+        edgevals[u] = [edgeval_initializer() for _ in OneTo(len)]
     end
-    SimpleValueGraph{V, E_VAL, typeof(edge_vals)}(ne(g), fadjlist, edge_vals)
+    SimpleValueGraph{V, E_VAL, typeof(edgevals)}(ne(g), fadjlist, edgevals)
 end
 
-edge_vals_container_type(::Val{E_VAL}) where {E_VAL <: Type} = Adjlist{E_VAL}
 
-@generated function edge_vals_container_type(::Val{E_VAL}) where {E_VAL <:Tuple}
+edgevals_container_type(::Val{E_VAL}) where {E_VAL <: Type} = Adjlist{E_VAL}
+
+@generated function edgevals_container_type(::Val{E_VAL}) where {E_VAL <:Tuple}
     R = Tuple{( Adjlist{T} for T in E_VAL.types )...}
     return :($R)
 end
 
-@generated function edge_vals_container_type(::Val{E_VAL}) where {E_VAL <:NamedTuple}
+@generated function edgevals_container_type(::Val{E_VAL}) where {E_VAL <:NamedTuple}
     R = NamedTuple{ Tuple(E_VAL.names), Tuple{( Adjlist{T} for T in E_VAL.types )...}}
     return :($R)
 end
 
 # TODO this function has some issues with typesafety
-function SimpleValueGraph(g::SimpleGraph, E_VAL::Type{<:TupleOrNamedTuple})
+# TODO weights are not symmetric
+function SimpleValueGraph(g::SimpleGraph{V},
+                          E_VAL::Type{<:TupleOrNamedTuple},
+                          edgeval_initializer = () -> default_edgeval(E_VAL)) where {V}
     n = nv(g)
-    V = eltype(g)
     fadjlist = deepcopy(g.fadjlist) # TODO deepcopy seems not be typesave
-    E_VAL_C = edge_vals_container_type(Val(E_VAL))
-    edge_vals = E_VAL_C( T(undef, n) for T in E_VAL_C.types )
-    for (i, T) in enumerate(E_VAL.types)
-        for u in Base.OneTo(n)
-            edge_vals[i][u] = fill(default_edge_val(E_VAL.types[i]), length(fadjlist[u]))
+    E_VAL_C = edgevals_container_type(Val(E_VAL))
+    edgevals = E_VAL_C( T(undef, n) for T in E_VAL_C.types )
+    for u in Base.OneTo(n)
+        w = edgeval_initializer()
+        for (i, T) in enumerate(E_VAL.types)
+            edgevals[i][u] = fill(w[i], length(fadjlist[u]))
         end
     end
-    SimpleValueGraph{V, E_VAL, E_VAL_C}(ne(g), fadjlist, edge_vals)
+    SimpleValueGraph{V, E_VAL, E_VAL_C}(ne(g), fadjlist, edgevals)
 end
 
 
@@ -78,19 +86,19 @@ function set_value_for_index!(g::SimpleValueGraph{V, E_VAL, <: Adjlist},
                               s::Integer,
                               index::Integer,
                               value) where {V, E_VAL}
-    @inbounds g.edge_vals[s][index] = value
+    @inbounds g.edgevals[s][index] = value
     return nothing
 end
 
 function set_value_for_index!(g::SimpleValueGraph{V, E_VAL}, s::Integer, index::Integer, value::E_VAL) where {V, E_VAL <: TupleOrNamedTuple}
     @inbounds for i in eachindex(value)
-        g.edge_vals[i][s][index] = value[i]
+        g.edgevals[i][s][index] = value[i]
     end
     return nothing
 end
 
-function set_value_for_index!(g::SimpleValueGraph{V, <:TupleOrNamedTuple}, s::Integer, index::Integer, key, value) where {V}
-    g.edge_vals[key][s][index] = value
+function set_value_for_index!(g::SimpleValueGraph{V, E_VAL, <:TupleOrNamedTuple}, s::Integer, index::Integer, key, value) where {V, E_VAL}
+    @inbounds g.edgevals[key][s][index] = value
     return nothing
 end
 
@@ -100,7 +108,7 @@ function insert_value_for_index!(g::SimpleValueGraph{V, E_VAL, <: Adjlist},
                                  s::Integer,
                                  index::Integer,
                                  value) where {V, E_VAL}
-    @inbounds insert!(g.edge_vals[s], index, value)
+    @inbounds insert!(g.edgevals[s], index, value)
     return nothing
 end
 
@@ -109,16 +117,47 @@ function insert_value_for_index!(g::SimpleValueGraph{V, E_VAL, <: TupleOrNamedTu
                                  index::Integer,
                                  value::E_VAL) where {V, E_VAL <: TupleOrNamedTuple}
     @inbounds for i in eachindex(value)
-        insert!(g.edge_vals[i][s], index, value[i])
+        insert!(g.edgevals[i][s], index, value[i])
     end
     return nothing
+end
+
+# TODO maybe move somewhere else
+function delete_value_for_index!(g::SimpleValueGraph{V, E_VAL, <: Adjlist},
+                                 s::Integer,
+                                 index::Integer) where {V, E_VAL}
+    @inbounds deleteat!(g.edgevals[s], index)
+    return nothing
+end
+
+function delete_value_for_index!(g::SimpleValueGraph{V, E_VAL},
+                                 s::Integer,
+                                 index::Integer) where {V, E_VAL <: TupleOrNamedTuple}
+    @inbounds for list in g.edgevals
+        deleteat!(list[s], index)
+    end
+    return nothing
+end
+
+# TODO maybe move this function somewhere else
+function value_for_index(g::SimpleValueGraph{V, E_VAL}, s::Integer, index::Integer) where {V, E_VAL}
+    @inbounds return g.edgevals[s][index]
+end
+
+function value_for_index(g::SimpleValueGraph{V, E_VAL}, s::Integer, index::Integer) where {V, E_VAL <: TupleOrNamedTuple}
+    @inbounds return E_VAL( adjlist[s][index] for adjlist in g.edgevals )
+end
+
+function value_for_index(g::SimpleValueGraph{V, E_VAL}, s::V, index::Integer, key) where {V, E_VAL <: TupleOrNamedTuple}
+    adjlist = g.edgevals[key]
+    @inbounds return adjlist[s][index]
 end
 
 
 function add_edge!(g::SimpleValueGraph{V, E_VAL},
                    s::Integer,
                    d::Integer,
-                   value=default_edge_val(E_VAL)) where {V, E_VAL}
+                   value=default_edgeval(E_VAL)) where {V, E_VAL}
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
     @inbounds list = g.fadjlist[s]
@@ -147,24 +186,8 @@ end
 
 add_edge!(g::SimpleValueGraph, e::SimpleEdge)      = add_edge!(g, src(e), dst(e))
 add_edge!(g::SimpleValueGraph, e::SimpleEdge, u)   = add_edge!(g, src(e), dst(e), u)
-add_edge!(g::SimpleValueGraph, e::SimpleValueEdge) = add_edge!(g, src(e), dst(e), edge_val(e))
+add_edge!(g::SimpleValueGraph, e::SimpleValueEdge) = add_edge!(g, src(e), dst(e), val(e))
 
-# TODO maybe move somewhere else
-function delete_value_for_index!(g::SimpleValueGraph{V, E_VAL, <: Adjlist},
-                                 s::Integer,
-                                 index::Integer) where {V, E_VAL}
-    @inbounds deleteat!(g.edge_vals[s], index)
-    return nothing
-end
-
-function delete_value_for_index!(g::SimpleValueGraph{V, E_VAL},
-                                 s::Integer,
-                                 index::Integer) where {V, E_VAL <: TupleOrNamedTuple}
-    @inbounds for list in g.edge_vals
-        deleteat!(list[s], index)
-    end
-    return nothing
-end
 
 
 function rem_edge!(g::SimpleValueGraph, s::Integer, d::Integer)
@@ -206,19 +229,6 @@ function has_edge(g::SimpleValueGraph, s::Integer, d::Integer)
     return LightGraphs.insorted(d, list_s)
 end
 
-# TODO maybe move this function somewhere else
-function value_for_index(g::SimpleValueGraph{V, E_VAL}, s::Integer, index::Integer) where {V, E_VAL}
-    @inbounds return g.edge_vals[s][index]
-end
-
-function value_for_index(g::SimpleValueGraph{V, E_VAL}, s::Integer, index::Integer) where {V, E_VAL <: TupleOrNamedTuple}
-    @inbounds return E_VAL( adjlist[s][index] for adjlist in g.edge_vals )
-end
-
-function value_for_index(g::SimpleValueGraph{V, E_VAL}, s::V, index::Integer, key) where {V, E_VAL <: TupleOrNamedTuple}
-    adjlist = g.edge_vals[key]
-    @inbounds return adjlist[s][index]
-end
 
 function has_edge(g::SimpleValueGraph, s::Integer, d::Integer, value)
     verts = vertices(g)
@@ -236,7 +246,7 @@ end
 
 has_edge(g::SimpleValueGraph, e::SimpleEdge)      = has_edge(g, src(e), dst(e))
 has_edge(g::SimpleValueGraph, e::SimpleEdge, u)   = has_edge(g, src(e), dst(e), u)
-has_edge(g::SimpleValueGraph, e::SimpleValueEdge) = has_edge(g, src(e), dst(e), edge_val(e))
+has_edge(g::SimpleValueGraph, e::SimpleValueEdge) = has_edge(g, src(e), dst(e), val(e))
 
 # TODO rest methods for get_value
 # TODO lots of duplicated code
@@ -306,7 +316,7 @@ end
 
 # TODO maybe move this function somewhere else
 set_value!(g::SimpleValueGraph, e::SimpleEdge, u)   = set_value!(g, src(e), dst(e), u)
-set_value!(g::SimpleValueGraph, e::SimpleValueEdge) = set_value!(g, src(e), dst(e), edge_val(e))
+set_value!(g::SimpleValueGraph, e::SimpleValueEdge) = set_value!(g, src(e), dst(e), edgeval(e))
 
 
 is_directed(::Type{<:SimpleValueGraph}) = false
@@ -317,27 +327,24 @@ outneighbors(g::SimpleValueGraph, v::Integer) = g.fadjlist[v]
 inneighbors(g::SimpleValueGraph,  v::Integer) = outneighbors(g, v)
 
 outedgevals(g::SimpleValueGraph{V, E_VAL, <: Adjlist}, v::Integer) where {V, E_VAL} =
-    g.edge_vals[v]
+    g.edgevals[v]
 inedgevals(g::SimpleValueGraph, v::Integer) = outedgevals(g, v)
 all_edgevals(g::SimpleValueGraph, v::Integer) = outedgevals(g, v)
 # edgevals(g::SimpleValueGraph, v::Integer)= outedgevals(g, v)
 
 # TODO implement these with iterators instead of generators
 outedgevals(g::SimpleValueGraph{V, E_VAL, <: Tuple}, v::Integer) where {V, E_VAL} =
-    ( Tuple( adjlist[v][i] for adjlist in g.edge_vals ) for i in OneTo(length(g.fadjlist[v])) )
+    ( Tuple( adjlist[v][i] for adjlist in g.edgevals ) for i in OneTo(length(g.fadjlist[v])) )
 outedgevals(g::SimpleValueGraph{V, E_VAL, T}, v::Integer) where {V, E_VAL, T <: NamedTuple} =
-    ( NamedTuple{Tuple(T.names)}( adjlist[v][i] for adjlist in g.edge_vals ) for i in OneTo(length(g.fadjlist[v])) )
+    ( NamedTuple{Tuple(T.names)}( adjlist[v][i] for adjlist in g.edgevals ) for i in OneTo(length(g.fadjlist[v])) )
 
 
 outedgevals(g::SimpleValueGraph{V, E_VAL, <: TupleOrNamedTuple}, v::Integer, key) where {V, E_VAL} =
-    g.edge_vals[key][v]
+    g.edgevals[key][v]
 inedgevals(g::SimpleValueGraph{V, E_VAL, <: TupleOrNamedTuple}, v::Integer, key) where {V, E_VAL} =
     outedgevals(g, v, key)
 all_edgevals(g::SimpleValueGraph{V, E_VAL, <: TupleOrNamedTuple}, v::Integer, key) where {V, E_VAL} =
     outedgevals(g, v, key)
-
-
-
 
 
 
@@ -347,10 +354,10 @@ function add_vertex!(g::SimpleValueGraph{V, E_VAL}) where {V, E_VAL}
     push!(g.fadjlist, V[])
     if E_VAL <: TupleOrNamedTuple
         for (i, T) in enumerate(E_VAL.types)
-            push!(g.edge_vals[i], T[])
+            push!(g.edgevals[i], T[])
         end
     else
-        push!(g.edge_vals, E_VAL[])
+        push!(g.edgevals, E_VAL[])
     end
     return true
 end

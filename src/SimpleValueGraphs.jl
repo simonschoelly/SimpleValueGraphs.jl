@@ -21,7 +21,8 @@ import LightGraphs:
 
 export AbstractSimpleValueGraph, SimpleValueGraph, SimpleValueDiGraph, SimpleValueEdge,
     get_edgeval, set_edgeval!,
-    outedgevals, inedgevals, default_edge_val, edge_val_type, edge_val, edgevals, all_edgevals, map_edge_vals! #, kruskal_mst_modified
+    val,
+    outedgevals, inedgevals, default_edgeval, edgeval_type, all_edgevals, map_edgevals! #, kruskal_mst_modified
 
 # ===== AbstractSimpleValueGraph ==========
 
@@ -30,14 +31,14 @@ abstract type AbstractSimpleValueGraph{V<:Integer, E_VAL} <: AbstractGraph{V} en
 
 const TupleOrNamedTuple = Union{Tuple, NamedTuple} # TODO maybe somewhere else?
 
-const default_edge_val_type = Float64
-edge_val_type(g::AbstractSimpleValueGraph{V, E_VAL}) where {V, E_VAL} = E_VAL
-default_edge_val(E_VAL) = oneunit(E_VAL)
-default_edge_val(::Type{Nothing}) = nothing
-default_edge_val(T::Type{<:TupleOrNamedTuple}) = T( default_edge_val(U) for U in T.types )
+const default_edgeval_type = Float64
+edgeval_type(g::AbstractSimpleValueGraph{V, E_VAL}) where {V, E_VAL} = E_VAL
+default_edgeval(E_VAL) = oneunit(E_VAL)
+default_edgeval(::Type{Nothing}) = nothing
+default_edgeval(T::Type{<:TupleOrNamedTuple}) = T( default_edgeval(U) for U in T.types )
 
-default_zero_edge_val(E_VAL) = zero(E_VAL)
-default_zero_edge_val(T::Type{<:TupleOrNamedTuple}) = T( default_zero_edge_val(U) for U in T.types )
+default_zero_edgeval(E_VAL) = zero(E_VAL)
+default_zero_edgeval(T::Type{<:TupleOrNamedTuple}) = T( default_zero_edgeval(U) for U in T.types )
 
 
 eltype(::AbstractSimpleValueGraph{V}) where {V} = V
@@ -63,7 +64,7 @@ eltype(::Type{SimpleValueEdgeIter{<:AbstractSimpleValueGraph{V, E_VAL}}}) where 
 
 function show(io::IO, g::AbstractSimpleValueGraph)
     dir = is_directed(g) ? "directed" : "undirected"
-    println(io, "{$(nv(g)), $(ne(g))} $dir $(eltype(g)) SimpleValueGraph with edge values of type $(edge_val_type(g))")
+    println(io, "{$(nv(g)), $(ne(g))} $dir $(eltype(g)) SimpleValueGraph with edge values of type $(edgeval_type(g))")
 end
 
 # ==== Includes ===========================

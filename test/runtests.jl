@@ -1,5 +1,6 @@
 using LightGraphs
 using SimpleValueGraphs
+using ProgressMeter
 using TerminalMenus
 using Test
 

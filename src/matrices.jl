@@ -15,7 +15,7 @@ function weights(g::AbstractSimpleValueGraph{V, E_VAL}) where {V, E_VAL}
 end
 
 function weights(g::AbstractSimpleValueGraph, key)
-    E_VAL = eltype(eltype(g.edge_vals[key]))
+    E_VAL = eltype(eltype(g.edgevals[key]))
     SimpleValueMatrix{E_VAL, typeof(key), typeof(g)}(key, g)
 end
 

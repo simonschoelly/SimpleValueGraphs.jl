@@ -4,7 +4,7 @@ using InteractiveUtils: subtypes
 const test_vertex_types = subtypes(Signed) ∪ subtypes(Unsigned)
 #
 # TODO needs more different types, also tuples and named tuples, unitful units
-const test_edge_value_types = [Rational{Int}, Float16, Float64, BigFloat, Int, UInt8, Tuple{Int, Int}, NamedTuple{(:a, :b), Tuple{Int, Int}}]
+const test_edgeval_types = [Rational{Int}, Float16, Float64, BigFloat, Int, UInt8, Tuple{Int, Int}, NamedTuple{(:a, :b), Tuple{Int, Int}}, Nothing]
 
 function make_testgraphs(G::Type{SimpleGraph}; kwargs...)
     return Channel(c -> _make_testgraphs(c, G, kwargs...))
@@ -18,6 +18,14 @@ function rand_sample(::Type{<:Rational{T}}) where {T}
 end
 
 rand_sample(T::Type) = rand(T)
+
+rand_sample(::Type{Nothing}) = nothing
+rand_sample(::Type{Missing}) = missing
+
+function rand_sample(U::Union)
+    i = rand(1:length(propertynames(U)))
+    return rand_sample(getproperty(U, propertynames(U)[i]))
+end
 
 function rand_sample(T::Type, dims...)
     result = Array{T}(dims)
