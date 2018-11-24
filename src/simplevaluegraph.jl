@@ -347,7 +347,7 @@ all_edgevals(g::SimpleValueGraph{V, E_VAL, <: TupleOrNamedTuple}, v::Integer, ke
     outedgevals(g, v, key)
 
 
-
+# TODO maybe add a sizehint kwarg
 function add_vertex!(g::SimpleValueGraph{V, E_VAL}) where {V, E_VAL}
     # TODO There are overflow checks in Julia Base, use these
     (nv(g) + one(V) <= nv(g)) && return false # overflow

@@ -3,7 +3,7 @@ using InteractiveUtils: subtypes
 
 const test_vertex_types = subtypes(Signed) ∪ subtypes(Unsigned)
 #
-# TODO needs more different types, also tuples and named tuples, unitful units
+# TODO needs more different types, also tuples and named tuples, unitful units, Union types
 const test_edgeval_types = [Rational{Int}, Float16, Float64, BigFloat, Int, UInt8, Tuple{Int, Int}, NamedTuple{(:a, :b), Tuple{Int, Int}}, Nothing]
 
 function make_testgraphs(G::Type{SimpleGraph}; kwargs...)

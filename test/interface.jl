@@ -2,7 +2,7 @@ using Base.Iterators: product
 using LinearAlgebra: issymmetric
 import SimpleValueGraphs.TupleOrNamedTuple
 
-pbar = Progress(6, 0.2)
+pbar = Progress(7, 0.2, "interface")
 
 @testset "Interface" begin
 
@@ -81,6 +81,21 @@ next!(pbar)
             w = rand_sample(E_VAL)
             set_edgeval!(gv, u, v, w)
             @test get_edgeval(gv, u, v) == (has_edge(gs, u, v) ? w : nothing)
+        end
+    end
+end
+
+next!(pbar)
+
+@testset "add_vertex!" begin
+    for (V, E_VAL) in product(test_vertex_types, test_edgeval_types)
+        g = SimpleValueGraph(CompleteGraph(V(4)), E_VAL)
+        n = nv(g)
+        m = ne(g)
+        for i in 1:10
+            add_vertex!(g)
+            @test nv(g) == n + i
+            @test ne(g) == m
         end
     end
 end
