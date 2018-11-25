@@ -16,7 +16,7 @@ const EdgeValContainer{T} = Union{Nothing,
                                  }
 
 
-create_edgeval_list(nv, E_VAL::Type{Nothing}) = Nothing
+create_edgeval_list(nv, E_VAL::Type{Nothing}) = nothing
 create_edgeval_list(nv, E_VAL::Type) = Adjlist{E_VAL}(nv)
 create_edgeval_list(nv, E_VAL::Type{<:Tuple}) = Tuple(Adjlist{T}(nv) for T in E_VAL.parameters)
 create_edgeval_list(nv, E_VAL::Type{<:NamedTuple}) = NamedTuple{Tuple(E_VAL.names)}(Adjlist{T}(nv) for T in E_VAL.types)

@@ -1,5 +1,5 @@
-function blockdiag(::Type{SimpleValueGraph{V, E_VAL}}, iter::AbstractGraph{<:Integer}...) where {V<:Integer, E_VAL}
-    n::V = zero(V)
+function blockdiag(::Type{<:SimpleValueGraph{V, E_VAL}}, iter::AbstractGraph{<:Integer}...) where {V, E_VAL}
+    n::V = V(0)
     for g in iter
         n += nv(g)
         # TODO check for overflow
@@ -13,7 +13,7 @@ function blockdiag(::Type{SimpleValueGraph{V, E_VAL}}, iter::AbstractGraph{<:Int
         w = weights(g)
         for u in vertices(g)
             for v in neighbors(g, u)
-                add_edge!(resultg, V(u) + Δ, T(v) + Δ, convert(V, w[u, v]))
+                add_edge!(resultg, V(u) + Δ, V(v) + Δ, convert(E_VAL, w[u, v]))
             end
         end
         Δ += nv(g)
@@ -22,7 +22,31 @@ function blockdiag(::Type{SimpleValueGraph{V, E_VAL}}, iter::AbstractGraph{<:Int
     return resultg
 end
 
-blockdiag(g::SimpleValueGraph, iter::AbstractGraph...) = blockdiag(typeof(g), g, iter...)
+function blockdiag(::Type{<:SimpleValueDiGraph{V, E_VAL}}, iter::AbstractGraph{<:Integer}...) where {V, E_VAL}
+    n::V = V(0)
+    for g in iter
+        n += nv(g)
+        # TODO check for overflow
+    end
+
+    resultg = SimpleValueDiGraph(n, E_VAL)
+
+    # TODO this is not very efficient
+    Δ::V = zero(V)
+    for g in iter
+        w = weights(g)
+        for u in vertices(g)
+            for v in outneighbors(g, u)
+                add_edge!(resultg, V(u) + Δ, V(v) + Δ, convert(E_VAL, w[u, v]))
+            end
+        end
+        Δ += nv(g)
+    end
+
+    return resultg
+end
+
+blockdiag(g::AbstractSimpleValueGraph, iter::AbstractGraph...) = blockdiag(typeof(g), g, iter...)
 
 #=
 function complement(g::SimpleValueGraph{T, U})

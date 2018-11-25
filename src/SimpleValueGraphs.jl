@@ -34,17 +34,19 @@ abstract type AbstractSimpleValueGraph{V<:Integer, E_VAL} <: AbstractGraph{V} en
 const TupleOrNamedTuple = Union{Tuple, NamedTuple} # TODO maybe somewhere else?
 
 const default_edgeval_type = Float64
-edgeval_type(g::AbstractSimpleValueGraph{V, E_VAL}) where {V, E_VAL} = E_VAL
 default_edgeval(E_VAL) = oneunit(E_VAL)
 default_edgeval(::Type{Nothing}) = nothing
 default_edgeval(T::Type{<:TupleOrNamedTuple}) = T( default_edgeval(U) for U in T.types )
 
+default_zero_edgeval(::Type{Nothing}) = nothing
 default_zero_edgeval(E_VAL) = zero(E_VAL)
 default_zero_edgeval(E_VAL::Type{<:TupleOrNamedTuple}) = E_VAL( default_zero_edgeval(T) for T in E_VAL.types )
 
 
 eltype(::AbstractSimpleValueGraph{V}) where {V} = V
 edgetype(::AbstractSimpleValueGraph{V, E_VAL}) where {V, E_VAL} = SimpleValueEdge{V, E_VAL}
+edgeval_type(g::AbstractSimpleValueGraph{V, E_VAL}) where {V, E_VAL} = E_VAL
+edgeval_type(::Type{<:AbstractSimpleValueGraph{V, E_VAL}}) where {V, E_VAL} = E_VAL
 
 edges(g::AbstractSimpleValueGraph) = SimpleValueEdgeIter(g)
 
