@@ -12,7 +12,7 @@ import LightGraphs:
     add_vertex!, add_edge!, rem_vertex!, rem_edge!,
     has_vertex, has_edge, inneighbors, outneighbors,
     indegree, outdegree, degree, has_self_loops, num_self_loops,
-    add_vertex!, adjacency_matrix, weights, edgetype,
+    add_vertex!, adjacency_matrix, weights,
     SimpleGraph, SimpleDiGraph, IsDirected,
 
     # operators
@@ -22,7 +22,9 @@ import LightGraphs:
 export AbstractSimpleValueGraph, SimpleValueGraph, SimpleValueDiGraph, SimpleValueEdge,
     get_edgeval, set_edgeval!,
     val,
-    outedgevals, inedgevals, default_edgeval, edgeval_type, all_edgevals, map_edgevals! #, kruskal_mst_modified
+    outedgevals, inedgevals, all_edgevals,
+    default_edgeval, edgeval_type,
+    map_edgevals! #, kruskal_mst_modified
 
 # ===== AbstractSimpleValueGraph ==========
 
@@ -38,7 +40,7 @@ default_edgeval(::Type{Nothing}) = nothing
 default_edgeval(T::Type{<:TupleOrNamedTuple}) = T( default_edgeval(U) for U in T.types )
 
 default_zero_edgeval(E_VAL) = zero(E_VAL)
-default_zero_edgeval(T::Type{<:TupleOrNamedTuple}) = T( default_zero_edgeval(U) for U in T.types )
+default_zero_edgeval(E_VAL::Type{<:TupleOrNamedTuple}) = E_VAL( default_zero_edgeval(T) for T in E_VAL.types )
 
 
 eltype(::AbstractSimpleValueGraph{V}) where {V} = V
@@ -66,6 +68,8 @@ function show(io::IO, g::AbstractSimpleValueGraph)
     dir = is_directed(g) ? "directed" : "undirected"
     println(io, "{$(nv(g)), $(ne(g))} $dir $(eltype(g)) SimpleValueGraph with edge values of type $(edgeval_type(g))")
 end
+
+
 
 # ==== Includes ===========================
 

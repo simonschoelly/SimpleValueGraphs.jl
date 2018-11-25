@@ -3,10 +3,10 @@ using InteractiveUtils: subtypes
 
 const test_vertex_types = subtypes(Signed) ∪ subtypes(Unsigned)
 #
-# TODO needs more different types, also tuples and named tuples, unitful units, Union types
-const test_edgeval_types = [Rational{Int}, Float16, Float64, BigFloat, Int, UInt8, Tuple{Int, Int}, NamedTuple{(:a, :b), Tuple{Int, Int}}, Nothing]
+# TODO needs more different types, also tuples and named tuples, unitful units, Union types, Nothing
+const test_edgeval_types = [Rational{Int}, Float16, Float64, BigFloat, Int, UInt8, Tuple{Int, Int}, NamedTuple{(:a, :b), Tuple{Int, Int}}]
 
-function make_testgraphs(G::Type{SimpleGraph}; kwargs...)
+function make_testgraphs(G::Type{<:AbstractGraph}; kwargs...)
     return Channel(c -> _make_testgraphs(c, G, kwargs...))
 end
 
@@ -104,8 +104,100 @@ function _make_testgraphs(c::Channel, ::Type{SimpleGraph}; kwargs...)
                   2-vertex-graph, 1 edge, 2 self-loops"""
         put!(c, (graph=g, info=info))
     end
+end
 
-
+function _make_testgraphs(c::Channel, ::Type{SimpleDiGraph}; kwargs...)
+    for V in test_vertex_types
+        g = SimpleDiGraph{V}(0)
+        info = """type: $(typeof(g))
+                  0-graph"""
+        put!(c, (graph=g, info=info))
+    end
+    for V in test_vertex_types
+        g = SimpleDiGraph{V}(1)
+        info = """type: $(typeof(g))
+                  1-graph"""
+        put!(c, (graph=g, info=info))
+    end
+    for V in test_vertex_types
+        g = SimpleDiGraph{V}(1)
+        add_edge!(g, 1, 1)
+        info = """type: $(typeof(g))
+                  1-graph with self-loop"""
+        put!(c, (graph=g, info=info))
+    end
+    for V in test_vertex_types
+        g = SimpleDiGraph{V}(2)
+        info = """type: $(typeof(g))
+                  2-vertex-graph, no edges"""
+        put!(c, (graph=g, info=info))
+    end
+    for V in test_vertex_types
+        g = SimpleDiGraph{V}(2)
+        add_edge!(g, 1, 2)
+        info = """type: $(typeof(g))
+                  2-vertex-graph, 1 edge"""
+        put!(c, (graph=g, info=info))
+    end
+    for V in test_vertex_types
+        g = SimpleDiGraph{V}(2)
+        add_edge!(g, 2, 2)
+        info = """type: $(typeof(g))
+                  2-vertex-graph, 1 self loop"""
+        put!(c, (graph=g, info=info))
+    end
+    for V in test_vertex_types
+        g = SimpleDiGraph{V}(2)
+        add_edge!(g, 1, 1)
+        add_edge!(g, 1, 2)
+        info = """type: $(typeof(g))
+                  2-vertex-graph, 1 edge, 1 self loop"""
+        put!(c, (graph=g, info=info))
+    end
+    for V in test_vertex_types
+        g = SimpleDiGraph{V}(2)
+        add_edge!(g, 1, 1)
+        add_edge!(g, 2, 2)
+        info = """type: $(typeof(g))
+                  2-vertex-graph, 2 self loops"""
+        put!(c, (graph=g, info=info))
+    end
+    for V in test_vertex_types
+        g = SimpleDiGraph{V}(2)
+        add_edge!(g, 1, 2)
+        add_edge!(g, 2, 1)
+        info = """type: $(typeof(g))
+                  2-vertex-graph, 1 edge, 1 reverse edge"""
+        put!(c, (graph=g, info=info))
+    end
+    for V in test_vertex_types
+        g = SimpleDiGraph{V}(2)
+        add_edge!(g, 1, 2)
+        add_edge!(g, 2, 1)
+        add_edge!(g, 2, 2)
+        info = """type: $(typeof(g))
+                  2-vertex-graph, 1 edge, 1 reverse edge, 1 self loop"""
+        put!(c, (graph=g, info=info))
+    end
+    for V in test_vertex_types
+        g = SimpleDiGraph{V}(2)
+        add_edge!(g, 1, 2)
+        add_edge!(g, 1, 1)
+        add_edge!(g, 2, 2)
+        info = """type: $(typeof(g))
+                  2-vertex-graph, 1 edge, 2 self loops"""
+        put!(c, (graph=g, info=info))
+    end
+    for V in test_vertex_types
+        g = SimpleDiGraph{V}(2)
+        add_edge!(g, 1, 2)
+        add_edge!(g, 2, 1)
+        add_edge!(g, 1, 1)
+        add_edge!(g, 2, 2)
+        info = """type: $(typeof(g))
+                  2-vertex-graph, 1 edge, 1 reverse edge, 2 self loops"""
+        put!(c, (graph=g, info=info))
+    end
 end
 
 
