@@ -56,6 +56,7 @@ let
         dsts[k] = j
     end
     weightsFloat64 = rand(Float64, m)
+    weightsTupleFloat32 = collect(zip(rand(Float32, m), rand(Float32, m)))
 
     bg["SimpleGraph"] =
         @benchmarkable add_edges(SimpleGraph{Int64}($n), $srcs, $dsts)
@@ -67,9 +68,9 @@ let
         @benchmarkable add_edges(SimpleValueGraph{Int64, Float64}($n), 
                                         $srcs, $dsts, $weightsFloat64)
     
-    bg["SimpleValueGraph with weights Nothing"] = 
-        @benchmarkable add_edges(SimpleValueGraph{Int64, Nothing}($n), 
-                                        $srcs, $dsts) 
+    bg["SimpleValueGraph with weights Tuple{Float32, Float32}"] = 
+        @benchmarkable add_edges(SimpleValueGraph{Int64, Tuple{Float32, Float32}}($n), 
+                                        $srcs, $dsts, $weightsTupleFloat32) 
 
     bg["SimpleWeightedGraph default weights Float64"] = 
         @benchmarkable add_edges(SimpleWeightedGraph{Int64, Float64}($n),
@@ -98,6 +99,7 @@ let
     srcs = rand(1:n, m)
     dsts = rand(1:n, m)
     weightsFloat64 = rand(Float64, m)
+    weightsTupleFloat32 = collect(zip(rand(Float32, m), rand(Float32, m)))
     weightsInt8 = rand(Int8, m)
 
     bg["SimpleGraph"] =
@@ -110,9 +112,9 @@ let
         @benchmarkable add_edges(SimpleValueGraph{Int64, Float64}($n), 
                                         $srcs, $dsts, $weightsFloat64)
     
-    bg["SimpleValueGraph with weights Nothing"] = 
-        @benchmarkable add_edges(SimpleValueGraph{Int64, Nothing}($n), 
-                                        $srcs, $dsts) 
+    bg["SimpleValueGraph with weights Tuple{Float32, Float32}"] = 
+        @benchmarkable add_edges(SimpleValueGraph{Int64, Tuple{Float32, Float32}}($n), 
+                                        $srcs, $dsts, $weightsTupleFloat32) 
       
     #=
     bg["SimpleValueGraph without weights Int8"] = 
@@ -167,7 +169,7 @@ let
 
     g = Grid([10, 10, 10, 10])
     g_valuegraph = SimpleValueGraph(g)
-    map_edge_vals!((u, v, w) -> rand(), g_valuegraph)
+    map_edgevals!((u, v, w) -> rand(), g_valuegraph)
     dense_weights = Matrix(weights(g_valuegraph))
     sparse_weights = SparseMatrixCSC(weights(g_valuegraph))
 
@@ -209,7 +211,7 @@ let
 
     g = random_regular_graph(1000, 100)
     g_valuegraph = SimpleValueGraph(g)
-    map_edge_vals!((u, v, w) -> rand(), g_valuegraph)
+    map_edgevals!((u, v, w) -> rand(), g_valuegraph)
     dense_weights = Matrix(weights(g_valuegraph))
     sparse_weights = SparseMatrixCSC(weights(g_valuegraph))
 
