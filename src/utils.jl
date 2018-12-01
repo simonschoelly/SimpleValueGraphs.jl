@@ -9,8 +9,7 @@ function Adjlist{T}(n::Integer) where {T}
     return result
 end
 
-const EdgeValContainer{T} = Union{Nothing,
-                                  Adjlist{T},
+const EdgeValContainer{T} = Union{Adjlist{T},
                                   Tuple{Vararg{Adjlist}},
                                   NamedTuple{S, <: Tuple{Vararg{Adjlist}}} where S
                                  }

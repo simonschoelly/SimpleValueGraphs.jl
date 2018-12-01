@@ -48,6 +48,7 @@ edgetype(::AbstractSimpleValueGraph{V, E_VAL}) where {V, E_VAL} = SimpleValueEdg
 edgeval_type(g::AbstractSimpleValueGraph{V, E_VAL}) where {V, E_VAL} = E_VAL
 edgeval_type(::Type{<:AbstractSimpleValueGraph{V, E_VAL}}) where {V, E_VAL} = E_VAL
 
+# TODO edges with key
 edges(g::AbstractSimpleValueGraph) = SimpleValueEdgeIter(g)
 
 nv(g::AbstractSimpleValueGraph) = eltype(g)(length(g.fadjlist))
