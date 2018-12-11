@@ -234,7 +234,7 @@ has_edge(g::SimpleValueGraph, e::SimpleValueEdge) = has_edge(g, src(e), dst(e), 
 # TODO lots of duplicated code
 function get_edgeval(g::InOutValueGraph{V, E_VAL}, s::Integer, d::Integer) where {V, E_VAL}
     verts = vertices(g)
-    (s in verts && d in verts) || return default # TODO may raise bounds error?
+    (s in verts && d in verts) || return nothing # TODO may raise bounds error?
     @inbounds list_s = g.fadjlist[s]
     @inbounds list_d = g.fadjlist[d]
     if length(list_s) > length(list_d)
@@ -250,7 +250,7 @@ end
 
 function get_edgeval(g::InOutValueGraph{V, E_VAL}, s::Integer, d::Integer, key) where {V <: Integer, E_VAL <: TupleOrNamedTuple}
     verts = vertices(g)
-    (s in verts && d in verts) || return default # TODO may raise bounds error?
+    (s in verts && d in verts) || return nothing # TODO may raise bounds error?
     @inbounds list_s = g.fadjlist[s]
     @inbounds list_d = g.fadjlist[d]
     if length(list_s) > length(list_d)

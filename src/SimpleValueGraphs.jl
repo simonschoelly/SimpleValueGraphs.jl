@@ -64,8 +64,9 @@ struct SimpleValueEdgeIter{G<:AbstractSimpleValueGraph} <: AbstractEdgeIter
 end
 
 length(iter::SimpleValueEdgeIter) = ne(iter.g)
-eltype(::Type{SimpleValueEdgeIter{<:AbstractSimpleValueGraph{V, E_VAL}}}) where {V, E_VAL} =
+eltype(::Type{<:SimpleValueEdgeIter{<:AbstractSimpleValueGraph{V, E_VAL}}}) where {V, E_VAL} =
         SimpleValueEdge{V, E_VAL}
+eltype(edges::SimpleValueEdgeIter) = eltype(typeof(edges))
 
 function show(io::IO, g::AbstractSimpleValueGraph)
     dir = is_directed(g) ? "directed" : "undirected"
