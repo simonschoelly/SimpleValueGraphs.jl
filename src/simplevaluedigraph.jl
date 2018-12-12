@@ -64,8 +64,8 @@ function SimpleValueDiGraph(g::SimpleDiGraph{V},
                           reverse_edgevals::Bool=false,
                           edgeval_initializer = (s, d) -> default_edgeval(E_VAL)) where {V}
     n = nv(g)
-    fadjlist = deepcopy(g.fadjlist)
-    badjlist = deepcopy(g.badjlist)
+    fadjlist = deepcopy_adjlist(g.fadjlist)
+    badjlist = deepcopy_adjlist(g.badjlist)
     if const_edgevals
         return ConstValueDiGraph{V, E_VAL}(ne(g), fadjlist, nothing)
     end
@@ -101,8 +101,8 @@ function SimpleValueDiGraph(g::SimpleDiGraph{V},
                           reverse_edgevals::Bool=false,
                           edgeval_initializer = (s, d) -> default_edgeval(E_VAL)) where {V}
     n = nv(g)
-    fadjlist = deepcopy(g.fadjlist) # TODO deepcopy seems not be typesave
-    badjlist = deepcopy(g.fadjlist)
+    fadjlist = deepcopy_adjlist(g.fadjlist) # TODO deepcopy seems not be typesave
+    badjlist = deepcopy_adjlist(g.fadjlist)
     if const_edgevals
         return ConstValueDiGraph{V, E_VAL}(ne(g), fadjlist, nothing)
     end

@@ -3,11 +3,27 @@ const Adjlist{T} = Vector{Vector{T}}
 
 function Adjlist{T}(n::Integer) where {T}
     result = Adjlist{T}(undef, n)
-    for i in 1:n
-        result[i] = Vector{T}()
+    @inbounds for i in 1:n
+        result[i] = T[]
     end
     return result
 end
+
+function deepcopy_adjlist(adjlist::Adjlist{T}) where {T}
+    n = length(adjlist)
+    result = Vector{Vector{T}}(undef, n)
+    @inbounds for i in OneTo(n)
+        list = adjlist[i]
+        n_list = length(list)
+        result_list = Vector{T}(undef, n_list)
+        for j in OneTo(n_list)
+            result_list[j] = deepcopy(list[j])
+        end
+        result[i] = result_list
+    end
+    return result
+end
+
 
 const EdgeValContainer{T} = Union{Adjlist{T},
                                   Tuple{Vararg{Adjlist}},
@@ -42,12 +58,25 @@ function set_value_for_index!(adjlist::Adjlist,
     return nothing
 end
 
-function set_value_for_index!(tup_adjlist::TupleOrNamedTuple, s::Integer, index::Integer, value)
+
+@generated function set_value_for_index!(tup_adjlist::TupleOrNamedTuple, s::Integer, index::Integer, value::T) where {T <: TupleOrNamedTuple}
+    len = length(T.types)
+    exprs = Expr[]
+    for i in OneTo(len)
+        e = :(@inbounds tup_adjlist[$i][s][index] = value[$i])
+        push!(exprs, e)
+    end
+    return Expr(:block, exprs...)
+end
+
+#= TODO remove
+function set_value_for_index!(tup_adjlist::TupleOrNamedTuple, s::Integer, index::Integer, value::TupleOrNamedTuple)
     @inbounds for i in eachindex(value)
         tup_adjlist[i][s][index] = value[i]
     end
     return nothing
 end
+=#
 
 function set_value_for_index!(tup_adjlist::TupleOrNamedTuple, s::Integer, index::Integer, key, value)
     @inbounds tup_adjlist[key][s][index] = value
@@ -55,7 +84,6 @@ function set_value_for_index!(tup_adjlist::TupleOrNamedTuple, s::Integer, index:
 end
 
 
-# TODO maybe move somewhere else
 function insert_value_for_index!(adjlist::Adjlist,
                                  s::Integer,
                                  index::Integer,
@@ -64,6 +92,20 @@ function insert_value_for_index!(adjlist::Adjlist,
     return nothing
 end
 
+@generated function insert_value_for_index!(tup_adjlist::TupleOrNamedTuple,
+                                 s::Integer,
+                                 index::Integer,
+                                 value::T) where {T <: TupleOrNamedTuple}
+    len = length(T.types)
+    exprs = Expr[]
+    for i in OneTo(len)
+        e = :(@inbounds insert!(tup_adjlist[$i][s], index, value[$i]))
+        push!(exprs, e)
+    end
+    return Expr(:block, exprs...)
+end
+
+#= TODO remove
 function insert_value_for_index!(tup_adjlist::TupleOrNamedTuple,
                                  s::Integer,
                                  index::Integer,
@@ -73,8 +115,8 @@ function insert_value_for_index!(tup_adjlist::TupleOrNamedTuple,
     end
     return nothing
 end
+=#
 
-# TODO maybe move somewhere else
 function delete_value_for_index!(adjlist::Adjlist,
                                  s::Integer,
                                  index::Integer)
@@ -91,7 +133,6 @@ function delete_value_for_index!(tup_adjlist::TupleOrNamedTuple,
     return nothing
 end
 
-# TODO maybe move this function somewhere else
 function value_for_index(adjlist::Adjlist, E_VAL, s::Integer, index::Integer)
     @inbounds return adjlist[s][index]
 end

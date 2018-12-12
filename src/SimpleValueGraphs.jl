@@ -34,9 +34,9 @@ abstract type AbstractSimpleValueGraph{V<:Integer, E_VAL} <: AbstractGraph{V} en
 const TupleOrNamedTuple = Union{Tuple, NamedTuple} # TODO maybe somewhere else?
 
 const default_edgeval_type = Float64
-default_edgeval(E_VAL) = oneunit(E_VAL)
-default_edgeval(::Type{Nothing}) = nothing
-default_edgeval(T::Type{<:TupleOrNamedTuple}) = T( default_edgeval(U) for U in T.types )
+default_edgeval(E_VAL)::E_VAL = oneunit(E_VAL)
+default_edgeval(::Type{Nothing})::Nothing = nothing
+default_edgeval(T::Type{<:TupleOrNamedTuple})::T = T( default_edgeval(U) for U in T.types )
 
 default_zero_edgeval(::Type{Nothing}) = nothing
 default_zero_edgeval(E_VAL) = zero(E_VAL)

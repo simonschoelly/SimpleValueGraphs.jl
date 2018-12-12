@@ -39,7 +39,7 @@ function SimpleValueGraph(g::SimpleGraph{V},
                           const_edgevals::Bool=false,
                           edgeval_initializer = (s, d) -> default_edgeval(E_VAL)) where {V}
     n = nv(g)
-    fadjlist = deepcopy(g.fadjlist)
+    fadjlist = deepcopy_adjlist(g.fadjlist)
     if const_edgevals
         return ConstValueGraph{V, E_VAL}(nv, fadjlist, nothing)
     end
@@ -60,7 +60,7 @@ function SimpleValueGraph(g::SimpleGraph{V},
                           const_edgevals::Bool=false,
                           edgeval_initializer = (s, d) -> default_edgeval(E_VAL)) where {V}
     n = nv(g)
-    fadjlist = deepcopy(g.fadjlist) # TODO deepcopy seems not be typesave
+    fadjlist = deepcopy_adjlist(g.fadjlist)
     if const_edgevals
         return ConstValueGraph{V, E_VAL}(nv, fadjlist, nothing)
     end

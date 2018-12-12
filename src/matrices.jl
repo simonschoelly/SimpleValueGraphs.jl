@@ -5,29 +5,27 @@
 # TODO would probably be better if the matrix stores the adjacency list instead of the key
 # TODO These methods are not typestable
 
-struct SimpleValueMatrix{E_VAL, K, G <: AbstractSimpleValueGraph} <: AbstractMatrix{E_VAL}
-    key::K
+struct SimpleValueMatrix{T, K <: Union{Nothing, Val}, G <: AbstractSimpleValueGraph} <: AbstractMatrix{T}
     g::G
 end
 
 function weights(g::AbstractSimpleValueGraph{V, E_VAL}) where {V, E_VAL}
-    SimpleValueMatrix{E_VAL, Nothing, typeof(g)}(nothing, g)
+    SimpleValueMatrix{E_VAL, Nothing, typeof(g)}(g)
 end
 
-function weights(g::AbstractSimpleValueGraph, key)
-    E_VAL = eltype(eltype(g.edgevals[key]))
-    SimpleValueMatrix{E_VAL, typeof(key), typeof(g)}(key, g)
+function weights(g::AbstractSimpleValueGraph{V, E_VAL}, key) where {V, E_VAL <: TupleOrNamedTuple}
+    T = eltype(eltype(g.edgevals[key]))
+    SimpleValueMatrix{T, Val{key}, typeof(g)}(g)
 end
 
-function getindex(A::SimpleValueMatrix{E_VAL, Nothing}, s::Integer, d::Integer) where {E_VAL}
+function getindex(A::SimpleValueMatrix{T, Nothing}, s::Integer, d::Integer) where {T}
     result = get_edgeval(A.g, s, d)
-    return ifelse(result == nothing, default_zero_edgeval(E_VAL), result)
+    return ifelse(result == nothing, default_zero_edgeval(T), result)
 end
 
-
-function getindex(A::SimpleValueMatrix{E_VAL}, s::Integer, d::Integer) where {E_VAL}
-    result = get_edgeval(A.g, s, d, A.key)
-    return ifelse(result == nothing, default_zero_edgeval(E_VAL)[A.key], result)
+function getindex(A::SimpleValueMatrix{T, Val{key}}, s::Integer, d::Integer) where {T, key}
+    result = get_edgeval(A.g, s, d, key)
+    return ifelse(result == nothing, default_zero_edgeval(T), result)
 end
 
 function size(A::SimpleValueMatrix) 
