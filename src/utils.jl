@@ -49,7 +49,6 @@ end
     return :($R)
 end
 
-# TODO maybe move somewhere else
 function set_value_for_index!(adjlist::Adjlist,
                               s::Integer,
                               index::Integer,
@@ -57,7 +56,6 @@ function set_value_for_index!(adjlist::Adjlist,
     @inbounds adjlist[s][index] = value
     return nothing
 end
-
 
 @generated function set_value_for_index!(tup_adjlist::TupleOrNamedTuple, s::Integer, index::Integer, value::T) where {T <: TupleOrNamedTuple}
     len = length(T.types)
@@ -68,15 +66,6 @@ end
     end
     return Expr(:block, exprs...)
 end
-
-#= TODO remove
-function set_value_for_index!(tup_adjlist::TupleOrNamedTuple, s::Integer, index::Integer, value::TupleOrNamedTuple)
-    @inbounds for i in eachindex(value)
-        tup_adjlist[i][s][index] = value[i]
-    end
-    return nothing
-end
-=#
 
 function set_value_for_index!(tup_adjlist::TupleOrNamedTuple, s::Integer, index::Integer, key, value)
     @inbounds tup_adjlist[key][s][index] = value
@@ -104,18 +93,6 @@ end
     end
     return Expr(:block, exprs...)
 end
-
-#= TODO remove
-function insert_value_for_index!(tup_adjlist::TupleOrNamedTuple,
-                                 s::Integer,
-                                 index::Integer,
-                                 value)
-    @inbounds for i in eachindex(value)
-        insert!(tup_adjlist[i][s], index, value[i])
-    end
-    return nothing
-end
-=#
 
 function delete_value_for_index!(adjlist::Adjlist,
                                  s::Integer,

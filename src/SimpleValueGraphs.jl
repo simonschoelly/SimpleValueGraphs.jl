@@ -20,9 +20,10 @@ import LightGraphs:
      
 
 export AbstractSimpleValueGraph, SimpleValueGraph, SimpleValueDiGraph, SimpleValueEdge,
-    get_edgeval, set_edgeval!,
+    get_edgeval, get_edgeval_for_key, set_edgeval!, set_edgeval_for_key!,
     val,
-    outedgevals, inedgevals, all_edgevals,
+    outedgevals, inedgevals,
+    outedgevals_for_key, inedgevals_for_key,
     default_edgeval, edgeval_type,
     map_edgevals! #, kruskal_mst_modified
 
@@ -59,6 +60,8 @@ zero(G::AbstractSimpleValueGraph{V}) where {V} = G(zero(V))
 vertices(g::AbstractSimpleValueGraph) = Base.OneTo(nv(g))
 has_vertex(g::AbstractSimpleValueGraph, v) = v ∈ vertices(g)
 
+# === Iterators =====================
+
 struct SimpleValueEdgeIter{G<:AbstractSimpleValueGraph} <: AbstractEdgeIter
     g::G
 end
@@ -67,6 +70,26 @@ length(iter::SimpleValueEdgeIter) = ne(iter.g)
 eltype(::Type{<:SimpleValueEdgeIter{<:AbstractSimpleValueGraph{V, E_VAL}}}) where {V, E_VAL} =
         SimpleValueEdge{V, E_VAL}
 eltype(edges::SimpleValueEdgeIter) = eltype(typeof(edges))
+
+struct EdgevalsIterator{E_VAL, E_VAL_C}
+    v::Int
+    n::Int
+    edgevals::E_VAL_C
+end
+
+function iterate(iter::EdgevalsIterator{E_VAL, E_VAL_C}, state=1) where {E_VAL <: TupleOrNamedTuple, E_VAL_C <: TupleOrNamedTuple}
+    state > iter.n && return nothing
+    v = iter.v
+    edgevals = iter.edgevals
+    return E_VAL( adjlist[v][state] for adjlist in edgevals ), (state + 1)
+end
+
+length(iter::EdgevalsIterator) = iter.n
+eltype(::Type{<:EdgevalsIterator{E_VAL}}) where {E_VAL} = E_VAL
+eltype(edges::EdgevalsIterator) = eltype(typeof(edges))
+
+
+# === Display =====================
 
 function show(io::IO, g::AbstractSimpleValueGraph)
     dir = is_directed(g) ? "directed" : "undirected"

@@ -144,7 +144,7 @@ end
 
 next!(pbar)
 
-@testset "get_edgeval & set_edgeval! with key undirected" begin
+@testset "get_edgeval_for_key & set_edgeval_for_key! with undirected" begin
     for (V, E_VAL) in product(test_vertex_types, filter(T -> T <: TupleOrNamedTuple, test_edgeval_types))
         n = 5
         m = 6
@@ -156,8 +156,8 @@ next!(pbar)
             v = rand(1:n)
             w = rand_sample(E_VAL)
             key = rand(1:length(E_VAL.parameters))
-            set_edgeval!(gv, u, v, key, w[key])
-            @test get_edgeval(gv, u, v, key) == (has_edge(gs, u, v) ? w[key] : nothing)
+            set_edgeval_for_key!(gv, u, v, key, w[key])
+            @test get_edgeval_for_key(gv, u, v, key) == (has_edge(gs, u, v) ? w[key] : nothing)
         end
     end
 end
@@ -183,7 +183,7 @@ end
 
 next!(pbar)
 
-@testset "get_edgeval & set_edgeval! with key directed" begin
+@testset "get_edgeval_for_key & set_edgeval_for_key! directed" begin
     for (V, E_VAL) in product(test_vertex_types, filter(T -> T <: TupleOrNamedTuple, test_edgeval_types))
         n = 5
         m = 6
@@ -195,8 +195,8 @@ next!(pbar)
             v = rand(1:n)
             w = rand_sample(E_VAL)
             key = rand(1:length(E_VAL.parameters))
-            set_edgeval!(gv, u, v, key, w[key])
-            @test get_edgeval(gv, u, v, key) == (has_edge(gs, u, v) ? w[key] : nothing)
+            set_edgeval_for_key!(gv, u, v, key, w[key])
+            @test get_edgeval_for_key(gv, u, v, key) == (has_edge(gs, u, v) ? w[key] : nothing)
         end
     end
 end

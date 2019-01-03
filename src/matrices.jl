@@ -19,13 +19,11 @@ function weights(g::AbstractSimpleValueGraph{V, E_VAL}, key) where {V, E_VAL <: 
 end
 
 function getindex(A::SimpleValueMatrix{T, Nothing}, s::Integer, d::Integer) where {T}
-    result = get_edgeval(A.g, s, d)
-    return ifelse(result == nothing, default_zero_edgeval(T), result)
+    return get_edgeval(A.g, s, d, default_zero_edgeval(T))
 end
 
 function getindex(A::SimpleValueMatrix{T, Val{key}}, s::Integer, d::Integer) where {T, key}
-    result = get_edgeval(A.g, s, d, key)
-    return ifelse(result == nothing, default_zero_edgeval(T), result)
+    return get_edgeval_for_key(A.g, s, d, key, default_zero_edgeval(T))
 end
 
 function size(A::SimpleValueMatrix) 

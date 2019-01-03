@@ -60,7 +60,7 @@ end
 
 # TODO docstring
 # TODO maybe better pass a SimpleValueEdge to f
-function map_edgevals!(f::Function, g::InOutValueGraph)
+function map_edgevals!(f::Function, g::SimpleValueGraph)
     V = eltype(g)
     E_VAL = edgeval_type(g)
     n = nv(g)
@@ -84,7 +84,7 @@ function map_edgevals!(f::Function, g::InOutValueGraph)
 end
 
 
-function map_edgevals!(f::Function, g::InOutValueGraph{V, E_VAL, <: TupleOrNamedTuple}, key) where {V, E_VAL}
+function map_edgevals!(f::Function, g::SimpleValueGraph{V, E_VAL, <: TupleOrNamedTuple}, key) where {V, E_VAL}
     n = nv(g)
     fadjlist = g.fadjlist
     edgevals = g.edgevals
