@@ -1,11 +1,14 @@
-function blockdiag(::Type{<:SimpleValueGraph{V, E_VAL}}, iter::AbstractGraph{<:Integer}...) where {V, E_VAL}
+# TODO disabled
+
+
+function blockdiag(::Type{<:ValueGraph{V, E_VAL}}, iter::AbstractGraph{<:Integer}...) where {V, E_VAL}
     n::V = V(0)
     for g in iter
         n += nv(g)
         # TODO check for overflow
     end
 
-    resultg = SimpleValueGraph(n, E_VAL)
+    resultg = ValueGraph(n, E_VAL)
 
     # TODO this is not very efficient
     Δ::V = zero(V)
@@ -22,14 +25,14 @@ function blockdiag(::Type{<:SimpleValueGraph{V, E_VAL}}, iter::AbstractGraph{<:I
     return resultg
 end
 
-function blockdiag(::Type{<:SimpleValueDiGraph{V, E_VAL}}, iter::AbstractGraph{<:Integer}...) where {V, E_VAL}
+function blockdiag(::Type{<:ValueDiGraph{V, E_VAL}}, iter::AbstractGraph{<:Integer}...) where {V, E_VAL}
     n::V = V(0)
     for g in iter
         n += nv(g)
         # TODO check for overflow
     end
 
-    resultg = SimpleValueDiGraph(n, E_VAL)
+    resultg = ValueDiGraph(n, E_VAL)
 
     # TODO this is not very efficient
     Δ::V = zero(V)
@@ -46,21 +49,14 @@ function blockdiag(::Type{<:SimpleValueDiGraph{V, E_VAL}}, iter::AbstractGraph{<
     return resultg
 end
 
-blockdiag(g::AbstractSimpleValueGraph, iter::AbstractGraph...) = blockdiag(typeof(g), g, iter...)
+blockdiag(g::AbstractValueGraph, iter::AbstractGraph...) = blockdiag(typeof(g), g, iter...)
 
-#=
-function complement(g::SimpleValueGraph{T, U})
-    n = nv(
-end
-=#
-
-# TODO reverse
 
 # ==== weight related operators =====
 
 # TODO docstring
-# TODO maybe better pass a SimpleValueEdge to f
-function map_edgevals!(f::Function, g::SimpleValueGraph)
+# TODO maybe better pass a ValueEdge to f
+function transform_edgevals!(f::Function, g::ValueGraph)
     V = eltype(g)
     E_VAL = edgeval_type(g)
     n = nv(g)
@@ -84,7 +80,7 @@ function map_edgevals!(f::Function, g::SimpleValueGraph)
 end
 
 
-function map_edgevals!(f::Function, g::SimpleValueGraph{V, E_VAL, <: TupleOrNamedTuple}, key) where {V, E_VAL}
+function transform_edgevals!(f::Function, g::ValueGraph{V, E_VAL, <: TupleOrNamedTuple}, key) where {V, E_VAL}
     n = nv(g)
     fadjlist = g.fadjlist
     edgevals = g.edgevals
@@ -105,7 +101,7 @@ function map_edgevals!(f::Function, g::SimpleValueGraph{V, E_VAL, <: TupleOrName
     end
 end
 
-function map_edgevals!(f::Function, g::OutValueDiGraph)
+function transform_edgevals!(f::Function, g::OutValueDiGraph)
     V = eltype(g)
     E_VAL = edgeval_type(g)
     n = nv(g)
@@ -125,7 +121,7 @@ function map_edgevals!(f::Function, g::OutValueDiGraph)
     end
 end
 
-function map_edgevals!(f::Function, g::OutValueDiGraph{V, E_VAL, <: TupleOrNamedTuple}, key) where {V, E_VAL}
+function transform_edgevals!(f::Function, g::OutValueDiGraph{V, E_VAL, <: TupleOrNamedTuple}, key) where {V, E_VAL}
     n = nv(g)
     fadjlist = g.fadjlist
     edgevals = g.edgevals

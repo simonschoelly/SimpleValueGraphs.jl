@@ -1,14 +1,17 @@
 
+# TODO make this stuff work again
+
 function graphviz_identifier(x)
     s = string(x)
-    result = replace(s, "\"" => "\\\"")
+    result = replace(s, '"' => "\\\"")
     if endswith(result, '\\')
         result = result * " "
     end
     return result
 end
 
-function show(io::IO, m::MIME"text/vnd.graphviz", g::AbstractSimpleValueGraph)
+
+function show(io::IO, m::MIME"text/vnd.graphviz", g::AbstractValueGraph)
     graph_symbol = is_directed(g) ? "digraph" : "graph"
     edge_symbol = is_directed(g) ? "->" : "--"
     println(io, "$graph_symbol {")
