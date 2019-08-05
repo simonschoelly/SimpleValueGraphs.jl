@@ -1,12 +1,18 @@
 module SimpleValueGraphs
 
 using LightGraphs
-using LightGraphs.SimpleGraphs: AbstractSimpleGraph, AbstractSimpleEdge, SimpleEdge
+using LightGraphs.SimpleGraphs: AbstractSimpleGraph, AbstractSimpleEdge,
+    SimpleEdge, IsDirected
+
+using SimpleTraits
 
 using Base: OneTo
 
-import Base: eltype, show, reverse, iterate, length, replace_in_print_matrix, getindex, size, zero, Tuple
+import Base: eltype, show, reverse, iterate, length, replace_in_print_matrix,
+    getindex, size, zero, Tuple
+
 import SparseArrays: blockdiag
+
 import LightGraphs:
     src, dst, edgetype, nv, ne, vertices, edges, is_directed,
     add_vertex!, add_edge!, rem_vertex!, rem_edge!,
@@ -19,74 +25,32 @@ import LightGraphs:
     complement
      
 
-export AbstractSimpleValueGraph, SimpleValueGraph, SimpleValueDiGraph, SimpleValueEdge,
-    get_edgeval, set_edgeval!,
-    val,
-    outedgevals, inedgevals, all_edgevals,
-    default_edgeval, edgeval_type,
-    map_edgevals! #, kruskal_mst_modified
-
-# ===== AbstractSimpleValueGraph ==========
-
-abstract type AbstractSimpleValueGraph{V<:Integer, E_VAL} <: AbstractGraph{V} end
-
-
-const TupleOrNamedTuple = Union{Tuple, NamedTuple} # TODO maybe somewhere else?
-
-const default_edgeval_type = Float64
-default_edgeval(E_VAL)::E_VAL = oneunit(E_VAL)
-default_edgeval(::Type{Nothing})::Nothing = nothing
-default_edgeval(T::Type{<:TupleOrNamedTuple})::T = T( default_edgeval(U) for U in T.types )
-
-default_zero_edgeval(::Type{Nothing}) = nothing
-default_zero_edgeval(E_VAL) = zero(E_VAL)
-default_zero_edgeval(E_VAL::Type{<:TupleOrNamedTuple}) = E_VAL( default_zero_edgeval(T) for T in E_VAL.types )
-
-
-eltype(::AbstractSimpleValueGraph{V}) where {V} = V
-edgetype(::AbstractSimpleValueGraph{V, E_VAL}) where {V, E_VAL} = SimpleValueEdge{V, E_VAL}
-edgeval_type(g::AbstractSimpleValueGraph{V, E_VAL}) where {V, E_VAL} = E_VAL
-edgeval_type(::Type{<:AbstractSimpleValueGraph{V, E_VAL}}) where {V, E_VAL} = E_VAL
-
-# TODO edges with key
-edges(g::AbstractSimpleValueGraph) = SimpleValueEdgeIter(g)
-
-nv(g::AbstractSimpleValueGraph) = eltype(g)(length(g.fadjlist))
-ne(g::AbstractSimpleValueGraph) = g.ne
-
-zero(G::AbstractSimpleValueGraph{V}) where {V} = G(zero(V))
-
-vertices(g::AbstractSimpleValueGraph) = Base.OneTo(nv(g))
-has_vertex(g::AbstractSimpleValueGraph, v) = v ∈ vertices(g)
-
-struct SimpleValueEdgeIter{G<:AbstractSimpleValueGraph} <: AbstractEdgeIter
-    g::G
-end
-
-length(iter::SimpleValueEdgeIter) = ne(iter.g)
-eltype(::Type{<:SimpleValueEdgeIter{<:AbstractSimpleValueGraph{V, E_VAL}}}) where {V, E_VAL} =
-        SimpleValueEdge{V, E_VAL}
-eltype(edges::SimpleValueEdgeIter) = eltype(typeof(edges))
-
-function show(io::IO, g::AbstractSimpleValueGraph)
-    dir = is_directed(g) ? "directed" : "undirected"
-    println(io, "{$(nv(g)), $(ne(g))} $dir $(eltype(g)) SimpleValueGraph with edge values of type $(edgeval_type(g))")
-end
-
-
+export AbstractValueGraph, ValueGraph, ValueOutDiGraph, ValueDiGraph,
+    AbstractValueEdge, ValueEdge, ValueDiEdge,
+    get_edgeval, get_edgeval_or, get_edgevals, get_edgevals_or,
+    set_edgeval!, set_edgevals!,
+    val, vals,
+    outedgevals, inedgevals,
+    outedgevals_for_key, inedgevals_for_key,
+    default_edgeval, edgevals_type,
+    transform_edgevals!,
+    KeyView, keyview,
+    ValueMatrix, AdjacencyMatrix
 
 # ==== Includes ===========================
 
 include("utils.jl")
-include("simplevalueedge.jl")
-include("simplevaluegraph.jl")
-include("simplevaluedigraph.jl")
+
+include("abstractvaluegraph.jl")
+include("valueedge.jl")
+include("valuegraph.jl")
+#include("keyview.jl")
 include("matrices.jl")
 
-include("operators.jl")
-# include("modified_functions.jl")
+#include("operators.jl")
+#include("modified_functions.jl")
 
-include("export.jl")
+#include("export.jl") # Temporary disabled
 
 
 end # module

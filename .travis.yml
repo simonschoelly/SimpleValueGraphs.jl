@@ -5,7 +5,7 @@ os:
   - linux
 
 julia:
-  - 1.0
+  - 1.1
   - nightly
 
 # # Uncomment the following lines to allow failures on nightly julia
@@ -15,7 +15,7 @@ matrix:
    - julia: nightly
 
 notifications:
-  email: false
+  email: true
 
 #script: # the default script is equivalent to the following
 #  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
