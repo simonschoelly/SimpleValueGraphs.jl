@@ -937,7 +937,7 @@ inedgevals(g::EdgeValDiGraph{V, E_VAL, E_VAL_C}, v::Integer) where {V, E_VAL, E_
 # ====================================================================
 
 
-@inline function iterate(eit::ValueEdgeIter{<:EdgeValGraph{V, E_VAL}}, state=(one(V), 1) ) where {V, E_VAL}
+@inline function iterate(eit::ValEdgeIter{<:EdgeValGraph{V, E_VAL}}, state=(one(V), 1) ) where {V, E_VAL}
     g = eit.g
     fadjlist = g.fadjlist
     edgevals = g.edgevals
@@ -951,7 +951,7 @@ inedgevals(g::EdgeValDiGraph{V, E_VAL, E_VAL_C}, v::Integer) where {V, E_VAL, E_
             i = searchsortedfirst(fadjlist[u], u)
             continue
         end
-        e = ValueEdge(u, list_u[i], values_for_index(edgevals, E_VAL, u, i))
+        e = ValEdge(u, list_u[i], values_for_index(edgevals, E_VAL, u, i))
         state = (u, i + 1)
         return e, state
     end
@@ -960,13 +960,13 @@ inedgevals(g::EdgeValDiGraph{V, E_VAL, E_VAL_C}, v::Integer) where {V, E_VAL, E_
 
     @inbounds (n == 0 || i > length(fadjlist[n])) && return nothing
 
-    e = ValueEdge(n, n, values_for_index(edgevals, E_VAL, u, i))
+    e = ValEdge(n, n, values_for_index(edgevals, E_VAL, u, i))
     state = (u, i + 1)
     return e, state
 end
 
 function iterate(
-            iter::ValueEdgeIter{<:Union{EdgeValOutDiGraph{V, E_VAL}, EdgeValDiGraph{V, E_VAL}}},
+            iter::ValEdgeIter{<:Union{EdgeValOutDiGraph{V, E_VAL}, EdgeValDiGraph{V, E_VAL}}},
             state=(one(V), 1)
     ) where {V, E_VAL}
 
@@ -984,7 +984,7 @@ function iterate(
             i = 1
             continue
         end
-        e = ValueDiEdge(u, fadjlist[u][i], values_for_index(edgevals, E_VAL, u, i))
+        e = ValDiEdge(u, fadjlist[u][i], values_for_index(edgevals, E_VAL, u, i))
         return e, (u, i + 1)
     end
 
