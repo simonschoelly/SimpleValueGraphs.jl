@@ -1,4 +1,4 @@
-import SimpleEdgeValGraphs: tuple_of_types
+import SimpleValueGraphs: tuple_of_types
 
 @testset "edge iterator $G" for
     G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph),
