@@ -1,8 +1,8 @@
 
 
-@testset "AbstractValueEdge" begin
-    @test ValueEdge <: AbstractValueEdge
-    @test ValueDiEdge <: AbstractValueEdge
+@testset "AbstractValEdge" begin
+    @test ValEdge <: AbstractValEdge
+    @test ValDiEdge <: AbstractValEdge
 end
 
 
@@ -15,27 +15,27 @@ end
     values = rand_sample(E_VALS)
 
     # We enforce that the constructor always puts the smaller vertex as src
-    @testset "ValueEdge($V($u), $V($v), $values)" begin
+    @testset "ValEdge($V($u), $V($v), $values)" begin
 
         src_should, dst_should = minmax(u, v)
-        e = ValueEdge(u, v, values)
-        e_rev = ValueEdge(v, u, values)
+        e = ValEdge(u, v, values)
+        e_rev = ValEdge(v, u, values)
 
         @test e.src == e_rev.src == src_should
         @test e.dst == e_rev.dst == dst_should
         @test e.src <= e.dst
         @test e.vals == values
-        @test e isa ValueEdge{V, E_VALS}
+        @test e isa ValEdge{V, E_VALS}
     end
 
-    @testset "ValueDiEdge($V($u), $V($v), $values)" begin
+    @testset "ValDiEdge($V($u), $V($v), $values)" begin
 
-        e = ValueDiEdge(u, v, values)
+        e = ValDiEdge(u, v, values)
 
         @test e.src == u
         @test e.dst == v
         @test e.vals == values
-        @test e isa ValueDiEdge{V, E_VALS}
+        @test e isa ValDiEdge{V, E_VALS}
     end
 end
 
@@ -48,9 +48,9 @@ end
 
     values = rand_sample(E_VALS)
 
-    e = ValueEdge(u, v, values)
-    e_rev = ValueEdge(v, u, values)
-    @testset "e == ValueEdge($V($u), $V($v), $values)" begin
+    e = ValEdge(u, v, values)
+    e_rev = ValEdge(v, u, values)
+    @testset "e == ValEdge($V($u), $V($v), $values)" begin
         
         @testset "src, dst" begin
             @test issetequal((src(e), dst(e)), (u, v))
@@ -72,8 +72,8 @@ end
         end
     end
 
-    e = ValueDiEdge(u, v, values)
-    @testset "e == ValueDiEdge($V($u), $V($v), $values)" begin
+    e = ValDiEdge(u, v, values)
+    @testset "e == ValDiEdge($V($u), $V($v), $values)" begin
         
         @testset "src, dst" begin
             @test src(e) == u
@@ -105,8 +105,8 @@ end
         E_VALS in TEST_EDGEVAL_TYPES_SINGE_VALUE_SMALL
 
         values = rand_sample(E_VALS)
-        e_undir = ValueEdge(1, 2, values)
-        e_dir = ValueEdge(1, 2, values)
+        e_undir = ValEdge(1, 2, values)
+        e_dir = ValEdge(1, 2, values)
 
         @test val(e_undir) == val(e_undir, key=1)
         @test val(e_undir) == vals(e_undir)[1]
@@ -122,8 +122,8 @@ end
         E_VALS in TEST_EDGEVAL_TYPES_NON_SINGE_VALUE_SMALL
 
         values = rand_sample(E_VALS)
-        e_undir = ValueEdge(1, 2, values)
-        e_dir = ValueEdge(1, 2, values)
+        e_undir = ValEdge(1, 2, values)
+        e_dir = ValEdge(1, 2, values)
 
         @test_throws Exception val(e_undir)
         @test_throws Exception val(e_dir)
@@ -137,7 +137,7 @@ end
         E_VALS  in TEST_EDGEVAL_TYPES_SMALL,
         u       in V[1, 2], 
         v       in V[1, 2],
-        e       in ( ValueEdge(u, v, rand_sample(E_VALS)), )
+        e       in ( ValEdge(u, v, rand_sample(E_VALS)), )
 
         e_rev = reverse(e)
         @test src(e) == src(e_rev)
@@ -151,7 +151,7 @@ end
         E_VALS  in TEST_EDGEVAL_TYPES_SMALL,
         u       in V[1, 2], 
         v       in V[1, 2],
-        e       in ( ValueDiEdge(u, v, rand_sample(E_VALS)), )
+        e       in ( ValDiEdge(u, v, rand_sample(E_VALS)), )
 
         e_rev = reverse(e)
         @test src(e) == dst(e_rev)

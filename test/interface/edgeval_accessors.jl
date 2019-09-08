@@ -4,7 +4,7 @@ import SimpleValueGraphs: tuple_of_types
 @testset "Edgeval setters" begin
 
     @testset "set_edgevals!(::$G{\$V, \$E_VALS}, s, d, vals)" for
-        G in (ValueGraph, ValueOutDiGraph, ValueDiGraph)
+        G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
 
         @testset "Params: V = $V, E_VALS = $E_VALS" for
             V in TEST_VERTEX_TYPES_SMALL,
@@ -43,7 +43,7 @@ import SimpleValueGraphs: tuple_of_types
     end
 
     @testset "set_edgeval!(::$G{\$V, \$E_VALS}, s, d, val, key=\$key)" for
-        G in (ValueGraph, ValueOutDiGraph, ValueDiGraph)
+        G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
 
         @testset "Params: V = $V, E_VALS = $E_VALS, key = $key" for
             V in TEST_VERTEX_TYPES_SMALL,
@@ -83,7 +83,7 @@ import SimpleValueGraphs: tuple_of_types
     end
 
     @testset "set_edgeval!(::$G{\$V, \$E_VALS}, s, d, val)" for
-        G in (ValueGraph, ValueOutDiGraph, ValueDiGraph)
+        G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
 
         @testset "Params: V = $V, E_VALS = $E_VALS" for
             V in TEST_VERTEX_TYPES_SMALL,
@@ -125,7 +125,7 @@ end
 @testset "Edgeval getters" begin
 
     @testset "get_edgevals(::$G{\$V, \$E_VALS}, s, d)" for
-        G in (ValueGraph, ValueOutDiGraph, ValueDiGraph)
+        G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
 
         @testset "Params: V = $V, E_VALS = $E_VALS" for
             V in TEST_VERTEX_TYPES_SMALL,
@@ -151,7 +151,7 @@ end
     end
         
     @testset "get_edgevals_or(::$G{\$V, \$E_VALS}, s, d, \$default)" for
-        G in (ValueGraph, ValueOutDiGraph, ValueDiGraph)
+        G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
 
         @testset "Params: V = $V, E_VALS = $E_VALS, default = $(repr(default))" for
             V in TEST_VERTEX_TYPES_SMALL,
@@ -177,7 +177,7 @@ end
     end
 
     @testset "get_edgeval(::$G{\$V, \$E_VALS}, s, d, key=\$key)" for
-        G in (ValueGraph, ValueOutDiGraph, ValueDiGraph)
+        G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
 
         @testset "Params: V = $V, E_VALS = $E_VALS, key = $key" for
             V in TEST_VERTEX_TYPES_SMALL,
@@ -204,7 +204,7 @@ end
     end
 
     @testset "get_edgeval(::$G{\$V, \$E_VALS}, s, d)" for
-        G in (ValueGraph, ValueOutDiGraph, ValueDiGraph)
+        G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
 
         @testset "Params: V = $V, E_VALS = $E_VALS" for
             V in TEST_VERTEX_TYPES_SMALL,
@@ -230,7 +230,7 @@ end
     end
 
     @testset "get_edgeval_or(::$G{\$V, \$E_VALS}, s, d, default, key=\$key)" for
-        G in (ValueGraph, ValueOutDiGraph, ValueDiGraph)
+        G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
 
         @testset "Params: V = $V, E_VALS = $E_VALS, key = $key, default = $(repr(default))" for
             V in TEST_VERTEX_TYPES_SMALL,
@@ -258,7 +258,7 @@ end
     end
 
     @testset "get_edgeval_or(::$G{\$V, \$E_VALS}, s, d, default)" for
-        G in (ValueGraph, ValueOutDiGraph, ValueDiGraph)
+        G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
 
         @testset "Params: V = $V, E_VALS = $E_VALS, default = $(repr(default))" for
             V in TEST_VERTEX_TYPES_SMALL,

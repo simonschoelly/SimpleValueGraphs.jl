@@ -25,8 +25,10 @@ import LightGraphs:
     complement
      
 
-export AbstractValueGraph, ValueGraph, ValueOutDiGraph, ValueDiGraph,
-    AbstractValueEdge, ValueEdge, ValueDiEdge,
+export AbstractValGraph,
+    AbstractEdgeValGraph,
+    EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph,
+    AbstractValEdge, ValEdge, ValDiEdge,
     get_edgeval, get_edgeval_or, get_edgevals, get_edgevals_or,
     set_edgeval!, set_edgevals!,
     val, vals,
@@ -35,7 +37,7 @@ export AbstractValueGraph, ValueGraph, ValueOutDiGraph, ValueDiGraph,
     default_edgeval, edgevals_type,
     transform_edgevals!,
     KeyView, keyview,
-    ValueMatrix, AdjacencyMatrix
+    ValMatrix, AdjacencyMatrix
 
 # ==== Includes ===========================
 
