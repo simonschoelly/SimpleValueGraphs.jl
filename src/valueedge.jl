@@ -1,59 +1,59 @@
 
 
-abstract type AbstractValueEdge{V <: Integer, E_VALS} <: AbstractEdge{V} end
+abstract type AbstractValEdge{V <: Integer, E_VALS} <: AbstractEdge{V} end
 
 """
-    ValueEdge{V, E_VALS} <: AbstractValueEdge{V}
+    ValEdge{V, E_VALS} <: AbstractValEdge{V}
 
 A datastructure representing an undirected edge with multiple values.
 """
-struct ValueEdge{V<:Integer, E_VALS} <: AbstractValueEdge{V, E_VALS}
+struct ValEdge{V<:Integer, E_VALS} <: AbstractValEdge{V, E_VALS}
     src::V
     dst::V
     vals::E_VALS
 
-    function ValueEdge(src::V, dst::V, vals::E_VALS) where {V, E_VALS}
+    function ValEdge(src::V, dst::V, vals::E_VALS) where {V, E_VALS}
         src, dst = minmax(src, dst) # TODO maybe use a branchless operator
         return new{V, E_VALS}(src, dst, vals)
     end
 end
 
-# TODO update docstring and ValueDiEdge
+# TODO update docstring and ValDiEdge
 """
-    ValueEdge(s, d, v)
-Create a `ValueEdge` with source `s`, destination `d` and value `v`.
+    ValEdge(s, d, v)
+Create a `ValEdge` with source `s`, destination `d` and value `v`.
 # Examples
 ```
-julia> e = SimplevalueEdge(4, 2, 'A')
+julia> e = ValEdge(4, 2, 'A')
 Edge 4 => 2 with value 'A'
 ```
 """
-function ValueEdge end
+function ValEdge end
 
 """
-    ValueDiEdge{V, E_VALS} <: AbstractValueEdge{V}
+    ValDiEdge{V, E_VALS} <: AbstractValEdge{V}
 
 A datastructure representing a directed edge with values.
 """
-struct ValueDiEdge{V<:Integer, E_VALS} <: AbstractValueEdge{V, E_VALS}
+struct ValDiEdge{V<:Integer, E_VALS} <: AbstractValEdge{V, E_VALS}
     src::V
     dst::V
     vals::E_VALS
 
-    function ValueDiEdge(src::V, dst::V, vals::E_VALS) where {V, E_VALS}
+    function ValDiEdge(src::V, dst::V, vals::E_VALS) where {V, E_VALS}
         return new{V, E_VALS}(src, dst, vals)
     end
 end
 
-src(e::AbstractValueEdge) = e.src
-dst(e::AbstractValueEdge) = e.dst
+src(e::AbstractValEdge) = e.src
+dst(e::AbstractValEdge) = e.dst
 
 """
-    vals(e::ValueEdge)
+    vals(e::ValEdge)
 Returns the value attached to the edge `e`.
 # Examples
 ```
-julia> g = ValueGraph(3, String)
+julia> g = EdgeValGraph(3, String)
 
 julia> add_edge!(g, 2, 3, ("xyz",))
 
@@ -61,34 +61,33 @@ julia> first(edges(g)) |> vals
 "xyz"
 ```
 """
-vals(e::AbstractValueEdge) = e.vals
+vals(e::AbstractValEdge) = e.vals
 
+# TODO Maybe that should be declared somewhere else
+const SingleValTuple{T} = Union{Tuple{T}, NamedTuple{S, Tuple{T}} where {S}}
 
-
-const SingleValueTuple{T} = Union{Tuple{T}, NamedTuple{S, Tuple{T}} where {S}}
-
-val(e::AbstractValueEdge; key::Union{Integer, Symbol, NoKey}=nokey) =
+val(e::AbstractValEdge; key::Union{Integer, Symbol, NoKey}=nokey) =
     _val(e, key)
 
-_val(e::AbstractValueEdge{V, E_VAL}, ::NoKey) where {V, E_VAL <: SingleValueTuple} =
+_val(e::AbstractValEdge{V, E_VAL}, ::NoKey) where {V, E_VAL <: SingleValTuple} =
     e.vals[1]
 
-_val(e::AbstractValueEdge, key::Union{Integer, Symbol}) = e.vals[key]
+_val(e::AbstractValEdge, key::Union{Integer, Symbol}) = e.vals[key]
 
-reverse(e::ValueEdge) = e
-reverse(e::ValueDiEdge) = ValueDiEdge(dst(e), src(e), vals(e))
+reverse(e::ValEdge) = e
+reverse(e::ValDiEdge) = ValDiEdge(dst(e), src(e), vals(e))
 
 
-is_directed(::Type{<:ValueEdge}) = false
-is_directed(::Type{<:ValueDiEdge}) = true
-is_directed(e::AbstractValueEdge) = is_directed(typeof(e))
+is_directed(::Type{<:ValEdge}) = false
+is_directed(::Type{<:ValDiEdge}) = true
+is_directed(e::AbstractValEdge) = is_directed(typeof(e))
 
-function show(io::IO, e::AbstractValueEdge)
+function show(io::IO, e::AbstractValEdge)
     isdir = is_directed(e) 
     e_keys = keys(vals(e))
     has_symbol_keys = eltype(e_keys) === Symbol
 
-    print(io, isdir ? "ValueDiEdge" : "ValueEdge")
+    print(io, isdir ? "ValDiEdge" : "ValEdge")
     arrow = isdir ? "->" : "--"
     print(io, " $(src(e)) $arrow $(dst(e))")
 
