@@ -224,7 +224,7 @@ end
 
 
 function testgraphA()
-    g = ValueGraph(CompleteBipartiteGraph(3, 4))
+    g = EdgeValGraph(CompleteBipartiteGraph(3, 4))
     add_edge!(g, 1, 4, 10.0)
     return g
 end
@@ -233,7 +233,7 @@ end
 # TODO allow for only non-negative or positive weights
 function graph_with_randvals(g::AbstractGraph{T}) where {T}
     U = Float64
-    resultg = ValueGraph{T, U}(nv(g))
+    resultg = EdgeValGraph{T, U}(nv(g))
     for e in edges(g)
         s, d = src(e), dst(e)
         add_edge!(resultg, s, d, convert(U, randn()))
@@ -250,7 +250,7 @@ end
 
 
 # TODO these functions are not finished yet
-function testset_isvalidgraph(g::ValueGraph; undef_edgevalues::Bool=false)
+function testset_isvalidgraph(g::EdgeValGraph; undef_edgevalues::Bool=false)
     @testset "Is valid graph" begin
         @testset "g.ne has correct value" begin
             # Each edge, apart from self-loops occurs twice
@@ -304,7 +304,7 @@ function testset_isvalidgraph(g::ValueGraph; undef_edgevalues::Bool=false)
     end
 end
 
-function testset_isvalidgraph(g::ValueOutDiGraph; undef_edgevalues::Bool=false)
+function testset_isvalidgraph(g::EdgeValOutDiGraph; undef_edgevalues::Bool=false)
     @testset "Is valid graph" begin
         @testset "g.ne has correct value" begin
             should_be = mapreduce(length, +, g.fadjlist, init=0)
@@ -324,7 +324,7 @@ function testset_isvalidgraph(g::ValueOutDiGraph; undef_edgevalues::Bool=false)
     end
 end
 
-function testset_isvalidgraph(g::ValueDiGraph; undef_edgevalues::Bool=false)
+function testset_isvalidgraph(g::EdgeValDiGraph; undef_edgevalues::Bool=false)
     @testset "Is valid graph" begin
         @testset "g.ne has correct value" begin
             should_be_forwards = mapreduce(length, +, g.fadjlist, init=0)
@@ -378,19 +378,19 @@ function testset_isvalidgraph(g::ValueDiGraph; undef_edgevalues::Bool=false)
     end
 end
 
-function testset_topological_equivalent(g::SimpleGraph, gv::ValueGraph)
+function testset_topological_equivalent(g::SimpleGraph, gv::EdgeValGraph)
     @testset "Topological equivalent" begin
         @test g.fadjlist == gv.fadjlist
     end
 end
 
-function testset_topological_equivalent(g::SimpleDiGraph, gv::ValueOutDiGraph)
+function testset_topological_equivalent(g::SimpleDiGraph, gv::EdgeValOutDiGraph)
     @testset "Topological equivalent" begin
         @test g.fadjlist == gv.fadjlist
     end
 end
 
-function testset_topological_equivalent(g::SimpleDiGraph, gv::ValueDiGraph)
+function testset_topological_equivalent(g::SimpleDiGraph, gv::EdgeValDiGraph)
     @testset "Topological equivalent" begin
         @test g.fadjlist == gv.fadjlist
         @test g.badjlist == gv.badjlist

@@ -1,18 +1,18 @@
-import SimpleValueGraphs: tuple_of_types, default_edgeval_types
+import SimpleEdgeValGraphs: tuple_of_types, default_edgeval_types
 
-function testset_toplogical_equivalent(g::SimpleGraph, gv::ValueGraph)
+function testset_toplogical_equivalent(g::SimpleGraph, gv::EdgeValGraph)
     @testset "Topological equivalent" begin
         @test all(lr -> lr[1] == lr[2], zip(g.fadjlist, gv.fadjlist))
     end
 end
 
-function testset_toplogical_equivalent(g::SimpleDiGraph, gv::ValueOutDiGraph)
+function testset_toplogical_equivalent(g::SimpleDiGraph, gv::EdgeValOutDiGraph)
     @testset "Topological equivalent" begin
         @test all(lr -> lr[1] == lr[2], zip(g.fadjlist, gv.fadjlist))
     end
 end
 
-function testset_toplogical_equivalent(g::SimpleDiGraph, gv::ValueDiGraph)
+function testset_toplogical_equivalent(g::SimpleDiGraph, gv::EdgeValDiGraph)
     @testset "Topological equivalent" begin
         @test all(lr -> lr[1] == lr[2], zip(g.fadjlist, gv.fadjlist))
         @test all(lr -> lr[1] == lr[2], zip(g.badjlist, gv.badjlist))
@@ -20,9 +20,9 @@ function testset_toplogical_equivalent(g::SimpleDiGraph, gv::ValueDiGraph)
 end
 
 
-# ValueGraph{Int, Tuple{Float64}}(10)
+# EdgeValGraph{Int, Tuple{Float64}}(10)
 @testset "Constructor $G{\$V, \$E_VALS}(\$n)" for
-    G in (ValueGraph, ValueOutDiGraph, ValueDiGraph)
+    G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
 
     @testset "Params: V = $V, E_VALS = $E_VALS" for
          V in TEST_VERTEX_TYPES_SMALL,
@@ -42,9 +42,9 @@ end
 end
 
 
-# ValueGraph(10, (Float64, ))
+# EdgeValGraph(10, (Float64, ))
 @testset "Constructor $G(\$n::\$V, \$edgeval_types)" for
-    G in (ValueGraph, ValueOutDiGraph, ValueDiGraph)
+    G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
 
     @testset "Params n = $n, V = $V, edgeval_types = $edgeval_types" for
                 V in TEST_VERTEX_TYPES_SMALL,
@@ -69,9 +69,9 @@ end
 
 
 
-# ValueGraph(10)
+# EdgeValGraph(10)
 @testset "Constructor $G(\$n::\$V)" for
-    G in (ValueGraph, ValueOutDiGraph, ValueDiGraph)
+    G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
 
     @testset "Params n = $n, V = $V" for
         V in TEST_VERTEX_TYPES_SMALL,
@@ -96,9 +96,9 @@ end
     end
 end
 
-# ValueGraph(undef, gs, (Float64,))
+# EdgeValGraph(undef, gs, (Float64,))
 @testset "Constructor $G(undef, \$gs, \$edgeval_types)" for
-    G in (ValueGraph, ValueOutDiGraph, ValueDiGraph)
+    G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
 
     GS = is_directed(G) ? SimpleDiGraph : SimpleGraph
 
@@ -123,9 +123,9 @@ end
     end
 end
 
-# ValueGraph(undef, gs)
+# EdgeValGraph(undef, gs)
 @testset "Constructor $G(undef, \$gs)" for
-    G in (ValueGraph, ValueOutDiGraph, ValueDiGraph)
+    G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
 
     GS = is_directed(G) ? SimpleDiGraph : SimpleGraph
 
@@ -151,9 +151,9 @@ end
 
 
 
-# ValueGraph((s, d) -> (f(s, d),), gs, (Float64,))
+# EdgeValGraph((s, d) -> (f(s, d),), gs, (Float64,))
 @testset "Constructor $G(f, \$gs, \$edgeval_types)" for
-    G in (ValueGraph, ValueOutDiGraph, ValueDiGraph)
+    G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
 
     GS = is_directed(G) ? SimpleDiGraph : SimpleGraph
 
@@ -192,9 +192,9 @@ end
 end
 
 
-# ValueGraph((s, d) -> (f(s, d),), gs)
+# EdgeValGraph((s, d) -> (f(s, d),), gs)
 @testset "Constructor $G(undef, \$gs)" for
-    G in (ValueGraph, ValueOutDiGraph, ValueDiGraph)
+    G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
 
     GS = is_directed(G) ? SimpleDiGraph : SimpleGraph
 

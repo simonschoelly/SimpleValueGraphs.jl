@@ -1,7 +1,7 @@
-import SimpleValueGraphs: tuple_of_types
+import SimpleEdgeValGraphs: tuple_of_types
 
 @testset "edge iterator $G" for
-    G in (ValueGraph, ValueOutDiGraph, ValueDiGraph),
+    G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph),
     V in TEST_VERTEX_TYPES_SMALL,
     E_VALS in TEST_EDGEVAL_TYPES_SMALL,
     (gs, info) in make_testgraphs(is_directed(G) ? SimpleDiGraph{V} : SimpleGraph{V})
@@ -12,7 +12,7 @@ import SimpleValueGraphs: tuple_of_types
 
         iter = edges(g)
 
-        E_should_be = (is_directed(g) ? ValueDiEdge : ValueEdge){V, E_VALS}
+        E_should_be = (is_directed(g) ? ValDiEdge : ValEdge){V, E_VALS}
 
         
         @testset "eltype" begin
@@ -48,7 +48,7 @@ import SimpleValueGraphs: tuple_of_types
 end
 
 @testset "inneighbors $G" for
-    G in (ValueGraph, ValueDiGraph),
+    G in (EdgeValGraph, EdgeValDiGraph),
     V in TEST_VERTEX_TYPES_SMALL,
     E_VALS in TEST_EDGEVAL_TYPES_SMALL,
     (gs, info) in make_testgraphs(is_directed(G) ? SimpleDiGraph{V} : SimpleGraph{V})
@@ -73,7 +73,7 @@ end
 end
 
 @testset "outneighbors $G" for
-    G in (ValueGraph, ValueOutDiGraph, ValueDiGraph),
+    G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph),
     V in TEST_VERTEX_TYPES_SMALL,
     E_VALS in TEST_EDGEVAL_TYPES_SMALL,
     (gs, info) in make_testgraphs(is_directed(G) ? SimpleDiGraph{V} : SimpleGraph{V})
