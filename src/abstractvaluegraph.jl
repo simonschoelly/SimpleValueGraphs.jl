@@ -2,8 +2,8 @@
 
 abstract type AbstractValGraph{V<:Integer, V_VALS, E_VALS} <: AbstractGraph{V} end
 
-eltype(::Type{<:AbstractValGraph{V}}) = V
-eltype(g::AbstractValGraph{V}) = eltype(typeof(g))
+eltype(::Type{<:AbstractValGraph{V}}) where {V} = V
+eltype(g::AbstractValGraph) = eltype(typeof(g))
 
 # TODO examples
 # TODO might also implement this for SimpleGraph
