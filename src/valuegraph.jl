@@ -15,7 +15,7 @@ by themself but rather let a constructor do that.
 mutable struct EdgeValGraph{  V <: Integer,
                             E_VALS <: AbstractTuple,
                             E_VALS_C
-                         } <: AbstractEdgeValGraph{V, Tuple{}, E_VALS}
+                         } <: AbstractEdgeValGraph{V, E_VALS}
 
     ne::Int
     fadjlist::Adjlist{V}
@@ -34,7 +34,7 @@ by themself but rather let a constructor do that.
 mutable struct EdgeValOutDiGraph{ V <: Integer,
                                 E_VALS <: AbstractTuple,
                                 E_VALS_C
-                              } <: AbstractEdgeValGraph{V, Tuple{}, E_VALS}
+                              } <: AbstractEdgeValGraph{V, E_VALS}
 
     ne::Int
     fadjlist::Adjlist{V}
