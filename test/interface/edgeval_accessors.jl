@@ -10,7 +10,7 @@ import SimpleValueGraphs: tuple_of_types
             V in TEST_VERTEX_TYPES_SMALL,
             E_VALS in TEST_EDGEVAL_TYPES_SMALL
 
-            gs = is_directed(G) ? CycleDiGraph(V(5)) : CycleGraph(V(4))
+            gs = is_directed(G) ? cycle_digraph(V(5)) : cycle_graph(V(4))
             g = G((s, d) -> rand_sample(E_VALS), gs, tuple_of_types(E_VALS))
             @assert g isa G{V, E_VALS}
 
@@ -50,7 +50,7 @@ import SimpleValueGraphs: tuple_of_types
             E_VALS in TEST_EDGEVAL_TYPES_SMALL,
             key in allkeys_for_E_VALS(E_VALS)
 
-            gs = is_directed(G) ? CycleDiGraph(V(5)) : CycleGraph(V(4))
+            gs = is_directed(G) ? cycle_digraph(V(5)) : cycle_graph(V(4))
             g = G((s, d) -> rand_sample(E_VALS), gs, tuple_of_types(E_VALS))
             @assert g isa G{V, E_VALS}
 
@@ -89,7 +89,7 @@ import SimpleValueGraphs: tuple_of_types
             V in TEST_VERTEX_TYPES_SMALL,
             E_VALS in TEST_EDGEVAL_TYPES_SINGE_VALUE_SMALL
 
-            gs = is_directed(G) ? CycleDiGraph(V(5)) : CycleGraph(V(4))
+            gs = is_directed(G) ? cycle_digraph(V(5)) : cycle_graph(V(4))
             g = G((s, d) -> rand_sample(E_VALS), gs, tuple_of_types(E_VALS))
             @assert g isa G{V, E_VALS}
 
@@ -131,7 +131,7 @@ end
             V in TEST_VERTEX_TYPES_SMALL,
             E_VALS in TEST_EDGEVAL_TYPES_SMALL
 
-            gs = is_directed(G) ? CycleDiGraph(V(5)) : CycleGraph(V(4))
+            gs = is_directed(G) ? cycle_digraph(V(5)) : cycle_graph(V(4))
             g = G((s, d) -> rand_sample(E_VALS), gs, tuple_of_types(E_VALS))
             @assert g isa G{V, E_VALS}
 
@@ -158,7 +158,7 @@ end
             E_VALS in TEST_EDGEVAL_TYPES_SMALL,
             default in (nothing, 0)
 
-            gs = is_directed(G) ? CycleDiGraph(V(5)) : CycleGraph(V(4))
+            gs = is_directed(G) ? cycle_digraph(V(5)) : cycle_graph(V(4))
             g = G((s, d) -> rand_sample(E_VALS), gs, tuple_of_types(E_VALS))
             @assert g isa G{V, E_VALS}
 
@@ -184,7 +184,7 @@ end
             E_VALS in TEST_EDGEVAL_TYPES_SMALL,
             key in allkeys_for_E_VALS(E_VALS)
 
-            gs = is_directed(G) ? CycleDiGraph(V(5)) : CycleGraph(V(4))
+            gs = is_directed(G) ? cycle_digraph(V(5)) : cycle_graph(V(4))
             g = G((s, d) -> rand_sample(E_VALS), gs, tuple_of_types(E_VALS))
             @assert g isa G{V, E_VALS}
 
@@ -210,7 +210,7 @@ end
             V in TEST_VERTEX_TYPES_SMALL,
             E_VALS in TEST_EDGEVAL_TYPES_SINGE_VALUE_SMALL
 
-            gs = is_directed(G) ? CycleDiGraph(V(5)) : CycleGraph(V(4))
+            gs = is_directed(G) ? cycle_digraph(V(5)) : cycle_graph(V(4))
             g = G((s, d) -> rand_sample(E_VALS), gs, tuple_of_types(E_VALS))
             @assert g isa G{V, E_VALS}
 
@@ -238,7 +238,7 @@ end
             key in allkeys_for_E_VALS(E_VALS),
             default in (nothing, 0)
 
-            gs = is_directed(G) ? CycleDiGraph(V(5)) : CycleGraph(V(4))
+            gs = is_directed(G) ? cycle_digraph(V(5)) : cycle_graph(V(4))
             g = G((s, d) -> rand_sample(E_VALS), gs, tuple_of_types(E_VALS))
             @assert g isa G{V, E_VALS}
 
@@ -265,7 +265,7 @@ end
             E_VALS in TEST_EDGEVAL_TYPES_SINGE_VALUE_SMALL,
             default in (nothing, 0)
 
-            gs = is_directed(G) ? CycleDiGraph(V(5)) : CycleGraph(V(4))
+            gs = is_directed(G) ? cycle_digraph(V(5)) : cycle_graph(V(4))
             g = G((s, d) -> rand_sample(E_VALS), gs, tuple_of_types(E_VALS))
             @assert g isa G{V, E_VALS}
 

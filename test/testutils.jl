@@ -148,8 +148,8 @@ function _make_testgraphs(c::Channel, ::Type{SimpleGraph{V}}; kwargs...) where {
         info = "$(typeof(g)) 2 verts, 1 edge, 1 loop"
         put!(c, (graph=g, info=info))
 
-        g = CompleteGraph(V(5))
-        info = "$(typeof(g)) CompleteGraph(5)"
+        g = complete_graph(V(5))
+        info = "$(typeof(g)) complete_graph(5)"
         put!(c, (graph=g, info=info))
 end
 
