@@ -1,13 +1,5 @@
-# ====== New stuff
 
-# ===================
-# Tuples
-# ===================
-
-const AbstractTuple = Union{Tuple, NamedTuple}
-
-const NamedNTuple{N, T} = NamedTuple{S, NTuple{N, T}} where S
-const AbstractNTuple{N, T} = Union{NTuple{N, T}, NamedNTuple{N, T}}
+using SimpleValueGraphs.AbstractTuples
 
 const TupleOfTypes = Tuple{Vararg{Type}}
 const NamedTupleOfTypes = NamedTuple{S, <:Tuple{Vararg{Type}}} where {S}

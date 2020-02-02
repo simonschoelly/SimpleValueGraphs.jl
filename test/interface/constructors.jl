@@ -1,4 +1,7 @@
+using SimpleValueGraphs.AbstractTuples
+
 import SimpleValueGraphs: tuple_of_types, default_edgeval_types
+
 
 function testset_toplogical_equivalent(g::SimpleGraph, gv::EdgeValGraph)
     @testset "Topological equivalent" begin

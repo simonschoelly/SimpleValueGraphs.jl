@@ -7,6 +7,7 @@ using Base.Iterators: product
 include("testutils.jl")
 
 tests = [
+         "AbstractTuples.jl",
          "interface/constructors.jl",
          "interface/edges.jl",
          "interface/edgeval_accessors.jl",

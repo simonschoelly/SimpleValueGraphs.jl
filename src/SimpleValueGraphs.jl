@@ -41,6 +41,7 @@ export AbstractValGraph,
 
 # ==== Includes ===========================
 
+include("AbstractTuples.jl")
 include("utils.jl")
 
 include("abstractvaluegraph.jl")
