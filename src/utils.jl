@@ -6,37 +6,29 @@ const NamedTupleOfTypes = NamedTuple{S, <:Tuple{Vararg{Type}}} where {S}
 const AbstractTupleOfTypes = Union{TupleOfTypes, NamedTupleOfTypes}
 
 
-# TODO maybe better name
+# TODO maybe remove, only used for tests
 function tuple_of_types(TT::Type{<:Tuple})
     return Tuple(TT.types)
 end
 
+# TODO maybe remove, only used for tests
 function tuple_of_types(TT::Type{<:NamedTuple})
     return NamedTuple{Tuple(TT.names)}(TT.types)
-end
-
-# TODO maybe better name
-function to_tuple(types::TupleOfTypes)
-    return Tuple{types...}
-end
-
-function typeTuple(types::NamedTupleOfTypes)
-    return NamedTuple{keys(types), Tuple{values(types)...}}
 end
 
 
 const Adjlist{T} = Vector{Vector{T}}
 
 # TODO better name, do we still need these?
+#  Seems to be only used in src/matrices.jl
 function E_VAL_for_key(E_VALS::Type{<:Tuple}, key)
     return E_VALS.types[key]
 end
 
+# TODO  Seems to be only used in src/matrices.jl
 function E_VAL_for_key(E_VALS::Type{<:NamedTuple}, key)
     return NamedTuple{Tuple(E_VALS.names)}(E_VALS.types)[key]
 end
-
-
 
 
 # ==========
@@ -65,17 +57,6 @@ function deepcopy_adjlist(adjlist::Adjlist{T}) where {T}
 end
 
 
-#=
-const EdgeValContainer{T} = Union{Adjlist{T},
-                                  Tuple{Vararg{Adjlist}},
-                                  NamedTuple{S, <: Tuple{Vararg{Adjlist}}} where S
-                                 }
-=#
-
-
-# TODO remove these two?
-create_edgeval_list(nv, E_VAL::TupleOfTypes) = Tuple(Adjlist{T}(nv) for T in E_VAL.types)
-create_edgeval_list(nv, E_VAL::NamedTupleOfTypes) = NamedTuple{Tuple(E_VAL.names)}(Adjlist{T}(nv) for T in E_VAL.types)
 
 
 # TODO check if still correct
@@ -102,17 +83,6 @@ end
 end
 
 
-#= TODO remove?
-function set_value_for_index!(adjlist::Adjlist,
-                              s::Integer,
-                              index::Integer,
-                              value)
-    @inbounds adjlist[s][index] = value
-    return nothing
-end
-=#
-
-
 @generated function set_values_for_index!(edgevals::AbstractTuple, s::Integer, index::Integer, values::T) where {T <: AbstractTuple}
     len = length(T.types)
     exprs = Expr[]
@@ -123,24 +93,6 @@ end
     return Expr(:block, exprs...)
 end
 
-
-#=
-function set_value_for_index!(tup_adjlist::AbstractTuple, s::Integer, index::Integer, key, value)
-    @inbounds tup_adjlist[key][s][index] = value
-    return nothing
-end
-=#
-
-
-#= TODO remove?
-function insert_value_for_index!(adjlist::Adjlist,
-                                 s::Integer,
-                                 index::Integer,
-                                 value)
-    @inbounds insert!(adjlist[s], index, value)
-    return nothing
-end
-=#
 
 @generated function insert_values_for_index!(tup_adjlist::AbstractTuple,
                                  s::Integer,
@@ -154,15 +106,6 @@ end
     end
     return Expr(:block, exprs...)
 end
-
-#= TODO remove?
-function delete_value_for_index!(adjlist::Adjlist,
-                                 s::Integer,
-                                 index::Integer)
-    @inbounds deleteat!(adjlist[s], index)
-    return nothing
-end
-=#
 
 
 function delete_values_for_index!(tup_adjlist::AbstractTuple,
