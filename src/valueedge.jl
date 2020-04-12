@@ -5,7 +5,7 @@ abstract type AbstractValEdge{V <: Integer, E_VALS} <: AbstractEdge{V} end
 """
     ValEdge{V, E_VALS} <: AbstractValEdge{V}
 
-A datastructure representing an undirected edge with multiple values.
+A data structure representing an undirected edge with multiple values.
 """
 struct ValEdge{V<:Integer, E_VALS} <: AbstractValEdge{V, E_VALS}
     src::V
@@ -33,7 +33,7 @@ function ValEdge end
 """
     ValDiEdge{V, E_VALS} <: AbstractValEdge{V}
 
-A datastructure representing a directed edge with values.
+A data structure representing a directed edge with values.
 """
 struct ValDiEdge{V<:Integer, E_VALS} <: AbstractValEdge{V, E_VALS}
     src::V
