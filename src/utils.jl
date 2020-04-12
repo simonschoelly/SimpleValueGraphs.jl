@@ -192,7 +192,12 @@ end
 
 
 
+# TODO maybe not used anymore
 struct NoKey end
 const nokey = NoKey()
+
+# TODO maybe better in another file
+struct AllKeys end
+const allkeys = AllKeys()
 
 

@@ -41,6 +41,8 @@ export
 
     edgevals_type,
 
+    allkeys,
+
     get_edgeval,
     get_edgeval_or,
     get_edgevals,
