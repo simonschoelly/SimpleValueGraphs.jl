@@ -3,6 +3,8 @@
 abstract type AbstractValGraph{V<:Integer, V_VALS, E_VALS} <: AbstractGraph{V} end
 
 eltype(::Type{<:AbstractValGraph{V}}) where {V} = V
+# This should not be necessary, as Base implements `eltype(x) = eltype(typeof(x))`
+# but unfortunately LightGraphs redefines `eltype(::AbstractGraph)` as not defined
 eltype(g::AbstractValGraph) = eltype(typeof(g))
 
 # TODO examples
