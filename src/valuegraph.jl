@@ -95,7 +95,7 @@ end
 Construct a `EdgeValGraph` with `n` vertices and 0 edges with of types
 `edgeval_types`.
 
-If omitted, the element type `V` is the type of `n`.
+If omitted, the element type `V` is $(default_eltype).
 """
 function EdgeValGraph{V, E_VAL}(n::Integer) where {V <: Integer, E_VAL <: AbstractTuple}
 
@@ -111,7 +111,7 @@ end
 
 Construct a `EdgeValOutDiGraph` with `n` vertices and 0 edges of types
 `edgeval_types`.
-If omitted, the element type `V` is the type of `n`.
+If omitted, the element type `V` is $(default_eltype).
 
 """
 function EdgeValOutDiGraph{V, E_VAL}(n::Integer) where {V<:Integer, E_VAL}
@@ -130,7 +130,7 @@ end
 Construct a `EdgeValDiGraph` with `n` vertices and 0 edges with value-types
 `edgeval_types`.
 
-If omitted, the element type `V` is the type of `n`.
+If omitted, the element type `V` is $(default_eltype).
 """
 function EdgeValDiGraph{V, E_VAL}(n::Integer) where {V<:Integer, E_VAL}
     fadjlist = Adjlist{V}(n)
@@ -145,9 +145,9 @@ end
 
 
 for G in (:EdgeValGraph, :EdgeValOutDiGraph, :EdgeValDiGraph)
-    @eval function $G(n::V, edgeval_types::AbstractTupleOfTypes=default_edgeval_types) where {V <: Integer}
+    @eval function $G(n, edgeval_types::AbstractTupleOfTypes=default_edgeval_types)
         E_VAL = construct_E_VAL(edgeval_types)
-        return $G{V, E_VAL}(n)
+        return $G{default_eltype, E_VAL}(n)
     end
 
     @eval function $G{V}(n, edgeval_types::AbstractTupleOfTypes=default_edgeval_types) where {V <: Integer}

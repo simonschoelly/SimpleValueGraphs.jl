@@ -31,6 +31,8 @@ ZeroEdgeValGraph{V} = AbstractEdgeValGraph{V, E_VALS} where
     E_VALS <: Union{Tuple{}, NamedTuple{S, Tuple{}} where S}
 
 
+const default_eltype = Int32
+
 const default_edgevals = (Float64,)
 
 const default_edgevals_type = Tuple{Float64}

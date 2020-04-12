@@ -1,6 +1,6 @@
 using SimpleValueGraphs.AbstractTuples
 
-import SimpleValueGraphs: tuple_of_types, default_edgeval_types
+import SimpleValueGraphs: tuple_of_types, default_edgeval_types, default_eltype
 
 
 function testset_toplogical_equivalent(g::SimpleGraph, gv::EdgeValGraph)
@@ -60,7 +60,7 @@ end
             Tuple{edgeval_types...} :
             NamedTuple{keys(edgeval_types), Tuple{edgeval_types...}}
 
-        @test g isa G{V, E_VALS_should_be}
+        @test g isa G{default_eltype, E_VALS_should_be}
         @test ne(g) == 0
         @test nv(g) == n
         gs = is_directed(G) ? SimpleDiGraph(n) : SimpleGraph(n)
@@ -88,7 +88,7 @@ end
                 NamedTuple{keys(default_edgeval_types),
                            Tuple{default_edgeval_types...}}
 
-            @test g isa G{V, E_VALS_should_be}
+            @test g isa G{default_eltype, E_VALS_should_be}
         end
 
         @testset "0 edges" begin @test ne(g) == 0 end
