@@ -55,7 +55,7 @@ function Base.size(matrix::ValMatrix)
     return (nvg, nvg)
 end
 
-function LG.getindex(matrix::ValMatrix{K, Tv}, s, d) where {K, Tv}
+function Base.getindex(matrix::ValMatrix{K, Tv}, s, d) where {K, Tv}
     return get_edgeval_or(matrix.graph, s, d, matrix.zero_value, key=K)
 end
 
