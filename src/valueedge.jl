@@ -45,8 +45,8 @@ struct ValDiEdge{V<:Integer, E_VALS} <: AbstractValEdge{V, E_VALS}
     end
 end
 
-src(e::AbstractValEdge) = e.src
-dst(e::AbstractValEdge) = e.dst
+LG.src(e::AbstractValEdge) = e.src
+LG.dst(e::AbstractValEdge) = e.dst
 
 """
     vals(e::ValEdge)
@@ -71,15 +71,15 @@ _val(e::AbstractValEdge{V, E_VAL}, ::NoKey) where {V, E_VAL <: AbstractNTuple{1}
 
 _val(e::AbstractValEdge, key::Union{Integer, Symbol}) = e.vals[key]
 
-reverse(e::ValEdge) = e
-reverse(e::ValDiEdge) = ValDiEdge(dst(e), src(e), vals(e))
+LG.reverse(e::ValEdge) = e
+LG.reverse(e::ValDiEdge) = ValDiEdge(dst(e), src(e), vals(e))
 
 
-is_directed(::Type{<:ValEdge}) = false
-is_directed(::Type{<:ValDiEdge}) = true
-is_directed(e::AbstractValEdge) = is_directed(typeof(e))
+LG.is_directed(::Type{<:ValEdge}) = false
+LG.is_directed(::Type{<:ValDiEdge}) = true
+LG.is_directed(e::AbstractValEdge) = is_directed(typeof(e))
 
-function show(io::IO, e::AbstractValEdge)
+function Base.show(io::IO, e::AbstractValEdge)
     isdir = is_directed(e) 
     e_keys = keys(vals(e))
     has_symbol_keys = eltype(e_keys) === Symbol

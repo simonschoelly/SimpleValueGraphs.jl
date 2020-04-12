@@ -2,10 +2,10 @@
 
 abstract type AbstractValGraph{V<:Integer, V_VALS, E_VALS} <: AbstractGraph{V} end
 
-eltype(::Type{<:AbstractValGraph{V}}) where {V} = V
+LG.eltype(::Type{<:AbstractValGraph{V}}) where {V} = V
 # This should not be necessary, as Base implements `eltype(x) = eltype(typeof(x))`
 # but unfortunately LightGraphs redefines `eltype(::AbstractGraph)` as not defined
-eltype(g::AbstractValGraph) = eltype(typeof(g))
+LG.eltype(g::AbstractValGraph) = eltype(typeof(g))
 
 # TODO examples
 # TODO might also implement this for SimpleGraph
@@ -19,8 +19,8 @@ function edgevals_type end
 edgevals_type(::Type{<:AbstractValGraph{V, V_VALS, E_VALS}}) where {V, V_VALS, E_VALS} = E_VALS
 edgevals_type(g::AbstractValGraph) = edgevals_type(typeof(g))
 
-vertices(g::AbstractValGraph) = OneTo{eltype(g)}(nv(g))
-has_vertex(g::AbstractValGraph, v) = v ∈ vertices(g)
+LG.vertices(g::AbstractValGraph) = OneTo{eltype(g)}(nv(g))
+LG.has_vertex(g::AbstractValGraph, v) = v ∈ vertices(g)
 
 # ===== AbstractEdgeValGraph ==========
 
@@ -51,20 +51,20 @@ default_zero_edgeval(E_VAL::Type{<:AbstractTuple}) = E_VAL( default_zero_edgeval
 
 
 
-edgetype(G::Type{<:AbstractEdgeValGraph{V, E_VALS}}) where {V, E_VALS} =
+LG.edgetype(G::Type{<:AbstractEdgeValGraph{V, E_VALS}}) where {V, E_VALS} =
     is_directed(G) ? ValDiEdge{V, E_VALS} : ValEdge{V, E_VALS}
 
-edgetype(g::AbstractEdgeValGraph) = edgetype(typeof(g))
+LG.edgetype(g::AbstractEdgeValGraph) = edgetype(typeof(g))
 
 
-edges(g::AbstractEdgeValGraph) = ValEdgeIter(g)
+LG.edges(g::AbstractEdgeValGraph) = ValEdgeIter(g)
 edges_for_key(g::AbstractEdgeValGraph, key) = ValEdgeIter(g, g.edgevals[key])
 
-nv(g::AbstractEdgeValGraph) = eltype(g)(length(g.fadjlist))
-ne(g::AbstractEdgeValGraph) = g.ne
+LG.nv(g::AbstractEdgeValGraph) = eltype(g)(length(g.fadjlist))
+LG.ne(g::AbstractEdgeValGraph) = g.ne
 
 # TODO do we need this?
-zero(G::AbstractEdgeValGraph{V}) where {V} = G(zero(V))
+LG.zero(G::AbstractEdgeValGraph{V}) where {V} = G(zero(V))
 
 function is_validkey(
             g::AbstractEdgeValGraph{V, E_VALS},
@@ -93,21 +93,21 @@ struct ValEdgeIter{G<:AbstractEdgeValGraph} <: AbstractEdgeIter
     g::G
 end
 
-length(iter::ValEdgeIter) = ne(iter.g)
+Base.length(iter::ValEdgeIter) = ne(iter.g)
 
 function eltype(::Type{<:ValEdgeIter{G}}) where
         {V, E_VALS, G <: AbstractEdgeValGraph{V, E_VALS}}
 
     return (is_directed(G) ? ValDiEdge : ValEdge){V, E_VALS}
 end
-eltype(iter::ValEdgeIter) = eltype(typeof(iter))
+Base.eltype(iter::ValEdgeIter) = eltype(typeof(iter))
 
 
 #
 # === Display =====================
 
 # TODO output should be actuall graph type
-function show(io::IO, g::AbstractEdgeValGraph)
+function Base.show(io::IO, g::AbstractEdgeValGraph)
     dir = is_directed(g) ? "directed" : "undirected"
     println(io, "{$(nv(g)), $(ne(g))} $dir $(eltype(g)) ValueGraph with edge values of type $(edgevals_type(g))")
 end

@@ -331,7 +331,7 @@ If the edge already exists, return `false` but still change the edge value.
 """
 function add_edge! end
 
-function add_edge!(g::EdgeValGraph{V, E_VALS},
+function LG.add_edge!(g::EdgeValGraph{V, E_VALS},
                    s::Integer,
                    d::Integer,
                    values::E_VALS=default_edgeval(E_VALS)) where {V, E_VALS}
@@ -364,7 +364,7 @@ function add_edge!(g::EdgeValGraph{V, E_VALS},
     return true # edge successfully added
 end
 
-function add_edge!(g::EdgeValOutDiGraph{V, E_VALS},
+function LG.add_edge!(g::EdgeValOutDiGraph{V, E_VALS},
                    s::Integer,
                    d::Integer,
                    value::E_VALS=default_edgeval(E_VALS)) where {V, E_VALS}
@@ -386,7 +386,7 @@ function add_edge!(g::EdgeValOutDiGraph{V, E_VALS},
     return true # edge successfully added
 end
 
-function add_edge!(g::EdgeValDiGraph{V, E_VALS},
+function LG.add_edge!(g::EdgeValDiGraph{V, E_VALS},
                    s::Integer,
                    d::Integer,
                    value::E_VALS=default_edgeval(E_VALS)) where {V, E_VALS}
@@ -416,7 +416,7 @@ end
 #  rem_edge!
 #  ------------------------------------------------------
 
-function rem_edge!(g::EdgeValGraph, s::Integer, d::Integer)
+function LG.rem_edge!(g::EdgeValGraph, s::Integer, d::Integer)
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
     edgevals = g.edgevals
@@ -437,7 +437,7 @@ function rem_edge!(g::EdgeValGraph, s::Integer, d::Integer)
     return true
 end
 
-function rem_edge!(g::EdgeValOutDiGraph, s::Integer, d::Integer)
+function LG.rem_edge!(g::EdgeValOutDiGraph, s::Integer, d::Integer)
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
     edgevals = g.edgevals
@@ -452,7 +452,7 @@ function rem_edge!(g::EdgeValOutDiGraph, s::Integer, d::Integer)
 end
 
 
-function rem_edge!(g::EdgeValDiGraph, s::Integer, d::Integer)
+function LG.rem_edge!(g::EdgeValDiGraph, s::Integer, d::Integer)
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
     @inbounds list = g.fadjlist[s]
@@ -482,7 +482,7 @@ Return `true` if `g` has an edge from node `s` to `d`.
 """
 function has_edge end
 
-function has_edge(g::EdgeValGraph, s::Integer, d::Integer)
+function LG.has_edge(g::EdgeValGraph, s::Integer, d::Integer)
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
     @inbounds list_s = g.fadjlist[s]
@@ -494,7 +494,7 @@ function has_edge(g::EdgeValGraph, s::Integer, d::Integer)
     return LightGraphs.insorted(d, list_s)
 end
 
-function has_edge(g::EdgeValOutDiGraph, s::Integer, d::Integer)
+function LG.has_edge(g::EdgeValOutDiGraph, s::Integer, d::Integer)
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
     @inbounds list_s = g.fadjlist[s]
@@ -502,7 +502,7 @@ function has_edge(g::EdgeValOutDiGraph, s::Integer, d::Integer)
     return LightGraphs.insorted(d, list_s)
 end
 
-function has_edge(g::EdgeValDiGraph, s::Integer, d::Integer)
+function LG.has_edge(g::EdgeValDiGraph, s::Integer, d::Integer)
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
     @inbounds list_fadj = g.fadjlist[s]
@@ -882,22 +882,22 @@ set_edgevals!(g::AbstractEdgeValGraph, e::SimpleEdge, u) = set_edgevals!(g, src(
 #  is_directed
 #  ------------------------------------------------------
 
-is_directed(::Type{<:EdgeValGraph}) = false
-is_directed(::Type{<:EdgeValOutDiGraph}) = true
-is_directed(::Type{<:EdgeValDiGraph}) = true
+LG.is_directed(::Type{<:EdgeValGraph}) = false
+LG.is_directed(::Type{<:EdgeValOutDiGraph}) = true
+LG.is_directed(::Type{<:EdgeValDiGraph}) = true
 
 #  ------------------------------------------------------
 #  outneighbors
 #  ------------------------------------------------------
 
-outneighbors(g::AbstractEdgeValGraph, v::Integer) = g.fadjlist[v]
+LG.outneighbors(g::AbstractEdgeValGraph, v::Integer) = g.fadjlist[v]
 
 #  ------------------------------------------------------
 #  inneighbors
 #  ------------------------------------------------------
 
-inneighbors(g::EdgeValGraph, v::Integer) = outneighbors(g, v)
-inneighbors(g::EdgeValDiGraph, v::Integer) = g.badjlist[v]
+LG.inneighbors(g::EdgeValGraph, v::Integer) = outneighbors(g, v)
+LG.inneighbors(g::EdgeValDiGraph, v::Integer) = g.badjlist[v]
 
 #  ------------------------------------------------------
 #  outedgevals
@@ -933,7 +933,7 @@ inedgevals(g::EdgeValDiGraph{V, E_VAL, E_VAL_C}, v::Integer) where {V, E_VAL, E_
 # ====================================================================
 
 
-@inline function iterate(eit::ValEdgeIter{<:EdgeValGraph{V, E_VAL}}, state=(one(V), 1) ) where {V, E_VAL}
+@inline function Base.iterate(eit::ValEdgeIter{<:EdgeValGraph{V, E_VAL}}, state=(one(V), 1) ) where {V, E_VAL}
     g = eit.g
     fadjlist = g.fadjlist
     edgevals = g.edgevals
@@ -961,7 +961,7 @@ inedgevals(g::EdgeValDiGraph{V, E_VAL, E_VAL_C}, v::Integer) where {V, E_VAL, E_
     return e, state
 end
 
-function iterate(
+function Base.iterate(
             iter::ValEdgeIter{<:Union{EdgeValOutDiGraph{V, E_VAL}, EdgeValDiGraph{V, E_VAL}}},
             state=(one(V), 1)
     ) where {V, E_VAL}

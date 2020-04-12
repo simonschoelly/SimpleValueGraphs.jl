@@ -4,24 +4,24 @@
 
 using SparseArrays: AbstractSparseMatrix
 
-import LinearAlgebra:ishermitian, issymmetric, transpose, adjoint
+import LinearAlgebra
 
 
 struct AdjacencyMatrix{G <: AbstractGraph} <: AbstractSparseMatrix{Bool, Int}
     graph::G
 end
 
-getindex(matrix::AdjacencyMatrix, s, d) = has_edge(matrix.graph, s, d) 
+Base.getindex(matrix::AdjacencyMatrix, s, d) = has_edge(matrix.graph, s, d)
 
 function size(matrix::AdjacencyMatrix)
     nvg = Int(nv(matrix.graph))
     return (nvg, nvg)
 end
 
-ishermitian(::AdjacencyMatrix{<:EdgeValGraph}) = true
+LinearAlgebra.ishermitian(::AdjacencyMatrix{<:EdgeValGraph}) = true
 
-adjoint(matrix::AdjacencyMatrix{<:EdgeValGraph}) = matrix
-transpose(matrix::AdjacencyMatrix{<:EdgeValGraph}) = transpose
+LinearAlgebra.adjoint(matrix::AdjacencyMatrix{<:EdgeValGraph}) = matrix
+LinearAlgebra.transpose(matrix::AdjacencyMatrix{<:EdgeValGraph}) = transpose
 
 struct ValMatrix{K, Tv, G <: AbstractEdgeValGraph} <:
         AbstractSparseMatrix{Tv, Int} # TODO maybe not int
@@ -50,23 +50,23 @@ function ValMatrix(g::OneEdgeValGraph{V, E_VAL};
     return ValMatrix(g, key; zero_value=zero_value)
 end
 
-function size(matrix::ValMatrix)
+function Base.size(matrix::ValMatrix)
     nvg = Int(nv(matrix.graph))
     return (nvg, nvg)
 end
 
-function getindex(matrix::ValMatrix{K, Tv}, s, d) where {K, Tv}
+function LG.getindex(matrix::ValMatrix{K, Tv}, s, d) where {K, Tv}
     return get_edgeval_or(matrix.graph, s, d, matrix.zero_value, key=K)
 end
 
 
-issymmetric(::ValMatrix{<:EdgeValGraph}) = true
+LinearAlgebra.issymmetric(::ValMatrix{<:EdgeValGraph}) = true
 
-transpose(matrix::ValMatrix{<:EdgeValGraph}) = transpose
+LinearAlgebra.transpose(matrix::ValMatrix{<:EdgeValGraph}) = transpose
 
 ### weights
 
-function weights(g::AbstractEdgeValGraph; key=nokey)
+function LG.weights(g::AbstractEdgeValGraph; key=nokey)
 
     if g isa ZeroEdgeValGraph && key == nokey
         return LightGraphs.DefaultDistance(nv(g))

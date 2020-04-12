@@ -13,6 +13,9 @@ import Base: eltype, show, reverse, iterate, length, replace_in_print_matrix,
 
 import SparseArrays: blockdiag
 
+import LightGraphs
+const LG = LightGraphs
+
 import LightGraphs:
     src, dst, edgetype, nv, ne, vertices, edges, is_directed,
     add_vertex!, add_edge!, rem_vertex!, rem_edge!,
