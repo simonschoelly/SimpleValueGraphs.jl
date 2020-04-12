@@ -23,7 +23,7 @@ import SimpleValueGraphs: tuple_of_types
 
                     vals = rand_sample(E_VALS)
                     set_edgevals!(g, s, d, vals)
-                    get_edgevals(g, s, d) == vals || return false
+                    get_edgevals(g, s, d, allkeys) == vals || return false
 
                 end
             end
@@ -35,7 +35,7 @@ import SimpleValueGraphs: tuple_of_types
                         vals = rand_sample(E_VALS)
                         set_edgevals!(g, s, d, vals)
                         
-                        get_edgevals(g, d, s) == vals
+                        get_edgevals(g, d, s, allkeys) == vals
                     end
                 end
             end
@@ -63,7 +63,7 @@ import SimpleValueGraphs: tuple_of_types
                     val = rand_sample(E_VALS)[key]
                     set_edgeval!(g, s, d, val, key=key)
 
-                    get_edgevals(g, s, d)[key] == val
+                    get_edgevals(g, s, d, allkeys)[key] == val
 
                 end
             end
@@ -75,7 +75,7 @@ import SimpleValueGraphs: tuple_of_types
                         val = rand_sample(E_VALS)[key]
                         set_edgeval!(g, s, d, val, key=key)
                         
-                        get_edgevals(g, d, s)[key] == val
+                        get_edgevals(g, d, s, allkeys)[key] == val
                     end
                 end
             end
@@ -102,7 +102,7 @@ import SimpleValueGraphs: tuple_of_types
                     val = rand_sample(E_VALS.types[1])
                     set_edgeval!(g, s, d, val)
 
-                    get_edgevals(g, s, d)[1] == val
+                    get_edgevals(g, s, d, allkeys)[1] == val
 
                 end
             end
@@ -114,7 +114,7 @@ import SimpleValueGraphs: tuple_of_types
                         val = rand_sample(E_VALS.types[1])
                         set_edgeval!(g, s, d, val)
                         
-                        get_edgevals(g, d, s)[1] == val
+                        get_edgevals(g, d, s, allkeys)[1] == val
                     end
                 end
             end
@@ -124,7 +124,7 @@ end
 
 @testset "Edgeval getters" begin
 
-    @testset "get_edgevals(::$G{\$V, \$E_VALS}, s, d)" for
+    @testset "get_edgevals(::$G{\$V, \$E_VALS}, s, d, allkeys)" for
         G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
 
         @testset "Params: V = $V, E_VALS = $E_VALS" for
@@ -144,7 +144,7 @@ end
                     vals = rand_sample(E_VALS)
                     set_edgevals!(g, s, d, vals)
 
-                    get_edgevals(g, s, d) == vals
+                    get_edgevals(g, s, d, allkeys) == vals
                 end
             end
         end
@@ -176,7 +176,7 @@ end
         end
     end
 
-    @testset "get_edgeval(::$G{\$V, \$E_VALS}, s, d, key=\$key)" for
+    @testset "get_edgevals(::$G{\$V, \$E_VALS}, s, d, \$key)" for
         G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
 
         @testset "Params: V = $V, E_VALS = $E_VALS, key = $key" for
@@ -197,13 +197,13 @@ end
                     vals = rand_sample(E_VALS)
                     set_edgevals!(g, s, d, vals)
 
-                    get_edgeval(g, s, d, key=key) == vals[key]
+                    get_edgevals(g, s, d, key) == vals[key]
                 end
             end
         end
     end
 
-    @testset "get_edgeval(::$G{\$V, \$E_VALS}, s, d)" for
+    @testset "get_edgevals(::$G{\$V, \$E_VALS}, s, d)" for
         G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
 
         @testset "Params: V = $V, E_VALS = $E_VALS" for
@@ -223,7 +223,7 @@ end
                     vals = rand_sample(E_VALS)
                     set_edgevals!(g, s, d, vals)
 
-                    get_edgeval(g, s, d) == vals[1]
+                    get_edgevals(g, s, d) == vals[1]
                 end
             end
         end

@@ -28,7 +28,7 @@ import SimpleValueGraphs: tuple_of_types
                 s, d, vs = src(e), dst(e), vals(e)
                 e isa E_should_be &&
                 has_edge(g, s, d) &&
-                get_edgevals(g, s, d) == vs
+                get_edgevals(g, s, d, allkeys) == vs
             end
         end
 

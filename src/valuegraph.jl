@@ -519,15 +519,24 @@ end
 #  get_edgevals
 #  ------------------------------------------------------
 
+get_edgevals(g::OneEdgeValGraph, s::Integer, d::Integer) =
+    get_edgevals(g, s, d, 1)
+
+function get_edgevals(
+            g::AbstractEdgeValGraph{V, E_VALS},
+            s::Integer,
+            d::Integer,
+            key::Symbol) where {V, E_VALS}
+
+    return get_edgevals(g, s, d, Base.fieldindex(E_VALS, key))
+end
+    
+
 # TODO more specific error
 
-function get_edgeval(g::EdgeValGraph, s::Integer, d::Integer; key=nokey)
-    
-    if g isa OneEdgeValGraph && key === nokey
-        key = 1
-    end
+function get_edgevals(g::EdgeValGraph, s::Integer, d::Integer, key::Integer)
 
-    validkey_or_throw(g, key)
+    validkey_or_throw(g, key) # TODO might be sufficient to just check index
 
     verts = vertices(g)
     
@@ -546,14 +555,9 @@ function get_edgeval(g::EdgeValGraph, s::Integer, d::Integer; key=nokey)
     error("No such edge")
 end
 
-function get_edgeval(g::EdgeValOutDiGraph, s::Integer, d::Integer; key=nokey)
+function get_edgevals(g::EdgeValOutDiGraph, s::Integer, d::Integer, key::Integer)
 
-    if g isa OneEdgeValGraph && key === nokey
-        key = 1
-    end
-
-
-    validkey_or_throw(g, key)
+   validkey_or_throw(g, key)
 
     verts = vertices(g)
     (s in verts && d in verts) || error("No such edge")
@@ -565,11 +569,7 @@ function get_edgeval(g::EdgeValOutDiGraph, s::Integer, d::Integer; key=nokey)
     error("No such edge")
 end
 
-function get_edgeval(g::EdgeValDiGraph, s::Integer, d::Integer; key=nokey)
-
-    if g isa OneEdgeValGraph && key === nokey
-        key = 1
-    end
+function get_edgevals(g::EdgeValDiGraph, s::Integer, d::Integer, key::Integer)
 
     validkey_or_throw(g, key)
 
@@ -650,11 +650,10 @@ end
 
 
 """
-    get_edgevals(g::AbstractEdgeValGraph, s, d, default=nothing)
-    get_edgevals(g::AbstractEdgeValGraph, e, default=nothing)
-Return the edge value for the edge `e: s => d` and `default` if that edge does not exist.
+    get_edgevals(g::AbstractEdgeValGraph, s, d, allkeys)
+
 """
-function get_edgevals(g::EdgeValGraph{V, E_VAL}, s::Integer, d::Integer) where {V, E_VAL}
+function get_edgevals(g::EdgeValGraph{V, E_VAL}, s::Integer, d::Integer, ::AllKeys) where {V, E_VAL}
 
     verts = vertices(g)
     (s in verts && d in verts) || error("Values not found")
@@ -671,7 +670,7 @@ function get_edgevals(g::EdgeValGraph{V, E_VAL}, s::Integer, d::Integer) where {
     (s in verts && d in verts) || error("Values not found")
 end
 
-function get_edgevals(g::EdgeValOutDiGraph{V, E_VAL}, s::Integer, d::Integer) where {V, E_VAL}
+function get_edgevals(g::EdgeValOutDiGraph{V, E_VAL}, s::Integer, d::Integer, ::AllKeys) where {V, E_VAL}
 
     verts = vertices(g)
     (s in verts && d in verts) ||  error("Values not found")
@@ -685,7 +684,7 @@ function get_edgevals(g::EdgeValOutDiGraph{V, E_VAL}, s::Integer, d::Integer) wh
 end
 
 # TODO could probably be made faster by checking the shorter list
-function get_edgevals(g::EdgeValDiGraph{V, E_VAL}, s::Integer, d::Integer) where
+function get_edgevals(g::EdgeValDiGraph{V, E_VAL}, s::Integer, d::Integer, ::AllKeys) where
 {V, E_VAL}
 
     verts = vertices(g)
