@@ -63,13 +63,10 @@ julia> first(edges(g)) |> vals
 """
 vals(e::AbstractValEdge) = e.vals
 
-# TODO Maybe that should be declared somewhere else
-const SingleValTuple{T} = Union{Tuple{T}, NamedTuple{S, Tuple{T}} where {S}}
-
 val(e::AbstractValEdge; key::Union{Integer, Symbol, NoKey}=nokey) =
     _val(e, key)
 
-_val(e::AbstractValEdge{V, E_VAL}, ::NoKey) where {V, E_VAL <: SingleValTuple} =
+_val(e::AbstractValEdge{V, E_VAL}, ::NoKey) where {V, E_VAL <: AbstractNTuple{1}} =
     e.vals[1]
 
 _val(e::AbstractValEdge, key::Union{Integer, Symbol}) = e.vals[key]
