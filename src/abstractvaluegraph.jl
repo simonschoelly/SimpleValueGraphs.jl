@@ -95,7 +95,7 @@ end
 
 Base.length(iter::ValEdgeIter) = ne(iter.g)
 
-function eltype(::Type{<:ValEdgeIter{G}}) where
+function Base.eltype(::Type{<:ValEdgeIter{G}}) where
         {V, E_VALS, G <: AbstractEdgeValGraph{V, E_VALS}}
 
     return (is_directed(G) ? ValDiEdge : ValEdge){V, E_VALS}
