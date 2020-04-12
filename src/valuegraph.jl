@@ -886,10 +886,6 @@ is_directed(::Type{<:EdgeValGraph}) = false
 is_directed(::Type{<:EdgeValOutDiGraph}) = true
 is_directed(::Type{<:EdgeValDiGraph}) = true
 
-is_directed(g::EdgeValGraph) = false
-is_directed(g::EdgeValOutDiGraph) = true
-is_directed(g::EdgeValDiGraph) = true
-
 #  ------------------------------------------------------
 #  outneighbors
 #  ------------------------------------------------------
