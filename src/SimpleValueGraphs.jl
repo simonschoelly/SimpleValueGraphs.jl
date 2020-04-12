@@ -40,7 +40,36 @@ export AbstractValGraph,
     default_edgeval, edgevals_type,
     transform_edgevals!,
     KeyView, keyview,
-    ValMatrix, AdjacencyMatrix
+    ValMatrix, AdjacencyMatrix,
+
+    # overridden methods from other packages
+    eltype,
+    vertices,
+    has_vertex,
+    edgetype,
+    edges,
+    nv,
+    ne,
+    src,
+    dst,
+    add_edge!,
+    rem_edge!,
+    has_edge,
+    outneighbors,
+    inneighbors,
+    iterate,
+    reverse,
+    is_diected,
+    weights,
+    zero,
+    length,
+    show,
+    getindex,
+    size,
+    ishermitian,
+    adjoint,
+    transpose,
+    issymmetric
 
 # ==== Includes ===========================
 
