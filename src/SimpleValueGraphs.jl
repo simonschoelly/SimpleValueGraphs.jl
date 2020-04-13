@@ -51,9 +51,7 @@ export
     set_edgevals!,
 
     inedgevals,
-    inedgevals_for_key,
     outedgevals,
-    outedgevals_for_key,
 
     AdjacencyMatrix,
     ValMatrix,
