@@ -150,7 +150,7 @@ end
         end
     end
         
-    @testset "get_edgevals_or(::$G{\$V, \$E_VALS}, s, d, \$default)" for
+    @testset "get_edgevals_or(::$G{\$V, \$E_VALS}, s, d, allkeys, \$default)" for
         G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
 
         @testset "Params: V = $V, E_VALS = $E_VALS, default = $(repr(default))" for
@@ -170,7 +170,7 @@ end
                         set_edgevals!(g, s, d, vals)
                     end
 
-                    get_edgevals_or(g, s, d, default) == (has_edge(g, s, d) ? vals : default)
+                    get_edgevals_or(g, s, d, allkeys, default) == (has_edge(g, s, d) ? vals : default)
                 end
             end
         end
@@ -229,7 +229,7 @@ end
         end
     end
 
-    @testset "get_edgeval_or(::$G{\$V, \$E_VALS}, s, d, default, key=\$key)" for
+    @testset "get_edgevals_or(::$G{\$V, \$E_VALS}, s, d, default, \$key)" for
         G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
 
         @testset "Params: V = $V, E_VALS = $E_VALS, key = $key, default = $(repr(default))" for
@@ -250,14 +250,14 @@ end
                         set_edgevals!(g, s, d, vals)
                     end
 
-                    get_edgeval_or(g, s, d, default, key=key) == (has_edge(g, s, d) ?
+                    get_edgevals_or(g, s, d, key, default) == (has_edge(g, s, d) ?
                         vals[key] : default)
                 end
             end
         end
     end
 
-    @testset "get_edgeval_or(::$G{\$V, \$E_VALS}, s, d, default)" for
+    @testset "get_edgevals_or(::$G{\$V, \$E_VALS}, s, d, default)" for
         G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
 
         @testset "Params: V = $V, E_VALS = $E_VALS, default = $(repr(default))" for
@@ -277,7 +277,7 @@ end
                         set_edgevals!(g, s, d, vals)
                     end
 
-                    get_edgeval_or(g, s, d, default) == (has_edge(g, s, d) ?
+                    get_edgevals_or(g, s, d, default) == (has_edge(g, s, d) ?
                         vals[1] : default)
                 end
             end
