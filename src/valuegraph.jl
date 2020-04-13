@@ -898,29 +898,33 @@ LG.inneighbors(g::EdgeValDiGraph, v::Integer) = g.badjlist[v]
 #  outedgevals
 #  ------------------------------------------------------
 
+# TODO adjust documentation
 """
     outedgevals(g::AbstractEdgeValGraph, v)
 Return an iterator the edge values of outgoing edges from `v` to its neighbors.
 The order of the neighbors is the same as for `outneighbors(g, v)`.
 """
-outedgevals(g::AbstractEdgeValGraph{V, E_VAL},
-            v::Integer
-            ) where {V, E_VAL, E_VAL_C} = 
-    EdgevalsIterator(Int(v), outdegree(g, v), g.edgevals)
+outedgevals(g::OneEdgeValGraph, v::Integer) = outedgevals(g, v, 1)
+
+outedgevals(g::EdgeValGraph, v::Integer, key) = g.fadjlist[key]
+
 
 #  ------------------------------------------------------
-#  intedgevals
+#  inedgevals
 #  ------------------------------------------------------
 
+# TODO adjust documentation
 """
     inedgevals(g::EdgeValGraph, v)
+
 Return an iterator the edge values of incoming edges from `v` to its neighbors.
 The order of the neighbors is the same as for `inneighbors(g, v)`.
 """
-inedgevals(g::EdgeValGraph, v::Integer) = outedgevals(g, v)
+inedgevals(g::OneEdgeValGraph, v::Integer) = inedgevals(g, v, 1)
 
-inedgevals(g::EdgeValDiGraph{V, E_VAL, E_VAL_C}, v::Integer) where {V, E_VAL, E_VAL_C} = 
-    EdgevalsIterator{E_VAL, E_VAL_C}(Int(v), indegree(g, v), g.redgevals)
+inedgevals(g::EdgeValGraph, v::Integer, key) = outedgevals(g, v, key)
+
+inedgevals(g::EdgeValDiGraph, v::Integer, key) = g.redgevals[key]
 
 
 # ====================================================================
