@@ -898,10 +898,12 @@ LG.inneighbors(g::EdgeValDiGraph, v::Integer) = g.badjlist[v]
 #  outedgevals
 #  ------------------------------------------------------
 
-# TODO adjust documentation
 """
-    outedgevals(g::AbstractEdgeValGraph, v)
-Return an iterator the edge values of outgoing edges from `v` to its neighbors.
+    outedgevals(g::AbstractEdgeValGraph, v [, key])
+
+Return an iterator of edge values of outgoing edges from `v` to its neighbors.
+
+If `g` has multiple edge values, the key cannot be omitted.
 The order of the neighbors is the same as for `outneighbors(g, v)`.
 """
 outedgevals(g::OneEdgeValGraph, v::Integer) = outedgevals(g, v, 1)
@@ -913,12 +915,15 @@ outedgevals(g::EdgeValGraph, v::Integer, key) = g.fadjlist[key]
 #  inedgevals
 #  ------------------------------------------------------
 
-# TODO adjust documentation
 """
-    inedgevals(g::EdgeValGraph, v)
+    inedgevals(g::EdgeValGraph, v [, key])
 
-Return an iterator the edge values of incoming edges from `v` to its neighbors.
+Return an iterator of edge values of incoming edges the neighbors of `v`.
+
+If `g` has multiple edge values, the key cannot be omitted.
 The order of the neighbors is the same as for `inneighbors(g, v)`.
+
+This function does not work for graphs of the type `EdgeValOutDiGraph`.
 """
 inedgevals(g::OneEdgeValGraph, v::Integer) = inedgevals(g, v, 1)
 
