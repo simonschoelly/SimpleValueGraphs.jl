@@ -1,11 +1,9 @@
-# =============
-# weight matrix
-# =====================
 
 using SparseArrays: AbstractSparseMatrix
 
-import LinearAlgebra
-
+#  ======================================================
+#  AdjacencyMatrix
+#  ======================================================
 
 struct AdjacencyMatrix{G <: AbstractGraph} <: AbstractSparseMatrix{Bool, Int}
     graph::G
@@ -13,24 +11,35 @@ end
 
 Base.getindex(matrix::AdjacencyMatrix, s, d) = has_edge(matrix.graph, s, d)
 
-function size(matrix::AdjacencyMatrix)
+function Base.size(matrix::AdjacencyMatrix)
     nvg = Int(nv(matrix.graph))
     return (nvg, nvg)
 end
 
 LinearAlgebra.ishermitian(::AdjacencyMatrix{<:EdgeValGraph}) = true
+LinearAlgebra.issymmetric(::AdjacencyMatrix{<:EdgeValGraph}) = true
 
 LinearAlgebra.adjoint(matrix::AdjacencyMatrix{<:EdgeValGraph}) = matrix
-LinearAlgebra.transpose(matrix::AdjacencyMatrix{<:EdgeValGraph}) = transpose
+LinearAlgebra.transpose(matrix::AdjacencyMatrix{<:EdgeValGraph}) = matrix
 
-struct ValMatrix{K, Tv, G <: AbstractEdgeValGraph} <:
-        AbstractSparseMatrix{Tv, Int} # TODO maybe not int
+#  ======================================================
+#  ValMatrix
+#  ======================================================
+
+struct ValMatrix{G <: AbstractGraph, Tv, K} <: AbstractSparseMatrix{Tv, Int} # TODO maybe not int
 
     graph::G
     zero_value::Tv
+    key::K
 end
 
 # TODO constructor
+
+ValMatrix(g::OneEdgeValGraph) = ValMatrix(g, 1)
+
+function ValMatrix(g::AbstractEdgeValGraph{V, E_VALS}, key)
+
+end
 
 function ValMatrix(g::AbstractEdgeValGraph{V, E_VALS}, key;
         zero_value= zero(E_VAL_for_key(E_VALS, key))) where {V, E_VALS}
@@ -62,7 +71,7 @@ end
 
 LinearAlgebra.issymmetric(::ValMatrix{<:EdgeValGraph}) = true
 
-LinearAlgebra.transpose(matrix::ValMatrix{<:EdgeValGraph}) = transpose
+LinearAlgebra.transpose(matrix::ValMatrix{<:EdgeValGraph}) = matrix
 
 ### weights
 
