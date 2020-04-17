@@ -110,8 +110,4 @@ include("valueedge.jl")
 include("valuegraph.jl")
 include("matrices.jl")
 
-#include("operators.jl")
-#include("modified_functions.jl")
-
-
 end # module
