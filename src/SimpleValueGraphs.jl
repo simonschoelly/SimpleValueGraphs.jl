@@ -46,11 +46,8 @@ export
 
     allkeys,
 
-    get_edgeval,
-    get_edgeval_or,
     get_edgevals,
     get_edgevals_or,
-    set_edgeval!,
     set_edgevals!,
 
     inedgevals,
