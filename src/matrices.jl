@@ -26,37 +26,22 @@ LinearAlgebra.transpose(matrix::AdjacencyMatrix{<:EdgeValGraph}) = matrix
 #  ValMatrix
 #  ======================================================
 
-struct ValMatrix{G <: AbstractGraph, Tv, K} <: AbstractSparseMatrix{Tv, Int} # TODO maybe not int
+struct ValMatrix{Tv, G <: AbstractGraph, key} <: AbstractSparseMatrix{Tv, Int} # TODO maybe not int
 
     graph::G
     zero_value::Tv
-    key::K
 end
 
 # TODO constructor
 
-ValMatrix(g::OneEdgeValGraph) = ValMatrix(g, 1)
 
-function ValMatrix(g::AbstractEdgeValGraph{V, E_VALS}, key)
+function ValMatrix(g::AbstractEdgeValGraph{V, E_VALS}, key::Union{Integer, Symbol}, zero_value) where {V, E_VALS}
 
-end
-
-function ValMatrix(g::AbstractEdgeValGraph{V, E_VALS}, key;
-        zero_value= zero(E_VAL_for_key(E_VALS, key))) where {V, E_VALS}
-    
     T = E_VAL_for_key(E_VALS, key)
     Z = typeof(zero_value)
     Tv = Union{T, Z}
 
-    return ValMatrix{key, Tv, typeof(g)}(g, zero_value)
-end
-
-function ValMatrix(g::OneEdgeValGraph{V, E_VAL};
-        zero_value= zero(E_VAL)) where {V, E_VAL}
-
-    key = edgeval_keys(g)[1] # TODO implement keys
-
-    return ValMatrix(g, key; zero_value=zero_value)
+    return ValMatrix{Tv, typeof(g), key}(g, zero_value)
 end
 
 function Base.size(matrix::ValMatrix)
@@ -64,26 +49,28 @@ function Base.size(matrix::ValMatrix)
     return (nvg, nvg)
 end
 
-function Base.getindex(matrix::ValMatrix{K, Tv}, s, d) where {K, Tv}
-    return get_edgeval_or(matrix.graph, s, d, matrix.zero_value, key=K)
+function Base.getindex(matrix::ValMatrix{Tv, G, key}, s, d) where {Tv, G, key}
+    return get_edgevals_or(matrix.graph, s, d, key, matrix.zero_value)
 end
 
 
-LinearAlgebra.issymmetric(::ValMatrix{<:EdgeValGraph}) = true
+LinearAlgebra.ishermitian(::ValMatrix{ <: Real, <:EdgeValGraph}) = true
+LinearAlgebra.issymmetric(::ValMatrix{ <: Any, <:EdgeValGraph}) = true
 
-LinearAlgebra.transpose(matrix::ValMatrix{<:EdgeValGraph}) = matrix
+LinearAlgebra.adjoint(matrix::ValMatrix{ <: Real, <:EdgeValGraph}) = matrix
+LinearAlgebra.transpose(matrix::ValMatrix{ <: Any, <:EdgeValGraph}) = matrix
 
 ### weights
 
-function LG.weights(g::AbstractEdgeValGraph; key=nokey)
+LG.weights(g::ZeroEdgeValGraph) = LG.DefaultDistance(nv(g))
 
-    if g isa ZeroEdgeValGraph && key == nokey
-        return LightGraphs.DefaultDistance(nv(g))
-    elseif g isa OneEdgeValGraph && key == nokey
-        return ValMatrix(g)
-    end
+LG.weights(g::OneEdgeValGraph) = weights(g, 1)
 
-    return ValMatrix(g, key)
+# TODO allow zero value keyword argument
+
+function LG.weights(g::AbstractEdgeValGraph, key; zerovalue=zero(E_VAL_for_key(g, key)))
+
+    return ValMatrix(g, key, zerovalue)
+
 end
-
 

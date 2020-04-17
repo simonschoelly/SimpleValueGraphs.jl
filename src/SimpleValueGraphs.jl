@@ -23,6 +23,8 @@ import LightGraphs:
 import Base: show, iterate, length,
     getindex, size
 
+import LinearAlgebra
+
 
 export
     AbstractEdgeValGraph,
