@@ -57,19 +57,15 @@ julia> g = EdgeValGraph(3, String)
 
 julia> add_edge!(g, 2, 3, ("xyz",))
 
-julia> first(edges(g)) |> vals
+julia> edges(g) |> vals |> first
 "xyz"
 ```
 """
 vals(e::AbstractValEdge) = e.vals
 
-val(e::AbstractValEdge; key::Union{Integer, Symbol, NoKey}=nokey) =
-    _val(e, key)
+val(e::AbstractValEdge{<: Any, E_VALS}) where {E_VALS <: AbstractNTuple{1}} = val(e, 1)
 
-_val(e::AbstractValEdge{V, E_VAL}, ::NoKey) where {V, E_VAL <: AbstractNTuple{1}} =
-    e.vals[1]
-
-_val(e::AbstractValEdge, key::Union{Integer, Symbol}) = e.vals[key]
+val(e::AbstractValEdge, key) = e.vals[key]
 
 LG.reverse(e::ValEdge) = e
 LG.reverse(e::ValDiEdge) = ValDiEdge(dst(e), src(e), vals(e))

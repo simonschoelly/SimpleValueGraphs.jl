@@ -64,11 +64,11 @@ end
             @test vals(e) isa E_VALS
         end
 
-        @testset "val(e, key=$key)" for
+        @testset "val(e, $key)" for
             key in (keys(values) ∪ Base.OneTo(length(values))) # number & symbols
 
-            @test val(e, key=key) == values[key]
-            key isa Integer && @test val(e, key=key) isa E_VALS.types[key]
+            @test val(e, key) == values[key]
+            key isa Integer && @test val(e, key) isa E_VALS.types[key]
         end
     end
 
@@ -87,12 +87,12 @@ end
             @test vals(e) isa E_VALS
         end
 
-        @testset "val(e, key=$key)" for
+        @testset "val(e, $key)" for
             key in (keys(values) ∪ Base.OneTo(length(values))) # number & symbols
 
-            @test val(e, key=key) == values[key]
-            @test val(e, key=key) == vals(e)[key]
-            key isa Integer && @test val(e, key=key) isa E_VALS.types[key]
+            @test val(e, key) == values[key]
+            @test val(e, key) == vals(e)[key]
+            key isa Integer && @test val(e, key) isa E_VALS.types[key]
         end
     end
 
@@ -108,11 +108,11 @@ end
         e_undir = ValEdge(1, 2, values)
         e_dir = ValEdge(1, 2, values)
 
-        @test val(e_undir) == val(e_undir, key=1)
+        @test val(e_undir) == val(e_undir, 1)
         @test val(e_undir) == vals(e_undir)[1]
         @test val(e_undir) isa E_VALS.types[1]
 
-        @test val(e_dir) == val(e_dir, key=1)
+        @test val(e_dir) == val(e_dir, 1)
         @test val(e_dir) == vals(e_dir)[1]
         @test val(e_dir) isa E_VALS.types[1]
 
