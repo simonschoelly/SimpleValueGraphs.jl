@@ -15,16 +15,6 @@ function tuple_of_types(TT::Type{<:NamedTuple})
     return NamedTuple{Tuple(TT.names)}(TT.types)
 end
 
-# TODO maybe better name
-function to_tuple(types::TupleOfTypes)
-    return Tuple{types...}
-end
-
-function typeTuple(types::NamedTupleOfTypes)
-    return NamedTuple{keys(types), Tuple{values(types)...}}
-end
-
-
 const Adjlist{T} = Vector{Vector{T}}
 
 # TODO better name, do we still need these?
@@ -65,29 +55,12 @@ function deepcopy_adjlist(adjlist::Adjlist{T}) where {T}
 end
 
 
-#=
-const EdgeValContainer{T} = Union{Adjlist{T},
-                                  Tuple{Vararg{Adjlist}},
-                                  NamedTuple{S, <: Tuple{Vararg{Adjlist}}} where S
-                                 }
-=#
-
-
-# TODO remove these two?
-create_edgeval_list(nv, E_VAL::TupleOfTypes) = Tuple(Adjlist{T}(nv) for T in E_VAL.types)
-create_edgeval_list(nv, E_VAL::NamedTupleOfTypes) = NamedTuple{Tuple(E_VAL.names)}(Adjlist{T}(nv) for T in E_VAL.types)
-
-
 # TODO check if still correct
 edgevaluetype_from_edgevaluecontainertype(::Type{<:Adjlist{T}}) where {T} = T
 edgevaluetype_from_edgevaluecontainertype(T::Type{<:Tuple})  = 
     Tuple{ (edgevaluetype_from_edgevaluecontainertype(TT) for TT in T.types)...  } 
 edgevaluetype_from_edgevaluecontainertype(T::Type{<:NamedTuple})  = 
     NamedTuple{ Tuple(T.names), Tuple{ (edgevaluetype_from_edgevaluecontainertype(TT) for TT in T.types)... } } 
-
-# TODO check if still correct
-edgevals_container_type(::Val{Nothing}) where {E_VAL <: Type} = Adjlist{Nothing}
-edgevals_container_type(::Val{E_VAL}) where {E_VAL <: Type} = Adjlist{E_VAL}
 
 # TODO check if still correct
 @generated function edgevals_container_type(::Val{E_VAL}) where {E_VAL <:Tuple}
@@ -101,18 +74,6 @@ end
     return :($R)
 end
 
-
-#= TODO remove?
-function set_value_for_index!(adjlist::Adjlist,
-                              s::Integer,
-                              index::Integer,
-                              value)
-    @inbounds adjlist[s][index] = value
-    return nothing
-end
-=#
-
-
 @generated function set_values_for_index!(edgevals::AbstractTuple, s::Integer, index::Integer, values::T) where {T <: AbstractTuple}
     len = length(T.types)
     exprs = Expr[]
@@ -122,25 +83,6 @@ end
     end
     return Expr(:block, exprs...)
 end
-
-
-#=
-function set_value_for_index!(tup_adjlist::AbstractTuple, s::Integer, index::Integer, key, value)
-    @inbounds tup_adjlist[key][s][index] = value
-    return nothing
-end
-=#
-
-
-#= TODO remove?
-function insert_value_for_index!(adjlist::Adjlist,
-                                 s::Integer,
-                                 index::Integer,
-                                 value)
-    @inbounds insert!(adjlist[s], index, value)
-    return nothing
-end
-=#
 
 @generated function insert_values_for_index!(tup_adjlist::AbstractTuple,
                                  s::Integer,
@@ -154,16 +96,6 @@ end
     end
     return Expr(:block, exprs...)
 end
-
-#= TODO remove?
-function delete_value_for_index!(adjlist::Adjlist,
-                                 s::Integer,
-                                 index::Integer)
-    @inbounds deleteat!(adjlist[s], index)
-    return nothing
-end
-=#
-
 
 function delete_values_for_index!(tup_adjlist::AbstractTuple,
                                  s::Integer,
