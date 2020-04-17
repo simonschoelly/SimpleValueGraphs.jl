@@ -1,57 +1,6 @@
 # TODO disabled
 
 
-function blockdiag(::Type{<:ValueGraph{V, E_VAL}}, iter::AbstractGraph{<:Integer}...) where {V, E_VAL}
-    n::V = V(0)
-    for g in iter
-        n += nv(g)
-        # TODO check for overflow
-    end
-
-    resultg = ValueGraph(n, E_VAL)
-
-    # TODO this is not very efficient
-    Δ::V = zero(V)
-    for g in iter
-        w = weights(g)
-        for u in vertices(g)
-            for v in neighbors(g, u)
-                add_edge!(resultg, V(u) + Δ, V(v) + Δ, convert(E_VAL, w[u, v]))
-            end
-        end
-        Δ += nv(g)
-    end
-
-    return resultg
-end
-
-function blockdiag(::Type{<:ValueDiGraph{V, E_VAL}}, iter::AbstractGraph{<:Integer}...) where {V, E_VAL}
-    n::V = V(0)
-    for g in iter
-        n += nv(g)
-        # TODO check for overflow
-    end
-
-    resultg = ValueDiGraph(n, E_VAL)
-
-    # TODO this is not very efficient
-    Δ::V = zero(V)
-    for g in iter
-        w = weights(g)
-        for u in vertices(g)
-            for v in outneighbors(g, u)
-                add_edge!(resultg, V(u) + Δ, V(v) + Δ, convert(E_VAL, w[u, v]))
-            end
-        end
-        Δ += nv(g)
-    end
-
-    return resultg
-end
-
-blockdiag(g::AbstractValueGraph, iter::AbstractGraph...) = blockdiag(typeof(g), g, iter...)
-
-
 # ==== weight related operators =====
 
 # TODO docstring
