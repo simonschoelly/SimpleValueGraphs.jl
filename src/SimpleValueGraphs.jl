@@ -108,7 +108,6 @@ include("utils.jl")
 include("abstractvaluegraph.jl")
 include("valueedge.jl")
 include("valuegraph.jl")
-#include("keyview.jl")
 include("matrices.jl")
 
 #include("operators.jl")
