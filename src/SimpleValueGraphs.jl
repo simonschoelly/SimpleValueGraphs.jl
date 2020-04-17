@@ -18,7 +18,8 @@ import LightGraphs:
     weights,
     add_edge!, rem_edge!, has_edge,
     inneighbors, outneighbors,
-    zero
+    zero,
+    adjacency_matrix
 
 import Base: show, iterate, length,
     getindex, size
@@ -83,6 +84,8 @@ export
     outneighbors,
 
     zero,
+
+    adjacency_matrix,
 
     # overridden methods from Base
     iterate,

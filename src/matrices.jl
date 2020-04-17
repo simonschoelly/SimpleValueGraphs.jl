@@ -5,6 +5,13 @@ using SparseArrays: AbstractSparseMatrix
 #  AdjacencyMatrix
 #  ======================================================
 
+"""
+    AdjacencyMatrix(g::AbstractGraph)
+
+A matrix view of a graph.
+
+Entry `(i, j)` is `true` if `i -> j` is and edge of `g` and `false` otherwise.
+"""
 struct AdjacencyMatrix{G <: AbstractGraph} <: AbstractSparseMatrix{Bool, Int}
     graph::G
 end
@@ -16,6 +23,13 @@ function Base.size(matrix::AdjacencyMatrix)
     return (nvg, nvg)
 end
 
+"""
+    adjacency_matrix(g::AbstractEdgeValGraph)
+
+Create an `AdjacencyMatrix` from a graph `g`.
+"""
+LG.adjacency_matrix(g::AbstractEdgeValGraph) = AdjacencyMatrix(g)
+
 LinearAlgebra.ishermitian(::AdjacencyMatrix{<:EdgeValGraph}) = true
 LinearAlgebra.issymmetric(::AdjacencyMatrix{<:EdgeValGraph}) = true
 
@@ -26,14 +40,16 @@ LinearAlgebra.transpose(matrix::AdjacencyMatrix{<:EdgeValGraph}) = matrix
 #  ValMatrix
 #  ======================================================
 
+"""
+    ValMatrix
+
+A matrix view of the edge values for a specific key of a graph.
+"""
 struct ValMatrix{Tv, G <: AbstractGraph, key} <: AbstractSparseMatrix{Tv, Int} # TODO maybe not int
 
     graph::G
     zero_value::Tv
 end
-
-# TODO constructor
-
 
 function ValMatrix(g::AbstractEdgeValGraph{V, E_VALS}, key::Union{Integer, Symbol}, zero_value) where {V, E_VALS}
 
@@ -62,11 +78,24 @@ LinearAlgebra.transpose(matrix::ValMatrix{ <: Any, <:EdgeValGraph}) = matrix
 
 ### weights
 
+"""
+    weights(g::AbstractEdgeValGraph[, key]; zerovalue)
+
+
+Return a matrix where entry (i,j) is the value of the edge `i -- j` for the specific `key` in `g`.
+
+If `g` has no edge values, `key` should be omitted and `DefaultDistance(g)` is returned.
+Otherwise the result is a `ValMatrix`.
+If `g` has a single value per edge, `key` can be omitted.
+If the optional argument `zerovalue` is specified, then this value will be used
+if entry (i, j) is not an edge in `g`. `zerovalue` cannot be used for graphs
+without any edge values.
+"""
+function weights end
+
 LG.weights(g::ZeroEdgeValGraph) = LG.DefaultDistance(nv(g))
 
 LG.weights(g::OneEdgeValGraph) = weights(g, 1)
-
-# TODO allow zero value keyword argument
 
 function LG.weights(g::AbstractEdgeValGraph, key; zerovalue=zero(E_VAL_for_key(g, key)))
 
