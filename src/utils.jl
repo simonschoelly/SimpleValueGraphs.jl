@@ -6,14 +6,6 @@ const NamedTupleOfTypes = NamedTuple{S, <:Tuple{Vararg{Type}}} where {S}
 const AbstractTupleOfTypes = Union{TupleOfTypes, NamedTupleOfTypes}
 
 
-# TODO maybe better name
-function tuple_of_types(TT::Type{<:Tuple})
-    return Tuple(TT.types)
-end
-
-function tuple_of_types(TT::Type{<:NamedTuple})
-    return NamedTuple{Tuple(TT.names)}(TT.types)
-end
 
 const Adjlist{T} = Vector{Vector{T}}
 
