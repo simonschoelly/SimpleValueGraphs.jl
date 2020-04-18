@@ -33,6 +33,7 @@ end
 
 @testset "vertices" begin
     @testset "vertices($G{$G, $E_VALS}($n))" for
+        G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph),
         V in TEST_VERTEX_TYPES_SMALL,
         E_VALS in TEST_EDGEVAL_TYPES_SMALL,
         n in [0, 1, 2, 3, 10, 11]
@@ -41,14 +42,15 @@ end
         @assert g isa G{V, E_VALS}
 
         @test vertices(g) == Base.OneTo(n)
-        @test eltype(vertices) == V
+        @test eltype(vertices(g)) == V
     end
 
     @testset "has_vertex($G{$G, $E_VALS}($n), $u))" for
+        G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph),
         V in TEST_VERTEX_TYPES_SMALL,
         E_VALS in TEST_EDGEVAL_TYPES_SMALL,
         n in [0, 1, 2, 3, 10, 11],
-        u in [-1, 0 1, 2, 4, 12, 127]
+        u in [-1, 0, 1, 2, 4, 12, 127]
 
         g = G{V, E_VALS}(n)
         @assert g isa G{V, E_VALS}
@@ -57,6 +59,7 @@ end
     end
 end
 
+# TODO might move tests for abstract type to separate class
 @testset "show" begin
 
 end
