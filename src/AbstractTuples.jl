@@ -25,7 +25,7 @@ julia> tuple_of_types(typeof(a = "first", b = 2.0))
 (a = String, b = Float64)
 ```
 """
-function tuple_of_types(T::AbstractTuple) end
+function tuple_of_types end
 
 function tuple_of_types(TT::Type{<:Tuple})
     return Tuple(TT.types)
