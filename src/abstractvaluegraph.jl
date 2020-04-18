@@ -102,14 +102,3 @@ function Base.eltype(::Type{<:ValEdgeIter{G}}) where
 end
 Base.eltype(iter::ValEdgeIter) = eltype(typeof(iter))
 
-
-#
-# === Display =====================
-
-# TODO output should be actuall graph type
-function Base.show(io::IO, g::AbstractEdgeValGraph)
-    dir = is_directed(g) ? "directed" : "undirected"
-    println(io, "{$(nv(g)), $(ne(g))} $dir $(eltype(g)) ValueGraph with edge values of type $(edgevals_type(g))")
-end
-
-

@@ -312,6 +312,41 @@ EdgeValDiGraph(g::SimpleDiGraph, edgeval_types::AbstractTupleOfTypes=default_edg
     EdgeValDiGraph(default_edgevals, g::SimpleGraph, edgeval_types)
 =#
 
+#  ------------------------------------------------------
+#  show
+#  ------------------------------------------------------
+
+has_named_edgevals(g::AbstractEdgeValGraph{ <: Any, <: NamedTuple}) = true
+has_named_edgevals(g::AbstractEdgeValGraph{ <: Any, <: Tuple}) = false
+
+# TODO this looks kind of ugly
+function Base.show(io::IO, g::AbstractEdgeValGraph{V, E_VALS}) where {V, E_VALS}
+    nvg = Int(nv(g))
+    neg = ne(g)
+    dir = is_directed(g) ? "directed" : "undirected"
+    name = string(nameof(typeof(g)))
+
+    types = tuple_of_types(E_VALS)
+
+    edgevalues_string = if g isa ZeroEdgeValGraph
+        "with no edge values"
+    elseif g isa OneEdgeValGraph
+        if has_named_edgevals(g)
+            "with named edge values of type $types"
+        else
+            "with edge values of type $types"
+        end
+    else
+        if has_named_edgevals(g)
+            "with multiple named edge values of types $types"
+        else
+            "with multiple edge values of types $types"
+        end
+
+    end
+
+    println(io, "{$nvg, $neg} $dir $name{$V} graph $edgevalues_string.")
+end
 
 # =========================================================
 # Interface
