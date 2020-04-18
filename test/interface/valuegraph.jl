@@ -31,3 +31,33 @@ end
 
 end
 
+@testset "vertices" begin
+    @testset "vertices($G{$G, $E_VALS}($n))" for
+        V in TEST_VERTEX_TYPES_SMALL,
+        E_VALS in TEST_EDGEVAL_TYPES_SMALL,
+        n in [0, 1, 2, 3, 10, 11]
+
+        g = G{V, E_VALS}(n)
+        @assert g isa G{V, E_VALS}
+
+        @test vertices(g) == Base.OneTo(n)
+        @test eltype(vertices) == V
+    end
+
+    @testset "has_vertex($G{$G, $E_VALS}($n), $u))" for
+        V in TEST_VERTEX_TYPES_SMALL,
+        E_VALS in TEST_EDGEVAL_TYPES_SMALL,
+        n in [0, 1, 2, 3, 10, 11],
+        u in [-1, 0 1, 2, 4, 12, 127]
+
+        g = G{V, E_VALS}(n)
+        @assert g isa G{V, E_VALS}
+
+        @test has_vertex(g, u) == ((u >= 1) && (u <= n))
+    end
+end
+
+@testset "show" begin
+
+end
+
