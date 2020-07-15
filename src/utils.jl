@@ -7,6 +7,7 @@ const AbstractTupleOfTypes = Union{TupleOfTypes, NamedTupleOfTypes}
 
 
 
+# TODO we might want to replace this with a proper wrapper around Adjlist
 const Adjlist{T} = Vector{Vector{T}}
 
 # TODO better name, do we still need these?
@@ -31,7 +32,7 @@ function Adjlist{T}(n::Integer) where {T}
     return result
 end
 
-function deepcopy_adjlist(adjlist::Adjlist{T}) where {T}
+function deepcopy_adjlist(T::Type, adjlist::Adjlist)
     n = length(adjlist)
     result = Vector{Vector{T}}(undef, n)
     @inbounds for i in OneTo(n)
@@ -39,7 +40,8 @@ function deepcopy_adjlist(adjlist::Adjlist{T}) where {T}
         n_list = length(list)
         result_list = Vector{T}(undef, n_list)
         for j in OneTo(n_list)
-            result_list[j] = deepcopy(list[j])
+            # TODO it seems to be wasteful to always convert & deepcopy
+            result_list[j] = deepcopy(convert(T, list[j]))
         end
         result[i] = result_list
     end
