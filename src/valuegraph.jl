@@ -365,20 +365,20 @@ EdgeValOutDiGraph{V}(g::AbstractGraph, edgeval_types::AbstractTupleOfTypes=defau
 EdgeValOutDiGraph{}(g::AbstractGraph, edgeval_types::AbstractTupleOfTypes=default_edgeval_types) =
     EdgeValOutDiGraph{eltype(g)}(g)
 
-EdgeValDiGraph?g{V}(edgeval_initializer::Base.Callable, g::AbstractGraph, edgeval_types::AbstractTupleOfTypes=default_edgeval_types) where {V} =
-        EdgeValDiGraph?g{V, construct_E_VAL(edgeval_types)}(edgeval_initializer, g)
+EdgeValDiGraph{V}(edgeval_initializer::Base.Callable, g::AbstractGraph, edgeval_types::AbstractTupleOfTypes=default_edgeval_types) where {V} =
+        EdgeValDiGraph{V, construct_E_VAL(edgeval_types)}(edgeval_initializer, g)
 
-EdgeValDiGraph?g{}(edgeval_initializer::Base.Callable, g::AbstractGraph, edgeval_types::AbstractTupleOfTypes=default_edgeval_types) =
-    EdgeValDiGraph?g{eltype(g)}(edgeval_initializer, g, edgeval_types)
+EdgeValDiGraph{}(edgeval_initializer::Base.Callable, g::AbstractGraph, edgeval_types::AbstractTupleOfTypes=default_edgeval_types) =
+    EdgeValDiGraph{eltype(g)}(edgeval_initializer, g, edgeval_types)
 
-EdgeValDiGraph?g{V, E_VALS}(g::AbstractGraph) where {V, E_VALS} =
-    EdgeValDiGraph?g{V, E_VALS}((s, d) -> default_edgeval(tuple_of_types(E_VAL)), g)
+EdgeValDiGraph{V, E_VALS}(g::AbstractGraph) where {V, E_VALS} =
+    EdgeValDiGraph{V, E_VALS}((s, d) -> default_edgeval(tuple_of_types(E_VAL)), g)
 
-EdgeValDiGraph?g{V}(g::AbstractGraph, edgeval_types::AbstractTupleOfTypes=default_edgeval_types) where {V} =
-    EdgeValDiGraph?g{V, construct_E_VAL(edgeval_types)}(g)
+EdgeValDiGraph{V}(g::AbstractGraph, edgeval_types::AbstractTupleOfTypes=default_edgeval_types) where {V} =
+    EdgeValDiGraph{V, construct_E_VAL(edgeval_types)}(g)
 
-EdgeValDiGraph?g{}(g::AbstractGraph, edgeval_types::AbstractTupleOfTypes=default_edgeval_types) =
-    EdgeValDiGraph?g{eltype(g)}(g)
+EdgeValDiGraph{}(g::AbstractGraph, edgeval_types::AbstractTupleOfTypes=default_edgeval_types) =
+    EdgeValDiGraph{eltype(g)}(g)
 
 
 
