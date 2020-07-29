@@ -215,10 +215,10 @@ function EdgeValOutDiGraph{V, E_VALS}(::UndefInitializer, g::SimpleDiGraph) wher
 end
 
 EdgeValOutDiGraph{V}(::UndefInitializer, g::SimpleDiGraph, edgeval_types::AbstractTupleOfTypes=default_edgeval_types) where {V} =
-    EdgeValGraph{V, construct_E_VAL(edgeval_types)}(undef, g)
+    EdgeValOutDiGraph{V, construct_E_VAL(edgeval_types)}(undef, g)
 
 EdgeValOutDiGraph(::UndefInitializer, g::SimpleDiGraph, edgeval_types::AbstractTupleOfTypes=default_edgeval_types) =
-    EdgeValGraph{eltype(g)}(undef, g, edgeval_types)
+    EdgeValOutDiGraph{eltype(g)}(undef, g, edgeval_types)
 
 
 
@@ -245,6 +245,12 @@ function EdgeValDiGraph{V, E_VALS}(::UndefInitializer, g::SimpleDiGraph) where {
     end
     return EdgeValDiGraph{V, E_VALS, E_VALS_C}(ne(g), fadjlist, badjlist, edgevals, redgevals)
 end
+
+EdgeValDiGraph{V}(::UndefInitializer, g::SimpleDiGraph, edgeval_types::AbstractTupleOfTypes=default_edgeval_types) where {V} =
+    EdgeValDiGraph{V, construct_E_VAL(edgeval_types)}(undef, g)
+
+EdgeValDiGraph(::UndefInitializer, g::SimpleDiGraph, edgeval_types::AbstractTupleOfTypes=default_edgeval_types) =
+    EdgeValDiGraph{eltype(g)}(undef, g, edgeval_types)
 
 """
     EdgeValGraph{V, E_VALS}([edgeval_initializer,] g::SimpleGraph)
