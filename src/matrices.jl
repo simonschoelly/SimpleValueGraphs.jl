@@ -95,7 +95,7 @@ function weights end
 
 LG.weights(g::ZeroEdgeValGraph) = LG.DefaultDistance(nv(g))
 
-LG.weights(g::OneEdgeValGraph) = weights(g, 1)
+LG.weights(g::OneEdgeValGraph; kwargs...) = weights(g, 1; kwargs...)
 
 function LG.weights(g::AbstractEdgeValGraph, key; zerovalue=zero(E_VAL_for_key(g, key)))
 

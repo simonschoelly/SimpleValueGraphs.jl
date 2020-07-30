@@ -49,13 +49,6 @@ end
 
 
 # TODO check if still correct
-edgevaluetype_from_edgevaluecontainertype(::Type{<:Adjlist{T}}) where {T} = T
-edgevaluetype_from_edgevaluecontainertype(T::Type{<:Tuple})  = 
-    Tuple{ (edgevaluetype_from_edgevaluecontainertype(TT) for TT in T.types)...  } 
-edgevaluetype_from_edgevaluecontainertype(T::Type{<:NamedTuple})  = 
-    NamedTuple{ Tuple(T.names), Tuple{ (edgevaluetype_from_edgevaluecontainertype(TT) for TT in T.types)... } } 
-
-# TODO check if still correct
 @generated function edgevals_container_type(::Val{E_VAL}) where {E_VAL <:Tuple}
     R = Tuple{( Adjlist{T} for T in E_VAL.types )...}
     return :($R)
