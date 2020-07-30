@@ -92,10 +92,6 @@ function delete_values_for_index!(tup_adjlist::AbstractTuple,
 end
 
 
-function value_for_index(adjlist::Adjlist, s::Integer, index::Integer)
-    @inbounds return adjlist[s][index]
-end
-
 
 # TODO E_VAL could probably be extracted without being explicitly passed to the function
 function values_for_index(tup_adjlist::AbstractTuple, E_VAL::Type, s::Integer, index::Integer)
