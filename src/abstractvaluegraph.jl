@@ -58,7 +58,6 @@ LG.edgetype(g::AbstractEdgeValGraph) = edgetype(typeof(g))
 
 
 LG.edges(g::AbstractEdgeValGraph) = ValEdgeIter(g)
-edges_for_key(g::AbstractEdgeValGraph, key) = ValEdgeIter(g, g.edgevals[key])
 
 LG.nv(g::AbstractEdgeValGraph) = eltype(g)(length(g.fadjlist))
 LG.ne(g::AbstractEdgeValGraph) = g.ne
