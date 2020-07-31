@@ -185,7 +185,7 @@ end
         @testset "correct values" begin
             @test all(edges(gs)) do e
                 s, d = src(e), dst(e)
-                A[s, d] == get_edgevals(g, s, d, allkeys)
+                A[s, d] == get_val(g, s, d, :)
             end
         end
 
@@ -223,7 +223,7 @@ end
         @testset "correct values" begin
             @test all(edges(gs)) do e
                 s, d = src(e), dst(e)
-                A[s, d] == get_edgevals(g, s, d, allkeys)
+                A[s, d] == get_val(g, s, d, :)
             end
         end
 

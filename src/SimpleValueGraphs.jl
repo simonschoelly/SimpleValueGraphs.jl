@@ -37,17 +37,12 @@ export
     ValEdge,
     ValDiEdge,
 
-    val,
-    vals,
-
     default_edgeval,
 
     edgevals_type,
 
-    allkeys,
-
-    get_edgevals,
-    get_edgevals_or,
+    get_val,
+    get_val_or,
     set_edgevals!,
 
     inedgevals,

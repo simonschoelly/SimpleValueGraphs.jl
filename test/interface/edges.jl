@@ -59,16 +59,16 @@ end
             @test dst(e) isa V
         end
 
-        @testset "vals" begin
-            @test vals(e) == values
-            @test vals(e) isa E_VALS
+        @testset "get_val(e, :)" begin
+            @test get_val(e, :) == values
+            @test get_val(e, :) isa E_VALS
         end
 
-        @testset "val(e, $key)" for
+        @testset "get_val(e, $key)" for
             key in (keys(values) ∪ Base.OneTo(length(values))) # number & symbols
 
-            @test val(e, key) == values[key]
-            key isa Integer && @test val(e, key) isa E_VALS.types[key]
+            @test get_val(e, key) == values[key]
+            key isa Integer && @test get_val(e, key) isa E_VALS.types[key]
         end
     end
 
@@ -82,53 +82,22 @@ end
             @test dst(e) isa V
         end
 
-        @testset "vals" begin
-            @test vals(e) == values
-            @test vals(e) isa E_VALS
+        @testset "get_val(e, :)" begin
+            @test get_val(e, :) == values
+            @test get_val(e, :) isa E_VALS
         end
 
-        @testset "val(e, $key)" for
+        @testset "get_val(e, $key)" for
             key in (keys(values) ∪ Base.OneTo(length(values))) # number & symbols
 
-            @test val(e, key) == values[key]
-            @test val(e, key) == vals(e)[key]
-            key isa Integer && @test val(e, key) isa E_VALS.types[key]
+            @test get_val(e, key) == values[key]
+            @test get_val(e, key) == get_val(e, :)[key]
+            key isa Integer && @test get_val(e, key) isa E_VALS.types[key]
         end
     end
 
 end
 
-
-@testset "edge access functions val(e) [no key]" begin
-
-    @testset "exactly one value, E_VALS == $E_VALS" for
-        E_VALS in TEST_EDGEVAL_TYPES_SINGE_VALUE_SMALL
-
-        values = rand_sample(E_VALS)
-        e_undir = ValEdge(1, 2, values)
-        e_dir = ValEdge(1, 2, values)
-
-        @test val(e_undir) == val(e_undir, 1)
-        @test val(e_undir) == vals(e_undir)[1]
-        @test val(e_undir) isa E_VALS.types[1]
-
-        @test val(e_dir) == val(e_dir, 1)
-        @test val(e_dir) == vals(e_dir)[1]
-        @test val(e_dir) isa E_VALS.types[1]
-
-    end
-
-    @testset "less ore more than one value, E_VALS == $E_VALS" for
-        E_VALS in TEST_EDGEVAL_TYPES_NON_SINGE_VALUE_SMALL
-
-        values = rand_sample(E_VALS)
-        e_undir = ValEdge(1, 2, values)
-        e_dir = ValEdge(1, 2, values)
-
-        @test_throws Exception val(e_undir)
-        @test_throws Exception val(e_dir)
-    end
-end
 
 @testset "reverse edge" begin
 
@@ -142,7 +111,7 @@ end
         e_rev = reverse(e)
         @test src(e) == src(e_rev)
         @test dst(e) == dst(e_rev)
-        @test vals(e) == vals(e_rev)
+        @test get_val(e, :) == get_val(e_rev, :)
         @test typeof(e) == typeof(e_rev)
     end
 
@@ -156,7 +125,7 @@ end
         e_rev = reverse(e)
         @test src(e) == dst(e_rev)
         @test dst(e) == src(e_rev)
-        @test vals(e) == vals(e_rev)
+        @test get_val(e, :) == get_val(e_rev, :)
         @test typeof(e) == typeof(e_rev)
     end
 

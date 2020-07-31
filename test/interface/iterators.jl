@@ -25,10 +25,10 @@ import SimpleValueGraphs: tuple_of_types
 
         @testset "correct edges" begin
             @test all(iter) do e
-                s, d, vs = src(e), dst(e), vals(e)
+                s, d, vs = src(e), dst(e), get_val(e, :)
                 e isa E_should_be &&
                 has_edge(g, s, d) &&
-                get_edgevals(g, s, d, allkeys) == vs
+                get_val(g, s, d, :) == vs
             end
         end
 

@@ -3,7 +3,7 @@ import SimpleValueGraphs: tuple_of_types
 
 @testset "Edgeval setters" begin
 
-    @testset "set_edgevals!(::$G{\$V, \$E_VALS}, s, d, allkeys, vals)" for
+    @testset "set_edgevals!(::$G{\$V, \$E_VALS}, s, d, :, vals)" for
         G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
 
         @testset "Params: V = $V, E_VALS = $E_VALS" for
@@ -22,8 +22,8 @@ import SimpleValueGraphs: tuple_of_types
                     s, d = src(e), dst(e)
 
                     vals = rand_sample(E_VALS)
-                    set_edgevals!(g, s, d, allkeys, vals)
-                    get_edgevals(g, s, d, allkeys) == vals || return false
+                    set_edgevals!(g, s, d, :, vals)
+                    get_val(g, s, d, :) == vals || return false
 
                 end
             end
@@ -33,9 +33,9 @@ import SimpleValueGraphs: tuple_of_types
                     @test all(edges(gs) ∪ reverse.(edges(gs))) do e
                         s, d = src(e), dst(e)
                         vals = rand_sample(E_VALS)
-                        set_edgevals!(g, s, d, allkeys, vals)
+                        set_edgevals!(g, s, d, :, vals)
                         
-                        get_edgevals(g, d, s, allkeys) == vals
+                        get_val(g, d, s, :) == vals
                     end
                 end
             end
@@ -63,7 +63,7 @@ import SimpleValueGraphs: tuple_of_types
                     val = rand_sample(E_VALS)[key]
                     set_edgevals!(g, s, d, key, val)
 
-                    get_edgevals(g, s, d, allkeys)[key] == val
+                    get_val(g, s, d, :)[key] == val
 
                 end
             end
@@ -75,7 +75,7 @@ import SimpleValueGraphs: tuple_of_types
                         val = rand_sample(E_VALS)[key]
                         set_edgevals!(g, s, d, key, val)
                         
-                        get_edgevals(g, d, s, allkeys)[key] == val
+                        get_val(g, d, s, :)[key] == val
                     end
                 end
             end
@@ -102,7 +102,7 @@ import SimpleValueGraphs: tuple_of_types
                     val = rand_sample(E_VALS.types[1])
                     set_edgevals!(g, s, d, val)
 
-                    get_edgevals(g, s, d, allkeys)[1] == val
+                    get_val(g, s, d, :)[1] == val
 
                 end
             end
@@ -114,7 +114,7 @@ import SimpleValueGraphs: tuple_of_types
                         val = rand_sample(E_VALS.types[1])
                         set_edgevals!(g, s, d, val)
                         
-                        get_edgevals(g, d, s, allkeys)[1] == val
+                        get_val(g, d, s, :)[1] == val
                     end
                 end
             end
@@ -124,7 +124,7 @@ end
 
 @testset "Edgeval getters" begin
 
-    @testset "get_edgevals(::$G{\$V, \$E_VALS}, s, d, allkeys)" for
+    @testset "get_val(::$G{\$V, \$E_VALS}, s, d, :)" for
         G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
 
         @testset "Params: V = $V, E_VALS = $E_VALS" for
@@ -142,15 +142,15 @@ end
                 @test all(edges_to_test) do e
                     s, d = src(e), dst(e)
                     vals = rand_sample(E_VALS)
-                    set_edgevals!(g, s, d, allkeys, vals)
+                    set_edgevals!(g, s, d, :, vals)
 
-                    get_edgevals(g, s, d, allkeys) == vals
+                    get_val(g, s, d, :) == vals
                 end
             end
         end
     end
         
-    @testset "get_edgevals_or(::$G{\$V, \$E_VALS}, s, d, allkeys, \$default)" for
+    @testset "get_val(::$G{\$V, \$E_VALS}, s, d, :, \$default)" for
         G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
 
         @testset "Params: V = $V, E_VALS = $E_VALS, default = $(repr(default))" for
@@ -167,16 +167,16 @@ end
                 @test all(Iterators.product(vertices(g), vertices(g))) do (s, d)
                     vals = rand_sample(E_VALS)
                     if has_edge(g, s, d)
-                        set_edgevals!(g, s, d, allkeys, vals)
+                        set_edgevals!(g, s, d, :, vals)
                     end
 
-                    get_edgevals_or(g, s, d, allkeys, default) == (has_edge(g, s, d) ? vals : default)
+                    get_val(g, s, d, :, default) == (has_edge(g, s, d) ? vals : default)
                 end
             end
         end
     end
 
-    @testset "get_edgevals(::$G{\$V, \$E_VALS}, s, d, \$key)" for
+    @testset "get_val(::$G{\$V, \$E_VALS}, s, d, \$key)" for
         G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
 
         @testset "Params: V = $V, E_VALS = $E_VALS, key = $key" for
@@ -195,15 +195,15 @@ end
                 @test all(edges_to_test) do e
                     s, d = src(e), dst(e)
                     vals = rand_sample(E_VALS)
-                    set_edgevals!(g, s, d, allkeys, vals)
+                    set_edgevals!(g, s, d, :, vals)
 
-                    get_edgevals(g, s, d, key) == vals[key]
+                    get_val(g, s, d, key) == vals[key]
                 end
             end
         end
     end
 
-    @testset "get_edgevals(::$G{\$V, \$E_VALS}, s, d)" for
+    @testset "get_val(::$G{\$V, \$E_VALS}, s, d)" for
         G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
 
         @testset "Params: V = $V, E_VALS = $E_VALS" for
@@ -221,15 +221,15 @@ end
                 @test all(edges_to_test) do e
                     s, d = src(e), dst(e)
                     vals = rand_sample(E_VALS)
-                    set_edgevals!(g, s, d, allkeys, vals)
+                    set_edgevals!(g, s, d, :, vals)
 
-                    get_edgevals(g, s, d) == vals[1]
+                    get_val(g, s, d) == vals[1]
                 end
             end
         end
     end
 
-    @testset "get_edgevals_or(::$G{\$V, \$E_VALS}, s, d, default, \$key)" for
+    @testset "get_val_or(::$G{\$V, \$E_VALS}, s, d, default, \$key)" for
         G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
 
         @testset "Params: V = $V, E_VALS = $E_VALS, key = $key, default = $(repr(default))" for
@@ -247,17 +247,17 @@ end
                 @test all(Iterators.product(vertices(g), vertices(g))) do (s, d)
                     vals = rand_sample(E_VALS)
                     if has_edge(g, s, d)
-                        set_edgevals!(g, s, d, allkeys, vals)
+                        set_edgevals!(g, s, d, :, vals)
                     end
 
-                    get_edgevals_or(g, s, d, key, default) == (has_edge(g, s, d) ?
+                    get_val_or(g, s, d, key, default) == (has_edge(g, s, d) ?
                         vals[key] : default)
                 end
             end
         end
     end
 
-    @testset "get_edgevals_or(::$G{\$V, \$E_VALS}, s, d, default)" for
+    @testset "get_val_or(::$G{\$V, \$E_VALS}, s, d, default)" for
         G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
 
         @testset "Params: V = $V, E_VALS = $E_VALS, default = $(repr(default))" for
@@ -274,10 +274,10 @@ end
                 @test all(Iterators.product(vertices(g), vertices(g))) do (s, d)
                     vals = rand_sample(E_VALS)
                     if has_edge(g, s, d)
-                        set_edgevals!(g, s, d, allkeys, vals)
+                        set_edgevals!(g, s, d, :, vals)
                     end
 
-                    get_edgevals_or(g, s, d, default) == (has_edge(g, s, d) ?
+                    get_val_or(g, s, d, default) == (has_edge(g, s, d) ?
                         vals[1] : default)
                 end
             end

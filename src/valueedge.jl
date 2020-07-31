@@ -75,53 +75,45 @@ LG.src(e::AbstractValEdge) = e.src
 LG.dst(e::AbstractValEdge) = e.dst
 
 """
-    vals(e::AbstractValEdge)
+    get_val(e::AbstractValEdge, :)
 Return the values attached to the edg;e `e`.
 
 # Examples
 
 ```jldoctest
 julia> e = ValEdge(1, 2, ("xyz", 123));
-julia> vals(e)
+julia> get_val(e, :)
 ("xyz", 123)
 
 julia> e = ValDiEdge(1, 2, (weight=2.5,));
-julia> vals(e)
+julia> get_val(e, :)
 (weight = 2.5,)
 ```
 """
-vals(e::AbstractValEdge) = e.vals
+get_val(e::AbstractValEdge, ::Colon) = e.vals
 
 """
-    val(e::AbstractValEdge[, key])
+    get_val(e::AbstractValEdge, key)
 
 Return the value attached to the edge `e` for the key `key`.
-
-If `e` has a single value `key` can be omitted
 
 # Examples
 ```jldoctest
 julia> e = ValEdge(1, 2, (a=11.0, ));
 
-julia> val(e, 1) # use integer key
+julia> get_val(e, 1) # use integer key
 11.0
 
-julia> val(e, :a) # use symbolic key
+julia> get_val(e, :a) # use symbolic key
 11.0
 
-julia> val(e) # e has a single value so the key can be omitted
-11.0
 ```
 """
-function val end
-
-val(e::AbstractValEdge{<: Any, E_VALS}) where {E_VALS <: AbstractNTuple{1}} = val(e, 1)
-
-val(e::AbstractValEdge, key) = e.vals[key]
+get_val(e::AbstractValEdge, key) = e.vals[key]
 
 
 LG.reverse(e::ValEdge) = e
-LG.reverse(e::ValDiEdge) = ValDiEdge(dst(e), src(e), vals(e))
+LG.reverse(e::ValDiEdge) = ValDiEdge(dst(e), src(e), get_val(e, :))
 
 
 LG.is_directed(::Type{<:ValEdge}) = false
@@ -130,7 +122,7 @@ LG.is_directed(e::AbstractValEdge) = is_directed(typeof(e))
 
 function Base.show(io::IO, e::AbstractValEdge)
     isdir = is_directed(e) 
-    e_keys = keys(vals(e))
+    e_keys = keys(get_val(e, :))
     has_symbol_keys = eltype(e_keys) === Symbol
 
     print(io, isdir ? "ValDiEdge" : "ValEdge")
@@ -138,10 +130,10 @@ function Base.show(io::IO, e::AbstractValEdge)
     print(io, " $(src(e)) $arrow $(dst(e))")
 
     if length(e_keys) == 1
-        print(io, " with value " * (has_symbol_keys ? "$(e_keys[1]) = $(val(e))" :
-                                                      "$(val(e))"))
+        print(io, " with value " * (has_symbol_keys ? "$(e_keys[1]) = $(get_val(e, 1))" :
+                                                      "$(get_val(e, 1))"))
     elseif length(e_keys) > 1
-        print(io, " with values $(vals(e))")
+        print(io, " with values $(get_val(e, :))")
     end
 
     println(io)

@@ -66,7 +66,7 @@ function Base.size(matrix::ValMatrix)
 end
 
 function Base.getindex(matrix::ValMatrix{Tv, G, key}, s, d) where {Tv, G, key}
-    return get_edgevals_or(matrix.graph, s, d, key, matrix.zero_value)
+    return get_val_or(matrix.graph, s, d, key, matrix.zero_value)
 end
 
 
