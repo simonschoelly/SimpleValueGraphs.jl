@@ -43,7 +43,7 @@ export
 
     get_val,
     get_val_or,
-    set_edgevals!,
+    set_val!,
 
     inedgevals,
     outedgevals,

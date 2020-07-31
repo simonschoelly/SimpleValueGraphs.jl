@@ -632,17 +632,17 @@ end
 
 
 #  ------------------------------------------------------
-#  set_edgevals!
+#  set_val!
 #  ------------------------------------------------------
 
-set_edgevals!(g::OneEdgeValGraph, s::Integer, d::Integer, value) =
-    set_edgevals!(g, s, d, 1, value)
+set_val!(g::OneEdgeValGraph, s::Integer, d::Integer, value) =
+    set_val!(g, s, d, 1, value)
 
-set_edgevals!(g::AbstractEdgeValGraph{V, E_VALS}, s::Integer, d::Integer, key::Symbol, value) where {V, E_VALS} =
-    set_edgevals!(g, s, d, Base.fieldindex(E_VALS, key), value)
+set_val!(g::AbstractEdgeValGraph{V, E_VALS}, s::Integer, d::Integer, key::Symbol, value) where {V, E_VALS} =
+    set_val!(g, s, d, Base.fieldindex(E_VALS, key), value)
 
 
-function set_edgevals!(g::EdgeValGraph, s::Integer, d::Integer, key::Integer, value)
+function set_val!(g::EdgeValGraph, s::Integer, d::Integer, key::Integer, value)
 
     validkey_or_throw(g, key)
 
@@ -663,7 +663,7 @@ function set_edgevals!(g::EdgeValGraph, s::Integer, d::Integer, key::Integer, va
     return true
 end
 
-function set_edgevals!(g::EdgeValOutDiGraph, s::Integer, d::Integer, key::Integer, value)
+function set_val!(g::EdgeValOutDiGraph, s::Integer, d::Integer, key::Integer, value)
 
     validkey_or_throw(g, key)
 
@@ -681,7 +681,7 @@ function set_edgevals!(g::EdgeValOutDiGraph, s::Integer, d::Integer, key::Intege
 
 end
 
-function set_edgevals!(g::EdgeValDiGraph, s::Integer, d::Integer, key::Integer, value)
+function set_val!(g::EdgeValDiGraph, s::Integer, d::Integer, key::Integer, value)
 
     validkey_or_throw(g, key)
 
@@ -706,12 +706,12 @@ end
 
 
 """
-    set_edgevals!(g::AbstractEdgeValGraph, s, d, allkeys, values)
-    set_edgevals!(g::AbstractEdgeValGraph, e, allkeys, values)
+    set_val!(g::AbstractEdgeValGraph, s, d, allkeys, values)
+    set_val!(g::AbstractEdgeValGraph, e, allkeys, values)
 Set the values of the edge `e: s -> d` to `values`. Return `true` if such an edge exists and
 `false` otherwise.
 """
-function set_edgevals!(g::EdgeValGraph, s::Integer, d::Integer, ::Colon, values)
+function set_val!(g::EdgeValGraph, s::Integer, d::Integer, ::Colon, values)
     verts = vertices(g)
     (s in verts && d in verts) || return false
     @inbounds list = g.fadjlist[s]
@@ -727,7 +727,7 @@ function set_edgevals!(g::EdgeValGraph, s::Integer, d::Integer, ::Colon, values)
     return true
 end
 
-function set_edgevals!(g::EdgeValOutDiGraph, s::Integer, d::Integer, ::Colon, values)
+function set_val!(g::EdgeValOutDiGraph, s::Integer, d::Integer, ::Colon, values)
     verts = vertices(g)
     (s in verts && d in verts) || return false
     @inbounds list = g.fadjlist[s]
@@ -739,7 +739,7 @@ function set_edgevals!(g::EdgeValOutDiGraph, s::Integer, d::Integer, ::Colon, va
     return true
 end
 
-function set_edgevals!(g::EdgeValDiGraph, s::Integer, d::Integer, ::Colon, values)
+function set_val!(g::EdgeValDiGraph, s::Integer, d::Integer, ::Colon, values)
     verts = vertices(g)
     (s in verts && d in verts) || return false
     @inbounds list = g.fadjlist[s]
@@ -756,7 +756,7 @@ function set_edgevals!(g::EdgeValDiGraph, s::Integer, d::Integer, ::Colon, value
 end
 
 #=
-set_edgevals!(g::AbstractEdgeValGraph, e::SimpleEdge, u) = set_edgevals!(g, src(e), dst(e), u)
+set_val!(g::AbstractEdgeValGraph, e::SimpleEdge, u) = set_val!(g, src(e), dst(e), u)
 =#
 
 #  ------------------------------------------------------

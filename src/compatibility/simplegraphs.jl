@@ -105,7 +105,7 @@ function EdgeValGraph{V, E_VALS}(edgeval_initializer::Base.Callable, g::SimpleGr
     # TODO there is a more efficient method for this
     for e in edges(g)
         s, d = Tuple(e)
-        set_edgevals!(gv, s, d, :, edgeval_initializer(s, d))
+        set_val!(gv, s, d, :, edgeval_initializer(s, d))
     end
 
     return gv
@@ -129,7 +129,7 @@ function EdgeValOutDiGraph{V, E_VALS}(edgeval_initializer::Base.Callable, g::Sim
     # TODO there is a more efficient method for this
     for e in edges(g)
         s, d = Tuple(e)
-        set_edgevals!(gv, s, d, :, edgeval_initializer(s, d))
+        set_val!(gv, s, d, :, edgeval_initializer(s, d))
     end
 
     return gv
@@ -151,7 +151,7 @@ function EdgeValDiGraph{V, E_VALS}(edgeval_initializer::Base.Callable, g::Simple
     # TODO there is a more efficient method for this
     for e in edges(g)
         s, d = Tuple(e)
-        set_edgevals!(gv, s, d, :, edgeval_initializer(s, d))
+        set_val!(gv, s, d, :, edgeval_initializer(s, d))
     end
 
     return gv
