@@ -14,6 +14,7 @@ tests = [
          "interface/edgeval_accessors.jl",
          "interface/iterators.jl",
          "interface/valuegraph.jl",
+         "matrices.jl"
         ]
 
 @testset "ValueGraphs" begin
