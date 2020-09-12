@@ -26,12 +26,9 @@ LG.has_vertex(g::AbstractValGraph, v) = v ∈ vertices(g)
 
 abstract type AbstractEdgeValGraph{V<:Integer, E_VALS} <: AbstractValGraph{V, Tuple{}, E_VALS} end
 
-OneEdgeValGraph{V, E_VAL} = AbstractEdgeValGraph{V, E_VALS} where
-    E_VALS <: Union{Tuple{<:E_VAL}, NamedTuple{S, Tuple{<:E_VAL}} where S}
+OneEdgeValGraph{V, E_VAL} = AbstractEdgeValGraph{V, E_VALS} where E_VALS <: AbstractNTuple{1, E_VAL}
 
-ZeroEdgeValGraph{V} = AbstractEdgeValGraph{V, E_VALS} where
-    E_VALS <: Union{Tuple{}, NamedTuple{S, Tuple{}} where S}
-
+ZeroEdgeValGraph{V} = AbstractEdgeValGraph{V, E_VALS} where E_VALS <: AbstractNTuple{0}
 
 const default_eltype = Int32
 
