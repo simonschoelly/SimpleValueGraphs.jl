@@ -208,19 +208,19 @@ end
 #  ------------------------------------------------------
 
 """
-    add_edge!(g::AbstractEdgeValGraph{V, E_VALS}, s, d, value=default_edgeval(E_VALS))
+    add_edge!(g::AbstractEdgeValGraph{V, E_VALS}, s, d, values)
 
-Add an edge `e = (s, d, [value])` to a graph `g` and set the edge value.
+Add an edge `e = (s, d, values)` to a graph `g` and set the edge values.
 
 Return `true` if the edge was added successfully, otherwise return `false`.
-If the edge already exists, return `false` but still change the edge value.
+If the edge already exists, return `false` but still change the edge values.
 """
 function add_edge! end
 
 function LG.add_edge!(g::EdgeValGraph{V, E_VALS},
                    s::Integer,
                    d::Integer,
-                   values::E_VALS=default_edgeval(E_VALS)) where {V, E_VALS}
+                   values::E_VALS) where {V, E_VALS}
 
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
@@ -253,7 +253,7 @@ end
 function LG.add_edge!(g::EdgeValOutDiGraph{V, E_VALS},
                    s::Integer,
                    d::Integer,
-                   value::E_VALS=default_edgeval(E_VALS)) where {V, E_VALS}
+                   value::E_VALS) where {V, E_VALS}
 
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
@@ -275,7 +275,8 @@ end
 function LG.add_edge!(g::EdgeValDiGraph{V, E_VALS},
                    s::Integer,
                    d::Integer,
-                   value::E_VALS=default_edgeval(E_VALS)) where {V, E_VALS}
+                   value::E_VALS) where {V, E_VALS}
+
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
     @inbounds list = g.fadjlist[s]
