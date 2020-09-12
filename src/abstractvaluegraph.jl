@@ -32,22 +32,6 @@ ZeroEdgeValGraph{V} = AbstractEdgeValGraph{V, E_VALS} where E_VALS <: AbstractNT
 
 const default_eltype = Int32
 
-const default_edgevals = (Float64,)
-
-const default_edgevals_type = Tuple{Float64}
-
-#= TODO do we still need these?
-default_edgeval(E_VAL)::E_VAL = oneunit(E_VAL)
-default_edgeval(::Type{Nothing})::Nothing = nothing
-default_edgeval(T::Type{<:AbstractTuple})::T = T( default_edgeval(U) for U in T.types )
-
-default_zero_edgeval(::Type{Nothing}) = nothing
-default_zero_edgeval(E_VAL) = zero(E_VAL)
-default_zero_edgeval(E_VAL::Type{<:AbstractTuple}) = E_VAL( default_zero_edgeval(T) for T in E_VAL.types )
-=#
-
-
-
 LG.edgetype(G::Type{<:AbstractEdgeValGraph{V, E_VALS}}) where {V, E_VALS} =
     is_directed(G) ? ValDiEdge{V, E_VALS} : ValEdge{V, E_VALS}
 
