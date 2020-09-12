@@ -43,9 +43,6 @@ LG.edges(g::AbstractEdgeValGraph) = ValEdgeIter(g)
 LG.nv(g::AbstractEdgeValGraph) = eltype(g)(length(g.fadjlist))
 LG.ne(g::AbstractEdgeValGraph) = g.ne
 
-# TODO do we need this?
-LG.zero(G::AbstractEdgeValGraph{V}) where {V} = G(zero(V))
-
 function is_validkey(
             g::AbstractEdgeValGraph{V, E_VALS},
             key::Symbol) where {V, E_VALS <: NamedTuple}
