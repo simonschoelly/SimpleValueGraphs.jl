@@ -12,7 +12,7 @@ A matrix view of a graph.
 
 Entry `(i, j)` is `true` if `i -> j` is and edge of `g` and `false` otherwise.
 
-As this as a view, the entries and the size of this matrix can change
+As this is as a view, the entries and the size of this matrix can change
 when the underlying graph changes. The view itself is immutable. Convert
 to a `Matrix` or `SparseMatrixCSC` to get a mutable matrix that does
 not change when the graph does.
@@ -88,9 +88,14 @@ LinearAlgebra.transpose(matrix::AdjacencyMatrix{<:EdgeValGraph}) = matrix
 #  ======================================================
 
 """
-    ValMatrix
+    ValMatrix{Tv, :< AbstractGraph, key}
 
 A matrix view of the edge values for a specific key of a graph.
+
+As this is as a view, the entries and the size of this matrix can change
+when the underlying graph changes. The view itself is immutable. Convert
+to a `Matrix` or `SparseMatrixCSC` to get a mutable matrix that does
+not change when the graph does.
 """
 struct ValMatrix{Tv, G <: AbstractGraph, key} <: AbstractSparseMatrix{Tv, Int}
 
@@ -98,6 +103,34 @@ struct ValMatrix{Tv, G <: AbstractGraph, key} <: AbstractSparseMatrix{Tv, Int}
     zero_value::Tv
 end
 
+"""
+    ValMatrix(g::AbstractGraph, key, zero_value)
+
+Construct a new `ValMatrix` view for a graph `g` where the values are
+the edge values specified by `key`. Entries that are not in the graph
+are represented by `zero_value` in the matrix.
+
+### See also
+[`AdjacencyMatrix`](@ref), [`adjacency_matrix`](@ref), [`weigths`](@ref)
+
+### Examples
+```jldoctest
+julia> gv = EdgeValDiGraph((s, d) -> (rand(), "\$s-\$d"), path_digraph(3), (a=Float64, b=String))
+{3, 2} directed EdgeValDiGraph{Int64} graph with multiple named edge values of types (a = Float64, b = String).
+
+julia> ValMatrix(gv, 1, 0.0)
+3×3 ValMatrix{Float64,EdgeValDiGraph{Int64,NamedTuple{(:a, :b),Tuple{Float64,String}},NamedTuple{(:a, :b),Tuple{Array{Array{Float64,1},1},Array{Array{String,1},1}}}},1}:
+ 0.0  0.706577  0.0
+ 0.0  0.0       0.680497
+ 0.0  0.0       0.0
+
+ julia> ValMatrix(gv, :b, nothing) |> Matrix
+ 3×3 Array{Union{Nothing, String},2}:
+  nothing  "1-2"    nothing
+  nothing  nothing  "2-3"
+  nothing  nothing  nothing
+```
+"""
 function ValMatrix(g::AbstractEdgeValGraph{V, E_VALS}, key::Union{Integer, Symbol}, zero_value) where {V, E_VALS}
 
     T = E_VAL_for_key(E_VALS, key)
