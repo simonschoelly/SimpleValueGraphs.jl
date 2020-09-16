@@ -195,40 +195,5 @@ end
 end
 
 
-# EdgeValGraph((s, d) -> (f(s, d),), gs)
-@testset "Constructor $G(undef, \$gs)" for
-    G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
 
-    GS = is_directed(G) ? SimpleDiGraph : SimpleGraph
-
-
-    @testset "Params: gs = $info" for
-                V in TEST_VERTEX_TYPES_SMALL,
-       (gs, info) in make_testgraphs(GS{V})
-  
-        E_VALS = (default_edgeval_types isa Tuple) ?
-                Tuple{default_edgeval_types...} :
-                NamedTuple{keys(default_edgeval_types),
-                           Tuple{default_edgeval_types...}}
-
-        n = nv(gs)
-        A = rand_sample(E_VALS, n, n)
-
-        g = G((s, d) -> A[s,d], gs)
-
-        @testset "correct type" begin
-            @test g isa G{V, E_VALS}
-        end
-
-        @testset "correct values" begin
-            @test all(edges(gs)) do e
-                s, d = src(e), dst(e)
-                A[s, d] == get_val(g, s, d, :)
-            end
-        end
-
-        testset_topological_equivalent(gs, g)
-        testset_isvalidgraph(g)
-    end
-end
 
