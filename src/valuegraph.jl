@@ -419,8 +419,39 @@ function get_val(
 end
     
 
-# TODO more specific error
+"""
+    get_val(g::AbstractEdgeValGraph, s, d, key)
 
+Return the value assoicated with the edge `s -> d` for the key `key` in `g`.
+
+Throw an exception if the graph does not contain such an edge or if the key is invalid.
+
+For graphs that only have one value per edge, `key` can be omitted.
+
+### See also
+[`get_val_or`](@ref), [`set_val!`](@ref)
+
+### Examples
+```jldoctest
+julia> gv = EdgeValDiGraph((s, d) -> (rand(),), path_digraph(3), (a=Float64,))
+{3, 2} directed EdgeValDiGraph{Int64} graph with named edge values of type (a = Float64,).
+
+julia> get_val(gv, 1, 2, :a)
+0.6238826396606063
+
+julia> get_val(gv, 1, 2, 1)
+0.6238826396606063
+
+julia> get_val(gv, 1, 2)
+0.6238826396606063
+
+julia> get_val(gv, 1, 3)
+ERROR: No such edge
+
+julia> get_val(gv, 1, 2, :b)
+ERROR: type NamedTuple has no field b
+```
+"""
 function get_val(g::EdgeValGraph, s::Integer, d::Integer, key::Integer)
 
     validkey_or_throw(g, key) # TODO might be sufficient to just check index
@@ -439,6 +470,7 @@ function get_val(g::EdgeValGraph, s::Integer, d::Integer, key::Integer)
     @inbounds if index <= length(list_s) && list_s[index] == d
         return g.edgevals[key][s][index]
     end
+    # TODO more specific error
     error("No such edge")
 end
 
@@ -470,6 +502,7 @@ function get_val(g::EdgeValDiGraph, s::Integer, d::Integer, key::Integer)
     error("No such edge")
 end
 
+# TODO document
 get_val_or(g::OneEdgeValGraph, s::Integer, d::Integer, alternative) =
     get_val_or(g, s, d, 1, alternative)
 
@@ -540,6 +573,24 @@ end
 """
     get_val(g::AbstractEdgeValGraph, s, d, :)
 
+Return all values assoicated with the edge `s -> d` in `g`.
+
+Throw an exception if the graph does not contain such an edge.
+
+### See also
+[`get_val_or`](@ref), [`set_val!`](@ref)
+
+### Examples
+```jldoctest
+julia> gv = EdgeValDiGraph((s, d) -> (rand(), 10), path_digraph(3), (a=Float64, b=Int))
+{3, 2} directed EdgeValDiGraph{Int64} graph with multiple named edge values of types (a = Float64, b = Int64).
+
+julia> get_val(gv, 1, 2, :)
+(a = 0.38605078026294826, b = 10)
+
+julia> get_val(gv, 1, 3, :)
+ERROR: Values not found
+```
 """
 function get_val(g::EdgeValGraph{V, E_VAL}, s::Integer, d::Integer, ::Colon) where {V, E_VAL}
 
@@ -586,7 +637,29 @@ function get_val(g::EdgeValDiGraph{V, E_VAL}, s::Integer, d::Integer, ::Colon) w
     error("Values not found")
 end
 
-function get_val(g::EdgeValGraph{V, E_VAL}, s::Integer, d::Integer, ::Colon, alternative) where {V, E_VAL}
+"""
+    get_val_or(g::AbstractEdgeValGraph, s, d, alterative)
+
+Return all values assoicated with the edge `s -> d` in `g`.
+
+If there is no such edge return `alternative`.
+
+### See also
+[`get_val`](@ref), [`set_val!`](@ref)
+
+### Examples
+```jldoctest
+julia> gv = EdgeValDiGraph((s, d) -> (rand(), 10), path_digraph(3), (a=Float64, b=Int))
+{3, 2} directed EdgeValDiGraph{Int64} graph with multiple named edge values of types (a = Float64, b = Int64).
+
+julia> get_val_or(gv, 1, 2, :, missing)
+(a = 0.34307617867033446, b = 10)
+
+julia> get_val_or(gv, 1, 3, :, missing)
+missing
+```
+"""
+function get_val_or(g::EdgeValGraph{V, E_VAL}, s::Integer, d::Integer, ::Colon, alternative) where {V, E_VAL}
 
     verts = vertices(g)
     (s in verts && d in verts) || return alternative
@@ -603,7 +676,7 @@ function get_val(g::EdgeValGraph{V, E_VAL}, s::Integer, d::Integer, ::Colon, alt
     return alternative
 end
 
-function get_val(g::EdgeValOutDiGraph{V, E_VAL}, s::Integer, d::Integer, ::Colon, alternative) where {V, E_VAL}
+function get_val_or(g::EdgeValOutDiGraph{V, E_VAL}, s::Integer, d::Integer, ::Colon, alternative) where {V, E_VAL}
 
     verts = vertices(g)
     (s in verts && d in verts) ||  return alternative
@@ -617,7 +690,7 @@ function get_val(g::EdgeValOutDiGraph{V, E_VAL}, s::Integer, d::Integer, ::Colon
 end
 
 # TODO could probably be made faster by checking the shorter list
-function get_val(g::EdgeValDiGraph{V, E_VAL}, s::Integer, d::Integer, ::Colon, alternative) where
+function get_val_or(g::EdgeValDiGraph{V, E_VAL}, s::Integer, d::Integer, ::Colon, alternative) where
 {V, E_VAL}
 
     verts = vertices(g)
