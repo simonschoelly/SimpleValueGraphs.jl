@@ -294,7 +294,7 @@ function LG.add_edge!(g::EdgeValDiGraph{V, E_VALS},
     @inbounds list = g.badjlist[d]
     index = searchsortedfirst(list, s)
     insert!(list, index, s)
-    set_values_for_index!(g.redgevals, d, index, value)
+    insert_values_for_index!(g.redgevals, d, index, value)
 
     return true # edge successfully added
 end
