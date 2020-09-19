@@ -43,25 +43,29 @@ LG.edges(g::AbstractEdgeValGraph) = ValEdgeIter(g)
 LG.nv(g::AbstractEdgeValGraph) = eltype(g)(length(g.fadjlist))
 LG.ne(g::AbstractEdgeValGraph) = g.ne
 
-function is_validkey(
-            g::AbstractEdgeValGraph{V, E_VALS},
+function is_validedgekey(
+            G::Type{<:AbstractEdgeValGraph{V, E_VALS}},
             key::Symbol) where {V, E_VALS <: NamedTuple}
 
     return key in E_VALS.names
 end
 
-function is_validkey(
-            g::AbstractEdgeValGraph{V, E_VALS},
+function is_validedgekey(
+            G::Type{<:AbstractEdgeValGraph{V, E_VALS}},
             key::Integer) where {V, E_VALS <: AbstractTuple}
 
     return key in OneTo(length(E_VALS.types))
 end
 
-function validkey_or_throw(g, key)
-    is_validkey(g, key) && return nothing
+is_validedgekey(g::AbstractEdgeValGraph, key) = is_validedgekey(typeof(g), key)
+
+function validedgekey_or_throw(G::Type{<:AbstractEdgeValGraph}, key)
+    is_validedgekey(G, key) && return nothing
 
     error("$key is not a valid edge key for this graph.")
 end
+
+validedgekey_or_throw(g::AbstractEdgeValGraph, key) = validedgekey_or_throw(typeof(g), key)
 
 
 # === Iterators =====================

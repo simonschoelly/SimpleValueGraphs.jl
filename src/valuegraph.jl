@@ -424,7 +424,7 @@ end
 
 Return the value assoicated with the edge `s -> d` for the key `key` in `g`.
 
-Throw an exception if the graph does not contain such an edge or if the key is invalid.
+Throw an exception if the graph does not contain such an edge or if the key is invalidedgekey_or_throw.
 
 For graphs that only have one value per edge, `key` can be omitted.
 
@@ -454,7 +454,7 @@ ERROR: type NamedTuple has no field b
 """
 function get_val(g::EdgeValGraph, s::Integer, d::Integer, key::Integer)
 
-    validkey_or_throw(g, key) # TODO might be sufficient to just check index
+    validedgekey_or_throw(g, key) # TODO might be sufficient to just check index
 
     verts = vertices(g)
     
@@ -476,7 +476,7 @@ end
 
 function get_val(g::EdgeValOutDiGraph, s::Integer, d::Integer, key::Integer)
 
-   validkey_or_throw(g, key)
+   validedgekey_or_throw(g, key)
 
     verts = vertices(g)
     (s in verts && d in verts) || error("No such edge")
@@ -490,7 +490,7 @@ end
 
 function get_val(g::EdgeValDiGraph, s::Integer, d::Integer, key::Integer)
 
-    validkey_or_throw(g, key)
+    validedgekey_or_throw(g, key)
 
     verts = vertices(g)
     (s in verts && d in verts) || error("No such edge")
@@ -519,7 +519,7 @@ end
 
 function get_val_or(g::EdgeValGraph, s::Integer, d::Integer, key::Integer, alternative)
 
-    validkey_or_throw(g, key)
+    validedgekey_or_throw(g, key)
 
     verts = vertices(g)
     
@@ -540,7 +540,7 @@ end
 
 function get_val_or(g::EdgeValOutDiGraph, s::Integer, d::Integer, key::Integer, alternative)
 
-    validkey_or_throw(g, key)
+    validedgekey_or_throw(g, key)
 
     verts = vertices(g)
     (s in verts && d in verts) || return alternative
@@ -554,7 +554,7 @@ end
 
 function get_val_or(g::EdgeValDiGraph, s::Integer, d::Integer, key::Integer, alternative)
 
-    validkey_or_throw(g, key)
+    validedgekey_or_throw(g, key)
 
     verts = vertices(g)
     (s in verts && d in verts) || return alternative
@@ -718,7 +718,7 @@ set_val!(g::AbstractEdgeValGraph{V, E_VALS}, s::Integer, d::Integer, key::Symbol
 
 function set_val!(g::EdgeValGraph, s::Integer, d::Integer, key::Integer, value)
 
-    validkey_or_throw(g, key)
+    validedgekey_or_throw(g, key)
 
     verts = vertices(g)
     edgevals = g.edgevals[key]
@@ -739,7 +739,7 @@ end
 
 function set_val!(g::EdgeValOutDiGraph, s::Integer, d::Integer, key::Integer, value)
 
-    validkey_or_throw(g, key)
+    validedgekey_or_throw(g, key)
 
     verts = vertices(g)
     edgevals = g.edgevals[key]
@@ -757,7 +757,7 @@ end
 
 function set_val!(g::EdgeValDiGraph, s::Integer, d::Integer, key::Integer, value)
 
-    validkey_or_throw(g, key)
+    validedgekey_or_throw(g, key)
 
     verts = vertices(g)
     edgevals = g.edgevals[key]

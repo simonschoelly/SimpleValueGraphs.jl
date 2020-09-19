@@ -9,12 +9,13 @@ include("testutils.jl")
 
 tests = [
          "AbstractTuples.jl",
+         "abstractvaluegraph.jl",
          "interface/constructors.jl",
          "interface/edges.jl",
          "interface/edgeval_accessors.jl",
          "interface/iterators.jl",
          "interface/valuegraph.jl",
-         "matrices.jl"
+         "matrices.jl",
         ]
 
 @testset "ValueGraphs" begin
