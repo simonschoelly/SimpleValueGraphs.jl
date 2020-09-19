@@ -1,6 +1,7 @@
 using LinearAlgebra: ishermitian, issymmetric
 using SparseArrays: AbstractSparseMatrix
-using SimpleValueGraphs: E_VAL_for_key
+using SimpleValueGraphs: E_VAL_for_key, OneEdgeValGraph
+using LightGraphs: DefaultDistance
 
 @testset "matrices" begin
 
@@ -104,10 +105,51 @@ using SimpleValueGraphs: E_VAL_for_key
                             end
                         end
 
+                        @testset "weights" begin
+
+                            @testset "weights(g, $key; zerovalue=$zv)" begin
+                                Mw = weights(g, key, zerovalue=zv)
+                                @test typeof(M) == typeof(Mw)
+                                @test M == Mw
+                            end
+
+                            if E_VAL_for_key(E_VALS, key) isa Number
+                                @testset "weights(g, $key)" begin
+                                    Mw = weights(g, key)
+                                    @test M isa ValMatrix{E_VAL_for_key(E_VALS, key), typeof(g), key}
+                                end
+                            end
+
+                            if g isa OneEdgeValGraph
+                                @testset "weights(g; zerovalue=$zv)" begin
+                                    Mw = weights(g, zerovalue=zv)
+                                    @test M == Mw
+                                end
+
+                                if E_VAL_for_key(E_VALS, key) isa Number
+                                    @testset "weights(g)" begin
+                                        Mw = weights(g)
+                                        @test M isa ValMatrix{E_VAL_for_key(E_VALS, key), typeof(g), key}
+                                    end
+                                end
+                            end
+                        end
+
                     end
                 end
             end
         end
+    end
+
+    @testset "weights for value graphs without values" for
+        G      in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph),
+        V      in TEST_VERTEX_TYPES_SMALL,
+        E_VALS in (Tuple{}, NamedTuple{(), Tuple{}}),
+        gs     in make_testgraphs(is_directed(G) ? SimpleDiGraph{V} : SimpleGraph{V})
+
+        g = G{V, E_VALS}((s, d) -> rand_sample(E_VALS), gs.graph)
+
+        @test weights(g) == DefaultDistance(nv(g))
     end
 
 end # testset
