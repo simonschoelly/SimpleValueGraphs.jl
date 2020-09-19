@@ -150,7 +150,7 @@ end
         end
     end
         
-    @testset "get_val(::$G{\$V, \$E_VALS}, s, d, :, \$default)" for
+    @testset "get_val_or(::$G{\$V, \$E_VALS}, s, d, :, \$default)" for
         G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
 
         @testset "Params: V = $V, E_VALS = $E_VALS, default = $(repr(default))" for
@@ -170,7 +170,7 @@ end
                         set_val!(g, s, d, :, vals)
                     end
 
-                    get_val(g, s, d, :, default) == (has_edge(g, s, d) ? vals : default)
+                    get_val_or(g, s, d, :, default) == (has_edge(g, s, d) ? vals : default)
                 end
             end
         end
@@ -229,7 +229,7 @@ end
         end
     end
 
-    @testset "get_val_or(::$G{\$V, \$E_VALS}, s, d, default, \$key)" for
+    @testset "get_val_or(::$G{\$V, \$E_VALS}, s, d, \$key, default)" for
         G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
 
         @testset "Params: V = $V, E_VALS = $E_VALS, key = $key, default = $(repr(default))" for
