@@ -1,5 +1,6 @@
 using LinearAlgebra: ishermitian, issymmetric
 using SparseArrays: AbstractSparseMatrix
+using SimpleValueGraphs: E_VAL_for_key
 
 @testset "matrices" begin
 
@@ -54,4 +55,59 @@ using SparseArrays: AbstractSparseMatrix
 
     end
 
-end
+    @testset "ValMatrix" begin
+        for G      in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph),
+            V      in TEST_VERTEX_TYPES_SMALL,
+            E_VALS in TEST_EDGEVAL_TYPES_SMALL,
+            gs     in make_testgraphs(is_directed(G) ? SimpleDiGraph{V} : SimpleGraph{V})
+
+            g = G{V, E_VALS}((s, d) -> rand_sample(E_VALS), gs.graph)
+
+            @testset "g::$(typeof(g))" begin
+                for key in allkeys_for_E_VALS(E_VALS)
+
+                    @testset "key = $key, zerovalue=$zv" for zv in (nothing, rand_sample(E_VAL_for_key(E_VALS, key)))
+
+                        M = ValMatrix(g, key, zv)
+
+                        @testset "size" begin
+                            @test size(M) == (nv(g), nv(g))
+                        end
+
+                        @testset "getindex" begin
+                            @test all(Iterators.product(vertices(g), vertices(g))) do (s, d)
+                                M[s, d] == (has_edge(g, s, d) ? get_val(g, s, d, key) : zv)
+                            end
+                        end
+
+                        if E_VAL_for_key(E_VALS, key) <: Real && zv isa Real && g isa EdgeValGraph
+                            @testset "ishermitian" begin
+                                @test ishermitian(M) == true
+                            end
+                        end
+
+                        if g isa EdgeValGraph
+                            @testset "issymmetric" begin
+                                @test issymmetric(M) == true
+                            end
+                        end
+
+                        if E_VAL_for_key(E_VALS, key) <: Real && zv isa Real && g isa EdgeValGraph
+                            @testset "isadjoint" begin
+                                @test adjoint(M) === M
+                            end
+                        end
+
+                        if g isa EdgeValGraph
+                            @testset "transpose" begin
+                                @test transpose(M) === M
+                            end
+                        end
+
+                    end
+                end
+            end
+        end
+    end
+
+end # testset
