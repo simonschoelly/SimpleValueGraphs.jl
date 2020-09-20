@@ -1,7 +1,7 @@
 @testset "modifiers" begin
 
 @testset "add_edge! 1" begin
-    
+
     g1 = EdgeValGraph{Int, Tuple{Int}}(3)
     # adding first edge succeed
     @test add_edge!(g1, 1, 2, (10, ))
