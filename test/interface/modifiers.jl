@@ -50,6 +50,14 @@ end
     @test ne(g1) == 2
     @test get_val(g1, 1, 2, :) == (a='x', b=1.0)
     @test get_val(g1, 2, 1, :) == (a='y', b=2.0)
+
+    # adding an edge twice should return false change the value the second time
+    @test add_edge!(g1, 1, 3, (a='z', b=3.0))
+    @test ne(g1) == 3
+    @test get_val(g1, 1, 3, :) == (a='z', b=3.0)
+    @test !add_edge!(g1, 1, 3, (a='z', b=4.0))
+    @test ne(g1) == 3
+    @test get_val(g1, 1, 3, :) == (a='z', b=4.0)
 end
 
 @testset "add_edge! 3" begin
@@ -66,6 +74,14 @@ end
     @test ne(g1) == 2
     @test get_val(g1, 1, 2, :) == (a='x', b=1.0)
     @test get_val(g1, 2, 1, :) == (a='y', b=2.0)
+
+    # adding an edge twice should return false change the value the second time
+    @test add_edge!(g1, 1, 3, (a='z', b=3.0))
+    @test ne(g1) == 3
+    @test get_val(g1, 1, 3, :) == (a='z', b=3.0)
+    @test !add_edge!(g1, 1, 3, (a='z', b=4.0))
+    @test ne(g1) == 3
+    @test get_val(g1, 1, 3, :) == (a='z', b=4.0)
 end
 
 @testset "rem_edge! 1" begin

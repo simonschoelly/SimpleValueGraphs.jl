@@ -176,6 +176,22 @@ end
         end
     end
 
+    # covering a special case
+    @testset "get_val_or for EdgeValGraph with colon key - deg(s) > deg(d)" begin
+
+        g = EdgeValGraph((s, d) -> (rand(Int), ), star_graph(3), edgeval_types=(Int, ))
+
+        @test get_val_or(g, 1, 2, :, nothing) == get_val_or(g, 2, 1, :, nothing)
+    end
+
+    @testset "get_val with colon for non existing edge should throw error" for
+        G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
+
+        g = G(0, edgeval_types=(Int, Float64))
+
+        @test_throws ErrorException get_val(g, 1, 2, :)
+    end
+
     @testset "get_val(::$G{\$V, \$E_VALS}, s, d, \$key)" for
         G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
 
@@ -227,6 +243,14 @@ end
                 end
             end
         end
+    end
+
+    @testset "get_val with correct key for non existing edge should throw error" for
+        G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
+
+        g = G(0, edgeval_types=(Int, ))
+
+        @test_throws ErrorException get_val(g, 1, 2, 1)
     end
 
     @testset "get_val_or(::$G{\$V, \$E_VALS}, s, d, \$key, default)" for
