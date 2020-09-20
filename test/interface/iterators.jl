@@ -113,6 +113,14 @@ end
                 outedgevals(g, u, key) == [get_val(g, u, v, key) for v in outneighbors(g, u)]
             end
         end
+
+        if g isa OneEdgeValGraph
+            @testset "outedgevals for graphs with single key" begin
+                @test all(vertices(g)) do u
+                    outedgevals(g, u) == outedgevals(g, u, 1)
+                end
+            end
+        end
     end
 end
 
@@ -130,6 +138,14 @@ end
 
             @test all(vertices(g)) do u
                 inedgevals(g, u, key) == [get_val(g, v, u, key) for v in inneighbors(g, u)]
+            end
+        end
+
+        if g isa OneEdgeValGraph
+            @testset "outedgevals for graphs with single key" begin
+                @test all(vertices(g)) do u
+                    inedgevals(g, u) == inedgevals(g, u, 1)
+                end
             end
         end
     end
