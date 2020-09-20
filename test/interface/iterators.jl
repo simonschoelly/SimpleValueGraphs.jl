@@ -142,7 +142,7 @@ end
         end
 
         if g isa OneEdgeValGraph
-            @testset "outedgevals for graphs with single key" begin
+            @testset "inedgevals for graphs with single key" begin
                 @test all(vertices(g)) do u
                     inedgevals(g, u) == inedgevals(g, u, 1)
                 end
@@ -150,3 +150,48 @@ end
         end
     end
 end
+
+@testset "edges $G" for
+    G in (EdgeValGraph, EdgeValDiGraph),
+    V in TEST_VERTEX_TYPES_SMALL,
+    E_VALS in TEST_EDGEVAL_TYPES_SMALL,
+    (gs, info) in make_testgraphs(is_directed(G) ? SimpleDiGraph{V} : SimpleGraph{V})
+
+    @testset "Params: $G{$V, $E_VALS}, gs = $info" begin
+
+        g = G((s,d) -> rand_sample(E_VALS), gs, tuple_of_types(E_VALS))
+
+        @testset "edges are lexicographical sorted, unique" begin
+            lexicographical_sorted = true
+            s = 0
+            d = 0
+            for e in edges(g)
+                s_new = src(e)
+                d_new = dst(e)
+
+                if s_new < s || (s_new == s && d_new <= d)
+                    lexicographical_sorted = false
+                    break
+                end
+            end
+            @test lexicographical_sorted
+        end
+
+        @testset "correct src, dst" begin
+            @test all(edges(g)) do e
+                has_edge(g, src(e), dst(e))
+            end
+        end
+
+        @testset "correct values" begin
+            @test all(edges(g)) do e
+                get_val(e, :) == get_val(g, src(e), dst(e), :)
+            end
+        end
+
+        @testset "correct length" begin
+            @test length(edges(g)) == ne(g)
+        end
+    end
+end
+
