@@ -109,7 +109,7 @@ end
               "{6, 15} undirected EdgeValGraph{UInt64} graph with multiple edge values of types (String, Char).\n")
 
     test_show(EdgeValDiGraph(undef, complete_digraph(UInt64(6)), edgeval_types=(a=Bool, b=Tuple{Bool, Bool}, c=Char)),
-              "{6, 30} directed EdgeValDiGraph{UInt64} graph with multiple named edge values of types (a = Bool, b = Tuple{Bool,Bool}, c = Char).\n")
+              "{6, 30} directed EdgeValDiGraph{UInt64} graph with multiple named edge values of types (a = Bool, b = $(Tuple{Bool,Bool}), c = Char).\n")
 
 end
 
