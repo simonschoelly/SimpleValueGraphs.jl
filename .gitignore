@@ -1,1 +1,3 @@
 tags
+*.cov
+Manifest.toml
