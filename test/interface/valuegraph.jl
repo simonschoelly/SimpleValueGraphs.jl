@@ -95,20 +95,20 @@ end
 # TODO use testset with different parameters
 @testset "show" begin
 
-    test_show(EdgeValGraph{Int8}(10, ()), "{10, 0} undirected EdgeValGraph{Int8} graph with no edge values.\n")
-    test_show(EdgeValDiGraph{Int64}(0, NamedTuple()), "{0, 0} directed EdgeValDiGraph{Int64} graph with no edge values.\n")
-    test_show(EdgeValOutDiGraph{UInt32}(0, NamedTuple()), "{0, 0} directed EdgeValOutDiGraph{UInt32} graph with no edge values.\n")
+    test_show(EdgeValGraph{Int8}(10; edgeval_types=()), "{10, 0} undirected EdgeValGraph{Int8} graph with no edge values.\n")
+    test_show(EdgeValDiGraph{Int64}(0; edgeval_types=NamedTuple()), "{0, 0} directed EdgeValDiGraph{Int64} graph with no edge values.\n")
+    test_show(EdgeValOutDiGraph{UInt32}(0; edgeval_types=NamedTuple()), "{0, 0} directed EdgeValOutDiGraph{UInt32} graph with no edge values.\n")
 
-    test_show(EdgeValGraph(undef, cycle_graph(Int16(3)), (Float32,)),
+    test_show(EdgeValGraph(undef, cycle_graph(Int16(3)), edgeval_types=(Float32,)),
               "{3, 3} undirected EdgeValGraph{Int16} graph with edge values of type (Float32,).\n")
 
-    test_show(EdgeValOutDiGraph(undef, path_digraph(Int32(5)), (label = String,)),
+    test_show(EdgeValOutDiGraph(undef, path_digraph(Int32(5)), edgeval_types=(label = String,)),
               "{5, 4} directed EdgeValOutDiGraph{Int32} graph with named edge values of type (label = String,).\n")
 
-    test_show(EdgeValGraph(undef, complete_graph(UInt64(6)), (String, Char)),
+    test_show(EdgeValGraph(undef, complete_graph(UInt64(6)), edgeval_types=(String, Char)),
               "{6, 15} undirected EdgeValGraph{UInt64} graph with multiple edge values of types (String, Char).\n")
 
-    test_show(EdgeValDiGraph(undef, complete_digraph(UInt64(6)), (a=Bool, b=Tuple{Bool, Bool}, c=Char)),
+    test_show(EdgeValDiGraph(undef, complete_digraph(UInt64(6)), edgeval_types=(a=Bool, b=Tuple{Bool, Bool}, c=Char)),
               "{6, 30} directed EdgeValDiGraph{UInt64} graph with multiple named edge values of types (a = Bool, b = Tuple{Bool,Bool}, c = Char).\n")
 
 end

@@ -8,7 +8,7 @@ import SimpleValueGraphs: tuple_of_types, OneEdgeValGraph
 
     @testset "Params: $G{$V, $E_VALS}, gs = $info" begin
 
-        g = G((s,d) -> rand_sample(E_VALS), gs, tuple_of_types(E_VALS)) 
+        g = G((s,d) -> rand_sample(E_VALS), gs, edgeval_types=tuple_of_types(E_VALS))
 
         iter = edges(g)
 
@@ -55,7 +55,7 @@ end
 
     @testset "Params: $G{$V, $E_VALS}, gs = $info" begin
 
-        g = G((s,d) -> rand_sample(E_VALS), gs, tuple_of_types(E_VALS)) 
+        g = G((s,d) -> rand_sample(E_VALS), gs, edgeval_types=tuple_of_types(E_VALS))
 
         @testset "inneighbors are unique" begin
             @test all(vertices(g)) do u
@@ -80,7 +80,7 @@ end
 
     @testset "Params: $G{$V, $E_VALS}, gs = $info" begin
 
-        g = G((s,d) -> rand_sample(E_VALS), gs, tuple_of_types(E_VALS)) 
+        g = G((s,d) -> rand_sample(E_VALS), gs, edgeval_types=tuple_of_types(E_VALS))
 
         @testset "outneighbors are unique" begin
             @test all(vertices(g)) do u
@@ -105,7 +105,7 @@ end
 
     @testset "Params: $G{$V, $E_VALS}, gs = $info" begin
 
-        g = G((s,d) -> rand_sample(E_VALS), gs, tuple_of_types(E_VALS))
+        g = G((s,d) -> rand_sample(E_VALS), gs, edgeval_types=tuple_of_types(E_VALS))
 
         @testset "outedgevals are correct for key $key" for key in allkeys_for_E_VALS(E_VALS)
 
@@ -132,7 +132,7 @@ end
 
     @testset "Params: $G{$V, $E_VALS}, gs = $info" begin
 
-        g = G((s,d) -> rand_sample(E_VALS), gs, tuple_of_types(E_VALS))
+        g = G((s,d) -> rand_sample(E_VALS), gs, edgeval_types=tuple_of_types(E_VALS))
 
         @testset "inedgevals are correct for key $key" for key in allkeys_for_E_VALS(E_VALS)
 
@@ -159,7 +159,7 @@ end
 
     @testset "Params: $G{$V, $E_VALS}, gs = $info" begin
 
-        g = G((s,d) -> rand_sample(E_VALS), gs, tuple_of_types(E_VALS))
+        g = G((s,d) -> rand_sample(E_VALS), gs, edgeval_types=tuple_of_types(E_VALS))
 
         @testset "edges are lexicographical sorted, unique" begin
             lexicographical_sorted = true

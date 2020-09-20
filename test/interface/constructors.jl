@@ -49,12 +49,12 @@ end
 @testset "Constructor $G(\$n::\$V, \$edgeval_types)" for
     G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
 
-    @testset "Params n = $n, V = $V, edgeval_types = $edgeval_types" for
+    @testset "Params n = $n, V = $V; edgeval_types = $edgeval_types" for
                 V in TEST_VERTEX_TYPES_SMALL,
     edgeval_types in tuple_of_types.(TEST_EDGEVAL_TYPES_SMALL),
                 n in (V in (UInt8, Int8) ? V[0, 5, typemax(V)] : V[0, 5])
                     
-        g = G(n, edgeval_types)
+        g = G(n; edgeval_types=edgeval_types)
 
         E_VALS_should_be = (edgeval_types isa Tuple) ?
             Tuple{edgeval_types...} :
@@ -111,7 +111,7 @@ end
        (gs, info) in make_testgraphs(GS{V})
   
 
-        g = G(undef, gs, edgeval_types)
+        g = G(undef, gs; edgeval_types=edgeval_types)
 
         @testset "correct type" begin
             E_VALS_should_be = (edgeval_types isa Tuple) ?
@@ -171,7 +171,7 @@ end
         A = rand_sample(E_VALS, n, n)
         edgeval_types = tuple_of_types(E_VALS)
 
-        g = G((s, d) -> A[s,d], gs, edgeval_types)
+        g = G((s, d) -> A[s,d], gs; edgeval_types=edgeval_types)
 
         @testset "correct type" begin
             E_VALS_should_be = (edgeval_types isa Tuple) ?

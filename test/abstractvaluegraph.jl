@@ -15,7 +15,7 @@ using SimpleValueGraphs: is_validedgekey, validedgekey_or_throw
     @test is_validedgekey(EdgeValDiGraph{Int8, NamedTuple{(:a, :b), Tuple{Int, Int}}}, :b)
     @test !is_validedgekey(EdgeValDiGraph{Int8, NamedTuple{(:a, :b), Tuple{Int, Int}}}, :c)
 
-    g = EdgeValOutDiGraph((s, d) -> (rand(Int), rand(Int)), cycle_digraph(5), (Int, Int))
+    g = EdgeValOutDiGraph((s, d) -> (rand(Int), rand(Int)), cycle_digraph(5), edgeval_types=(Int, Int))
     @test is_validedgekey(g, 1)
     @test is_validedgekey(g, 2)
     @test !is_validedgekey(g, 3)
@@ -28,7 +28,7 @@ end
     @test validedgekey_or_throw(EdgeValGraph{Int, Tuple{Int, Int}}, 2) === nothing
     @test_throws ErrorException validedgekey_or_throw(EdgeValGraph{Int, Tuple{Int, Int}}, 3)
 
-    g = EdgeValDiGraph((s, d) -> (a=rand(Int), b=rand(Int)), cycle_digraph(5), (a=Int, b=Int))
+    g = EdgeValDiGraph((s, d) -> (a=rand(Int), b=rand(Int)), cycle_digraph(5), edgeval_types=(a=Int, b=Int))
     @test validedgekey_or_throw(g, 1) === nothing
     @test validedgekey_or_throw(g, 2) === nothing
     @test_throws ErrorException validedgekey_or_throw(g, -1)
