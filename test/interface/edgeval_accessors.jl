@@ -187,7 +187,7 @@ end
     @testset "get_val with colon for non existing edge should throw error" for
         G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
 
-        g = G(0, edgeval_types=(Int, Float64))
+        g = G(3, edgeval_types=(Int, Float64))
 
         @test_throws ErrorException get_val(g, 1, 2, :)
     end
@@ -248,7 +248,7 @@ end
     @testset "get_val with correct key for non existing edge should throw error" for
         G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
 
-        g = G(0, edgeval_types=(Int, ))
+        g = G(4, edgeval_types=(Int, ))
 
         @test_throws ErrorException get_val(g, 1, 2, 1)
     end
