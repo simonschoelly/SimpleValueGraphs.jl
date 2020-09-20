@@ -868,7 +868,7 @@ The order of the neighbors is the same as for `outneighbors(g, v)`.
 """
 outedgevals(g::OneEdgeValGraph, v::Integer) = outedgevals(g, v, 1)
 
-outedgevals(g::EdgeValGraph, v::Integer, key) = g.fadjlist[key]
+outedgevals(g::AbstractEdgeValGraph, v::Integer, key) = g.edgevals[key][v]
 
 
 #  ------------------------------------------------------
@@ -889,7 +889,7 @@ inedgevals(g::OneEdgeValGraph, v::Integer) = inedgevals(g, v, 1)
 
 inedgevals(g::EdgeValGraph, v::Integer, key) = outedgevals(g, v, key)
 
-inedgevals(g::EdgeValDiGraph, v::Integer, key) = g.redgevals[key]
+inedgevals(g::EdgeValDiGraph, v::Integer, key) = g.redgevals[key][v]
 
 
 # ====================================================================
