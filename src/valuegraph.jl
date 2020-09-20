@@ -606,7 +606,7 @@ function get_val(g::EdgeValGraph{V, E_VAL}, s::Integer, d::Integer, ::Colon) whe
     @inbounds if index <= length(list_s) && list_s[index] == d
         return values_for_index(g.edgevals, E_VAL, s, index)
     end
-    (s in verts && d in verts) || error("Values not found")
+    error("Values not found")
 end
 
 function get_val(g::EdgeValOutDiGraph{V, E_VAL}, s::Integer, d::Integer, ::Colon) where {V, E_VAL}
