@@ -19,6 +19,9 @@ A type `Union` of a `Tuple` and a `NamedTuple`.
 
 Useful for methods that take either a `Tuple` or a `NamedTuple` of some specific types as some parameter.
 
+Note that like `NamedTuple` but unlike `Tuple`, ÀbstractTuple is not covariant.
+I.e. it does not hold that `AbstractTuple{Tuple{Int}} <: AbstractTuple{Tuple{Integer}}`
+
 ### See also
 [`AbstractNTuple`](@ref), [`Tuple`](@ref), [`NTuple`](@ref)
 
@@ -35,7 +38,7 @@ julia> (a=1, b="xyz") isa AbstractTuple
 true
 ```
 """
-const AbstractTuple{T <: Tuple} = Union{<: T, NamedTuple{S, <:T} where S}
+const AbstractTuple{T <: Tuple} = Union{T, NamedTuple{S, T} where S}
 
 
 """
@@ -43,7 +46,8 @@ const AbstractTuple{T <: Tuple} = Union{<: T, NamedTuple{S, <:T} where S}
 
 A `NamedTuple` with `N` arguments of the same type.
 
-Analogue to `NTuple` for `Tuple`.
+Analogue to `NTuple` for `Tuple` but as `NamedTuple` is not covariant so is
+also `NamedNTuple` not covariant.
 
 ### See also
 [`AbstractNTuple`](@ref), [`NTuple`](@ref), [`NamedTuple`](@ref)
