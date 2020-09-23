@@ -3,7 +3,6 @@ using SimpleValueGraphs
 using Test
 
 using Base.Iterators: product
-using SimpleValueGraphs.AbstractTuples: tuple_of_types
 
 include("testutils.jl")
 
