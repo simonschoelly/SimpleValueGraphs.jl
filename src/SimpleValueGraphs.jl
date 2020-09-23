@@ -102,6 +102,6 @@ include("valueedge.jl")
 include("valuegraph.jl")
 include("matrices.jl")
 
-include("compatibility/simplegraphs.jl")
+include("integrations/SimpleGraphs.jl")
 
 end # module

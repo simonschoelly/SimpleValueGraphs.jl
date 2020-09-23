@@ -154,27 +154,7 @@ function EdgeValDiGraph{V, E_VALS}(edgeval_initializer::Base.Callable, g::Simple
     return gv
 end
 
-# TODO something wrong with this macro here, so we create the constructors manually
-#=
-for G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValGraph)
-    @eval begin
-        $G{V}(edgeval_initializer::Base.Callable, g::AbstractGraph, edgeval_types::AbstractTupleOfTypes=default_edgeval_types) where {V} =
-        $G{V, construct_E_VAL(edgeval_types)}(edgeval_initializer, g)
 
-        $G{}(edgeval_initializer::Base.Callable, g::AbstractGraph, edgeval_types::AbstractTupleOfTypes=default_edgeval_types) =
-            $G{eltype(g)}(edgeval_initializer, g, edgeval_types)
-
-        $G{V, E_VALS}(g::AbstractGraph) where {V, E_VALS} =
-            $G{V, E_VALS}((s, d) -> default_edgeval(tuple_of_types(E_VAL)), g)
-
-        $G{V}(g::AbstractGraph, edgeval_types::AbstractTupleOfTypes=default_edgeval_types) where {V} =
-            $G{V, construct_E_VAL(edgeval_types)}(g)
-
-        $G{}(g::AbstractGraph, edgeval_types::AbstractTupleOfTypes=default_edgeval_types) =
-            $G{eltype(g)}(g)
-    end
-end
-=#
 EdgeValGraph{V}(edgeval_initializer::Base.Callable, g::SimpleGraph; edgeval_types::AbstractTupleOfTypes=default_edgeval_types) where {V} =
     EdgeValGraph{V, construct_E_VAL(edgeval_types)}(edgeval_initializer, g)
 
