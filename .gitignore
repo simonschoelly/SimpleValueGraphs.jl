@@ -1,3 +1,4 @@
 tags
 *.cov
 Manifest.toml
+.vscode
