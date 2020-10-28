@@ -22,6 +22,12 @@ edgevals_type(g::AbstractValGraph) = edgevals_type(typeof(g))
 LG.vertices(g::AbstractValGraph) = OneTo{eltype(g)}(nv(g))
 LG.has_vertex(g::AbstractValGraph, v) = v ∈ vertices(g)
 
+LG.edgetype(g::AbstractValGraph) = eltype(edges(g))
+LG.ne(g::AbstractValGraph) = length(edges(g))
+
+LG.inneighbors(g::AbstractValGraph, v) = (u for u ∈ vertices(g) if has_edge(g, u, v))
+LG.outneighbors(g::AbstractValGraph, u) = (v for v ∈ vertices(g) if has_edge(g, u, v))
+
 # ===== AbstractEdgeValGraph ==========
 
 abstract type AbstractEdgeValGraph{V<:Integer, E_VALS} <: AbstractValGraph{V, Tuple{}, E_VALS} end
