@@ -39,6 +39,7 @@ export
 
     default_edgeval,
 
+    vertexvals_type,
     edgevals_type,
 
     get_val,
@@ -75,8 +76,6 @@ export
     inneighbors,
     outneighbors,
 
-    zero,
-
     adjacency_matrix,
 
     # overridden methods from Base
@@ -85,6 +84,7 @@ export
     size,
     getindex,
     show,
+    zero,
 
     # overridden methods from LinearAlgebra
     ishermitian,

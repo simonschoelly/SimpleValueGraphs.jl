@@ -1,5 +1,14 @@
 # ===== AbstractValGraph ==========
 
+"""
+    AbstractValGraph{V, V_VALS, E_VALS} <: AbstractGraph{V}
+
+Abstract value graph with vertex type `V`, vertex values of types `V_VALS}`
+and edge values of types `E_VALS`.
+
+### See also
+[`AbstractGraph`](@ref), [`AbstractEdgeValGraph`](@ref)
+"""
 abstract type AbstractValGraph{V<:Integer, V_VALS, E_VALS} <: AbstractGraph{V} end
 
 LG.eltype(::Type{<:AbstractValGraph{V}}) where {V} = V
@@ -16,6 +25,9 @@ Return the types of the edgevalues of a graph `g`.
 """
 function edgevals_type end
 
+vertexvals_type(::Type{<:AbstractValGraph{V, V_VALS, E_VALS}}) where {V, V_VALS, E_VALS} = V_VALS
+vertexvals_type(g::AbstractValGraph) = vertexvals_type(typeof(g))
+
 edgevals_type(::Type{<:AbstractValGraph{V, V_VALS, E_VALS}}) where {V, V_VALS, E_VALS} = E_VALS
 edgevals_type(g::AbstractValGraph) = edgevals_type(typeof(g))
 
@@ -25,8 +37,8 @@ LG.has_vertex(g::AbstractValGraph, v) = v ∈ vertices(g)
 LG.edgetype(g::AbstractValGraph) = eltype(edges(g))
 LG.ne(g::AbstractValGraph) = length(edges(g))
 
-LG.inneighbors(g::AbstractValGraph, v) = (u for u ∈ vertices(g) if has_edge(g, u, v))
 LG.outneighbors(g::AbstractValGraph, u) = (v for v ∈ vertices(g) if has_edge(g, u, v))
+LG.inneighbors(g::AbstractValGraph, v) = is_directed(g) ? (u for u ∈ vertices(g) if has_edge(g, u, v)) : outneighbors(g, v)
 
 # ===== AbstractEdgeValGraph ==========
 
