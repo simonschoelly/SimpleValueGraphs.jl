@@ -17,7 +17,7 @@ function EdgeValGraph{V, E_VALS}(::UndefInitializer, g::SimpleGraph) where {V, E
     edgevals = E_VALS_C( Adjlist{T}(undef, n) for T in E_VALS.types )
     for s in OneTo(n)
         for (i, T) in enumerate(E_VALS.types)
-            edgevals[i][s] = Vector{T}(undef, length(fadjlist[s])) 
+            edgevals[i][s] = Vector{T}(undef, length(fadjlist[s]))
         end
     end
     return EdgeValGraph{V, E_VALS, E_VALS_C}(ne(g), fadjlist, edgevals)

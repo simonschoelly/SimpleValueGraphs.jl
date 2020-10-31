@@ -74,11 +74,11 @@ construct_E_VAL(edgeval_types::NamedTuple) =
 
 const default_edgeval_types = (weight=Float64,)
 
-function create_edgevals(n, E_VAL::Type{<:Tuple}) 
+function create_edgevals(n, E_VAL::Type{<:Tuple})
     return Tuple( Adjlist{T}(n) for T in E_VAL.types )
 end
 
-function create_edgevals(n, E_VAL::Type{<:NamedTuple}) 
+function create_edgevals(n, E_VAL::Type{<:NamedTuple})
     return NamedTuple{Tuple(E_VAL.names)}(Tuple( Adjlist{T}(n) for T in E_VAL.types ))
 end
 
@@ -417,14 +417,14 @@ function get_val(
 
     return get_val(g, s, d, Base.fieldindex(E_VALS, key))
 end
-    
+
 
 """
     get_val(g::AbstractEdgeValGraph, s, d, key)
 
 Return the value assoicated with the edge `s -> d` for the key `key` in `g`.
 
-Throw an exception if the graph does not contain such an edge or if the key is invalidedgekey_or_throw.
+Throw an exception if the graph does not contain such an edge or if the key is not a valid edge key.
 
 For graphs that only have one value per edge, `key` can be omitted.
 
@@ -454,10 +454,10 @@ ERROR: type NamedTuple has no field b
 """
 function get_val(g::EdgeValGraph, s::Integer, d::Integer, key::Integer)
 
-    validedgekey_or_throw(g, key) # TODO might be sufficient to just check index
+    hasedgekey_or_throw(g, key) # TODO might be sufficient to just check index
 
     verts = vertices(g)
-    
+
     (s in verts && d in verts) || error("No such edge")
     @inbounds list_s = g.fadjlist[s]
     @inbounds list_d = g.fadjlist[d]
@@ -476,7 +476,7 @@ end
 
 function get_val(g::EdgeValOutDiGraph, s::Integer, d::Integer, key::Integer)
 
-   validedgekey_or_throw(g, key)
+   hasedgekey_or_throw(g, key)
 
     verts = vertices(g)
     (s in verts && d in verts) || error("No such edge")
@@ -490,7 +490,7 @@ end
 
 function get_val(g::EdgeValDiGraph, s::Integer, d::Integer, key::Integer)
 
-    validedgekey_or_throw(g, key)
+    hasedgekey_or_throw(g, key)
 
     verts = vertices(g)
     (s in verts && d in verts) || error("No such edge")
@@ -519,10 +519,10 @@ end
 
 function get_val_or(g::EdgeValGraph, s::Integer, d::Integer, key::Integer, alternative)
 
-    validedgekey_or_throw(g, key)
+    hasedgekey_or_throw(g, key)
 
     verts = vertices(g)
-    
+
     (s in verts && d in verts) || return alternative
     @inbounds list_s = g.fadjlist[s]
     @inbounds list_d = g.fadjlist[d]
@@ -540,7 +540,7 @@ end
 
 function get_val_or(g::EdgeValOutDiGraph, s::Integer, d::Integer, key::Integer, alternative)
 
-    validedgekey_or_throw(g, key)
+    hasedgekey_or_throw(g, key)
 
     verts = vertices(g)
     (s in verts && d in verts) || return alternative
@@ -554,7 +554,7 @@ end
 
 function get_val_or(g::EdgeValDiGraph, s::Integer, d::Integer, key::Integer, alternative)
 
-    validedgekey_or_throw(g, key)
+    hasedgekey_or_throw(g, key)
 
     verts = vertices(g)
     (s in verts && d in verts) || return alternative
@@ -718,7 +718,7 @@ set_val!(g::AbstractEdgeValGraph{V, E_VALS}, s::Integer, d::Integer, key::Symbol
 
 function set_val!(g::EdgeValGraph, s::Integer, d::Integer, key::Integer, value)
 
-    validedgekey_or_throw(g, key)
+    hasedgekey_or_throw(g, key)
 
     verts = vertices(g)
     edgevals = g.edgevals[key]
@@ -739,7 +739,7 @@ end
 
 function set_val!(g::EdgeValOutDiGraph, s::Integer, d::Integer, key::Integer, value)
 
-    validedgekey_or_throw(g, key)
+    hasedgekey_or_throw(g, key)
 
     verts = vertices(g)
     edgevals = g.edgevals[key]
@@ -757,7 +757,7 @@ end
 
 function set_val!(g::EdgeValDiGraph, s::Integer, d::Integer, key::Integer, value)
 
-    validedgekey_or_throw(g, key)
+    hasedgekey_or_throw(g, key)
 
     verts = vertices(g)
     edgevals = g.edgevals[key]

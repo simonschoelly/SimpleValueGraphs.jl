@@ -32,13 +32,67 @@ edgevals_type(::Type{<:AbstractValGraph{V, V_VALS, E_VALS}}) where {V, V_VALS, E
 edgevals_type(g::AbstractValGraph) = edgevals_type(typeof(g))
 
 LG.vertices(g::AbstractValGraph) = OneTo{eltype(g)}(nv(g))
+
 LG.has_vertex(g::AbstractValGraph, v) = v ∈ vertices(g)
 
 LG.edgetype(g::AbstractValGraph) = eltype(edges(g))
+
 LG.ne(g::AbstractValGraph) = length(edges(g))
 
 LG.outneighbors(g::AbstractValGraph, u) = (v for v ∈ vertices(g) if has_edge(g, u, v))
+
 LG.inneighbors(g::AbstractValGraph, v) = is_directed(g) ? (u for u ∈ vertices(g) if has_edge(g, u, v)) : outneighbors(g, v)
+
+
+function hasedgekey(
+            G::Type{<:AbstractValGraph{V, V_VALS, E_VALS}},
+            key::Symbol) where {V, V_VALS, E_VALS <: NamedTuple}
+
+    return key in E_VALS.names
+end
+
+function hasedgekey(
+            G::Type{<:AbstractValGraph{V, V_VALS, E_VALS}},
+            key::Integer) where {V, V_VALS, E_VALS <: AbstractTuple}
+
+    return key in OneTo(length(E_VALS.types))
+end
+
+hasedgekey(g::AbstractValGraph, key) = hasedgekey(typeof(g), key)
+
+function hasedgekey_or_throw(G::Type{<:AbstractValGraph}, key)
+    hasedgekey(G, key) && return nothing
+
+    error("$key is not a valid edge key for this graph.")
+end
+
+hasedgekey_or_throw(g::AbstractValGraph, key) = hasedgekey_or_throw(typeof(g), key)
+
+
+function hasvertexkey(
+            G::Type{<:AbstractValGraph{V, V_VALS}},
+            key::Symbol) where {V, V_VALS <: NamedTuple}
+
+    return key in V_VALS.names
+end
+
+function hasvertexkey(
+            G::Type{<:AbstractValGraph{V, V_VALS}},
+            key::Integer) where {V, V_VALS <: AbstractTuple}
+
+    return key in OneTo(length(E_VALS.types))
+end
+
+hasvertexkey(g::AbstractValGraph, key) = hasvertexkey(typeof(g), key)
+
+function hasvertexkey_or_throw(G::Type{<:AbstractValGraph}, key)
+    hasvertexkey(G, key) && return nothing
+
+    error("$key is not a valid vertex key for this graph.")
+end
+
+hasvertexkey_or_throw(g::AbstractValGraph, key) = hasvertexkey_or_throw(typeof(g), key)
+
 
 # ===== AbstractEdgeValGraph ==========
 
@@ -53,38 +107,9 @@ const default_eltype = Int32
 LG.edgetype(G::Type{<:AbstractEdgeValGraph{V, E_VALS}}) where {V, E_VALS} =
     is_directed(G) ? ValDiEdge{V, E_VALS} : ValEdge{V, E_VALS}
 
-LG.edgetype(g::AbstractEdgeValGraph) = edgetype(typeof(g))
-
-
 LG.edges(g::AbstractEdgeValGraph) = ValEdgeIter(g)
 
 LG.nv(g::AbstractEdgeValGraph) = eltype(g)(length(g.fadjlist))
-LG.ne(g::AbstractEdgeValGraph) = g.ne
-
-function is_validedgekey(
-            G::Type{<:AbstractEdgeValGraph{V, E_VALS}},
-            key::Symbol) where {V, E_VALS <: NamedTuple}
-
-    return key in E_VALS.names
-end
-
-function is_validedgekey(
-            G::Type{<:AbstractEdgeValGraph{V, E_VALS}},
-            key::Integer) where {V, E_VALS <: AbstractTuple}
-
-    return key in OneTo(length(E_VALS.types))
-end
-
-is_validedgekey(g::AbstractEdgeValGraph, key) = is_validedgekey(typeof(g), key)
-
-function validedgekey_or_throw(G::Type{<:AbstractEdgeValGraph}, key)
-    is_validedgekey(G, key) && return nothing
-
-    error("$key is not a valid edge key for this graph.")
-end
-
-validedgekey_or_throw(g::AbstractEdgeValGraph, key) = validedgekey_or_throw(typeof(g), key)
-
 
 # === Iterators =====================
 
@@ -92,7 +117,7 @@ struct ValEdgeIter{G<:AbstractEdgeValGraph} <: AbstractEdgeIter
     g::G
 end
 
-Base.length(iter::ValEdgeIter) = ne(iter.g)
+Base.length(iter::ValEdgeIter) = iter.g.ne
 
 function Base.eltype(::Type{<:ValEdgeIter{G}}) where
         {V, E_VALS, G <: AbstractEdgeValGraph{V, E_VALS}}
