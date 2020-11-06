@@ -34,6 +34,11 @@ struct ValEdge{V<:Integer, E_VALS} <: AbstractValEdge{V, E_VALS}
         src, dst = minmax(src, dst) # TODO maybe use a branchless operator
         return new{V, E_VALS}(src, dst, vals)
     end
+
+    function ValEdge{V, E_VALS}(src, dst, vals) where {V, E_VALS}
+        src, dst = minmax(src, dst) # TODO maybe use a branchless operator
+        return new{V, E_VALS}(src, dst, vals)
+    end
 end
 
 
@@ -67,6 +72,10 @@ struct ValDiEdge{V<:Integer, E_VALS} <: AbstractValEdge{V, E_VALS}
     vals::E_VALS
 
     function ValDiEdge(src::V, dst::V, vals::E_VALS) where {V, E_VALS}
+        return new{V, E_VALS}(src, dst, vals)
+    end
+
+    function ValDiEdge{V, E_VALS}(src, dst, vals) where {V, E_VALS}
         return new{V, E_VALS}(src, dst, vals)
     end
 end
@@ -121,7 +130,7 @@ LG.is_directed(::Type{<:ValDiEdge}) = true
 LG.is_directed(e::AbstractValEdge) = is_directed(typeof(e))
 
 function Base.show(io::IO, e::AbstractValEdge)
-    isdir = is_directed(e) 
+    isdir = is_directed(e)
     e_keys = keys(get_val(e, :))
     has_symbol_keys = eltype(e_keys) === Symbol
 
