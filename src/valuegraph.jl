@@ -204,6 +204,12 @@ end
 # =========================================================
 
 #  ------------------------------------------------------
+#  ne
+#  ------------------------------------------------------
+
+LG.ne(g::AbstractEdgeValGraph) = g.ne
+
+#  ------------------------------------------------------
 #  add_edge!
 #  ------------------------------------------------------
 
@@ -898,7 +904,7 @@ inedgevals(g::EdgeValDiGraph, v::Integer, key) = g.redgevals[key][v]
 
 
 @inline function Base.iterate(eit::ValEdgeIter{<:EdgeValGraph{V, E_VAL}}, state=(one(V), 1) ) where {V, E_VAL}
-    g = eit.g
+    g = eit.graph
     fadjlist = g.fadjlist
     edgevals = g.edgevals
     n = V(nv(g))
@@ -930,7 +936,7 @@ function Base.iterate(
             state=(one(V), 1)
     ) where {V, E_VAL}
 
-    g = iter.g
+    g = iter.graph
     fadjlist = g.fadjlist
     edgevals = g.edgevals
     n = V(nv(g))

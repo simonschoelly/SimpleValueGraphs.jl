@@ -31,18 +31,8 @@ vertexvals_type(g::AbstractValGraph) = vertexvals_type(typeof(g))
 edgevals_type(::Type{<:AbstractValGraph{V, V_VALS, E_VALS}}) where {V, V_VALS, E_VALS} = E_VALS
 edgevals_type(g::AbstractValGraph) = edgevals_type(typeof(g))
 
-LG.vertices(g::AbstractValGraph) = OneTo{eltype(g)}(nv(g))
 
-LG.has_vertex(g::AbstractValGraph, v) = v ∈ vertices(g)
-
-LG.edgetype(g::AbstractValGraph) = eltype(edges(g))
-
-LG.ne(g::AbstractValGraph) = length(edges(g))
-
-LG.outneighbors(g::AbstractValGraph, u) = (v for v ∈ vertices(g) if has_edge(g, u, v))
-
-LG.inneighbors(g::AbstractValGraph, v) = is_directed(g) ? (u for u ∈ vertices(g) if has_edge(g, u, v)) : outneighbors(g, v)
-
+# === Type information =====================
 
 function hasedgekey(
             G::Type{<:AbstractValGraph{V, V_VALS, E_VALS}},
@@ -94,6 +84,122 @@ end
 hasvertexkey_or_throw(g::AbstractValGraph, key) = hasvertexkey_or_throw(typeof(g), key)
 
 
+# === Partial default implementation of the LightGraphs interface =====================
+
+LG.vertices(g::AbstractValGraph) = OneTo{eltype(g)}(nv(g))
+
+LG.has_vertex(g::AbstractValGraph, v) = v ∈ vertices(g)
+
+LG.edges(g::AbstractValGraph) = ValEdgeIter(g)
+
+LG.edgetype(g::AbstractValGraph) = eltype(edges(g))
+
+LG.ne(g::AbstractValGraph) = length(edges(g))
+
+# TODO a Base.Generator would be better here, but it causes problems with sort. Maybe
+# add a custom iterator
+LG.outneighbors(g::AbstractValGraph, u) = [v for v ∈ vertices(g) if has_edge(g, u, v)]
+
+LG.inneighbors(g::AbstractValGraph, v) = is_directed(g) ? [u for u ∈ vertices(g) if has_edge(g, u, v)] : outneighbors(g, v)
+
+#
+# === Accessors =====================
+
+# TODO might consider adding a check
+get_val(g::AbstractValGraph{V, Tuple{}}, v::Integer, ::Colon) where {V} = ()
+get_val(g::AbstractValGraph{V, NamedTuple{(), Tuple{}}}, v::Integer, ::Colon) where {V} = NamedTuple()
+
+
+
+
+get_val(g::AbstractValGraph{V, V_VALS, Tuple{}}, s::Integer, d::Integer, ::Colon) where {V, V_VALS} = ()
+get_val(g::AbstractValGraph{V, V_VALS, NamedTuple{(), Tuple{}}}, s::Integer, d::Integer, ::Colon) where {V, V_VALS} = NamedTuple()
+
+get_val(g::AbstractValGraph, s::Integer, d::Integer, key::Union{Integer, Symbol}) = get_val(g, s, d, :)[key]
+
+get_val_or(g::AbstractValGraph, s::Integer, d::Integer, key::Union{Integer, Symbol}, alternative) = has_edge(g, s, d) ? get_val(g, s, d, key) : alternative
+
+
+# === Edge Iterator =====================
+
+struct ValEdgeIter{G<:AbstractValGraph} <: AbstractEdgeIter
+    graph::G
+end
+
+Base.length(iter::ValEdgeIter) = count(_ -> true, iter)
+
+function Base.eltype(::Type{<:ValEdgeIter{G}}) where
+        {V, V_VALS, E_VALS, G <: AbstractValGraph{V, V_VALS, E_VALS}}
+
+    return (is_directed(G) ? ValDiEdge : ValEdge){V, E_VALS}
+end
+Base.eltype(iter::ValEdgeIter) = eltype(typeof(iter))
+
+function Base.iterate(iter::ValEdgeIter)
+
+    verts = vertices(iter.graph)
+
+    isempty(verts) && return nothing
+
+    iterate(iter, (vertices=verts, i=1, j=1))
+end
+
+function Base.iterate(iter::ValEdgeIter, state)
+
+    verts = state.vertices
+    i = state.i
+    j = state.j
+    graph = iter.graph
+
+    while i <= length(verts)
+        while j <= length(verts) nothing
+            u = verts[i]
+            v = verts[j]
+            if has_edge(graph, u, v)
+                new_state = (vertices=verts, i=i, j=j+1)
+                edge = eltype(iter)(u, v, get_val(graph, u, v, :))
+                return (edge, new_state)
+            end
+            j += 1
+        end
+        i += 1
+        j = 1
+    end
+    return nothing
+end
+
+
+#= TODO
+function Base.iterate(iter::ValEdgeIter)
+
+    iterate(iter, (srcs=vertices(iter.graph), dsts=nothing))
+end
+
+function Base.iterate(iter::ValEdgeIter, state)
+
+    srcs, dsts = state
+    graph = iter.graph
+    # Not ideal, should passed along in each iteration
+    verts = vertices(graph)
+
+    while srcs != nothing
+        s, srcs_state = srcs
+        while dsts != nothing
+            d = dsts, dsts_state
+            if (is_directed(graph) || d >= s) && has_edge(graph, s, d)
+                v = get_val(graph, s, d, :)
+                return is_directed(graph) ? ValDiEdge(s, d, v) : ValEdge(s, d, v)
+            end
+            dsts = iterate(vertices(g), dsts_state)
+        end
+        srcs = iterate(vertices(g), 
+
+    end
+end
+=#
+
+
+
 # ===== AbstractEdgeValGraph ==========
 
 abstract type AbstractEdgeValGraph{V<:Integer, E_VALS} <: AbstractValGraph{V, Tuple{}, E_VALS} end
@@ -111,18 +217,4 @@ LG.edges(g::AbstractEdgeValGraph) = ValEdgeIter(g)
 
 LG.nv(g::AbstractEdgeValGraph) = eltype(g)(length(g.fadjlist))
 
-# === Iterators =====================
-
-struct ValEdgeIter{G<:AbstractEdgeValGraph} <: AbstractEdgeIter
-    g::G
-end
-
-Base.length(iter::ValEdgeIter) = iter.g.ne
-
-function Base.eltype(::Type{<:ValEdgeIter{G}}) where
-        {V, E_VALS, G <: AbstractEdgeValGraph{V, E_VALS}}
-
-    return (is_directed(G) ? ValDiEdge : ValEdge){V, E_VALS}
-end
-Base.eltype(iter::ValEdgeIter) = eltype(typeof(iter))
 
