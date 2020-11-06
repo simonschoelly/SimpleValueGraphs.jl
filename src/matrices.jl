@@ -53,7 +53,7 @@ function Base.size(matrix::AdjacencyMatrix)
 end
 
 """
-    adjacency_matrix(g::AbstractEdgeValGraph)
+    adjacency_matrix(g::AbstractValGraph)
 
 Create an `AdjacencyMatrix` view from a graph `g`.
 
@@ -75,7 +75,7 @@ julia> adjacency_matrix(gv)
  1  0  0  0
 ```
 """
-LG.adjacency_matrix(g::AbstractEdgeValGraph) = AdjacencyMatrix(g)
+LG.adjacency_matrix(g::AbstractValGraph) = AdjacencyMatrix(g)
 
 LinearAlgebra.ishermitian(::AdjacencyMatrix{<:EdgeValGraph}) = true
 LinearAlgebra.issymmetric(::AdjacencyMatrix{<:EdgeValGraph}) = true
@@ -131,7 +131,7 @@ julia> ValMatrix(gv, 1, 0.0)
   nothing  nothing  nothing
 ```
 """
-function ValMatrix(g::AbstractEdgeValGraph{V, E_VALS}, key::Union{Integer, Symbol}, zero_value) where {V, E_VALS}
+function ValMatrix(g::AbstractValGraph{V, V_VALS, E_VALS}, key::Union{Integer, Symbol}, zero_value) where {V, V_VALS, E_VALS}
 
     T = E_VAL_for_key(E_VALS, key)
     Z = typeof(zero_value)
@@ -173,11 +173,11 @@ without any edge values.
 """
 function weights end
 
-LG.weights(g::ZeroEdgeValGraph) = LG.DefaultDistance(nv(g))
+LG.weights(g::AbstractValGraph{V, V_VALS, <: AbstractNTuple{0}}) where {V, V_VALS} = LG.DefaultDistance(nv(g))
 
-LG.weights(g::OneEdgeValGraph; kwargs...) = LG.weights(g, 1; kwargs...)
+LG.weights(g::AbstractValGraph{V, V_VALS, <: AbstractNTuple{1}}; kwargs...) where {V, V_VALS} = LG.weights(g, 1; kwargs...)
 
-function LG.weights(g::AbstractEdgeValGraph, key; zerovalue=zero(E_VAL_for_key(edgevals_type(g), key)))
+function LG.weights(g::AbstractValGraph, key; zerovalue=zero(E_VAL_for_key(edgevals_type(g), key)))
 
     return ValMatrix(g, key, zerovalue)
 end
