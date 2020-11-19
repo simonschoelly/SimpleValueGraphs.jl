@@ -3,12 +3,12 @@
 #  ------------------------------------------------------
 
 """
-    EdgeValGraph{V, E_VALS}(undef, g::SimpleGraph)
-    EdgeValGraph{V = eltype(g)}(undef, g::SimpleGraph; edgeval_types=$(default_edgeval_types))
+    ValGraph{V, V_VALS, E_VALS}(undef, g::SimpleGraph)
+    ValGraph{V = eltype(g)}(undef, g::SimpleGraph; vertexval_types=(), edgeval_types=()))
 
-Construct a `EdgeValGraph` with the same structure as `g` with uninitialized edge values.
+Construct a `ValGraph` with the same structure as `g` with uninitialized edge values.
 """
-function EdgeValGraph{V, E_VALS}(::UndefInitializer, g::SimpleGraph) where {V, E_VALS}
+function ValGraph{V, V_VALS, E_VALS}(::UndefInitializer, g::SimpleGraph) where {V, V_VALS, E_VALS}
 
     n = nv(g)
     fadjlist = deepcopy_adjlist(V, g.fadjlist)
@@ -20,19 +20,19 @@ function EdgeValGraph{V, E_VALS}(::UndefInitializer, g::SimpleGraph) where {V, E
             edgevals[i][s] = Vector{T}(undef, length(fadjlist[s]))
         end
     end
-    return EdgeValGraph{V, E_VALS, E_VALS_C}(ne(g), fadjlist, edgevals)
+    return ValGraph{V, V_VALS, E_VALS, E_VALS_C}(ne(g), fadjlist, edgevals)
 end
 
-EdgeValGraph{V}(::UndefInitializer, g::SimpleGraph; edgeval_types::AbstractTupleOfTypes=default_edgeval_types) where {V} =
-    EdgeValGraph{V, construct_E_VAL(edgeval_types)}(undef, g)
+ValGraph{V}(::UndefInitializer, g::SimpleGraph; edgeval_types::AbstractTupleOfTypes=default_edgeval_types) where {V} =
+    ValGraph{V, construct_E_VAL(edgeval_types)}(undef, g)
 
-EdgeValGraph(::UndefInitializer, g::SimpleGraph; edgeval_types::AbstractTupleOfTypes=default_edgeval_types) =
-    EdgeValGraph{eltype(g)}(undef, g;  edgeval_types=edgeval_types)
+ValGraph(::UndefInitializer, g::SimpleGraph; edgeval_types::AbstractTupleOfTypes=default_edgeval_types) =
+    ValGraph{eltype(g)}(undef, g;  edgeval_types=edgeval_types)
 
 
 """
-    EdgeValOutDiGraph{V, E_VALS}(undef, g::SimpleDiGraph)
-    EdgeValOutDiGraph{V = eltype(g)}(undef, g::SimpleDiGraph; edgeval_types=$(default_edgeval_types))
+    ValOutDiGraph{V, E_VALS}(undef, g::SimpleDiGraph)
+    ValOutDiGraph{V = eltype(g)}(undef, g::SimpleDiGraph; edgeval_types=$(default_edgeval_types))
 
 Construct a `EdgeValOutDiGraph` with the same structure as `g` with uninitialized edge values.
 """
@@ -45,13 +45,13 @@ function EdgeValOutDiGraph{V, E_VALS}(::UndefInitializer, g::SimpleDiGraph) wher
     edgevals = E_VALS_C( Adjlist{T}(undef, n) for T in E_VALS.types )
     for s in OneTo(n)
         for (i, T) in enumerate(E_VALS.types)
-            edgevals[i][s] = Vector{T}(undef, length(fadjlist[s])) 
+            edgevals[i][s] = Vector{T}(undef, length(fadjlist[s]))
         end
     end
-    return EdgeValOutDiGraph{V, E_VALS, E_VALS_C}(ne(g), fadjlist, edgevals)
+    return ValOutDiGraph{V, E_VALS, E_VALS_C}(ne(g), fadjlist, edgevals)
 end
 
-EdgeValOutDiGraph{V}(::UndefInitializer, g::SimpleDiGraph; edgeval_types::AbstractTupleOfTypes=default_edgeval_types) where {V} =
+ValOutDiGraph{V}(::UndefInitializer, g::SimpleDiGraph; edgeval_types::AbstractTupleOfTypes=default_edgeval_types) where {V} =
     EdgeValOutDiGraph{V, construct_E_VAL(edgeval_types)}(undef, g)
 
 EdgeValOutDiGraph(::UndefInitializer, g::SimpleDiGraph; edgeval_types::AbstractTupleOfTypes=default_edgeval_types) =

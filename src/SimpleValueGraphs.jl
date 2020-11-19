@@ -28,10 +28,9 @@ import LinearAlgebra
 
 
 export
-    AbstractEdgeValGraph,
-    EdgeValGraph,
-    EdgeValOutDiGraph,
-    EdgeValDiGraph,
+    ValGraph,
+    ValOutDiGraph,
+    ValDiGraph,
 
     AbstractValEdge,
     ValEdge,
@@ -42,9 +41,12 @@ export
     vertexvals_type,
     edgevals_type,
 
-    get_val,
-    get_val_or,
-    set_val!,
+    get_vertexval,
+    set_vertexval!,
+
+    get_edgeval,
+    get_edgeval_or,
+    set_edgeval!,
 
     inedgevals,
     outedgevals,
@@ -102,6 +104,7 @@ include("valueedge.jl")
 include("valuegraph.jl")
 include("matrices.jl")
 
-include("integrations/SimpleGraphs.jl")
+#   TODO temporarily disabled until initializors are fixed
+#   include("integrations/SimpleGraphs.jl")
 
 end # module

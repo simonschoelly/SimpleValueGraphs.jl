@@ -8,7 +8,7 @@ const TEST_VERTEX_TYPES_BIG =
     [ UInt8,
       Int8,
       Int16,
-      UInt16, 
+      UInt16,
       Int32,
       UInt32,
       Int64,
@@ -58,7 +58,7 @@ const test_multi_edgeval_types =
       (a=Float64, b=Float64),
       (Int8, Int16, Int8),
       (a=Vector{Int64}, b=Tuple{Int, Int}, c=Union{Nothing, Int}),
-    ] 
+    ]
 
 const test_edgeval_types = union(
         test_zero_edgval_types,
@@ -224,7 +224,7 @@ end
 
 
 function testgraphA()
-    g = EdgeValGraph(CompleteBipartiteGraph(3, 4))
+    g = ValGraph(CompleteBipartiteGraph(3, 4))
     add_edge!(g, 1, 4, 10.0)
     return g
 end
@@ -233,7 +233,7 @@ end
 # TODO allow for only non-negative or positive weights
 function graph_with_randvals(g::AbstractGraph{T}) where {T}
     U = Float64
-    resultg = EdgeValGraph{T, U}(nv(g))
+    resultg = ValGraph{T, U}(nv(g))
     for e in edges(g)
         s, d = src(e), dst(e)
         add_edge!(resultg, s, d, convert(U, randn()))
@@ -250,7 +250,7 @@ end
 
 
 # TODO these functions are not finished yet
-function testset_isvalidgraph(g::EdgeValGraph; undef_edgevalues::Bool=false)
+function testset_isvalidgraph(g::ValGraph; undef_edgevalues::Bool=false)
     @testset "Is valid graph" begin
         @testset "g.ne has correct value" begin
             # Each edge, apart from self-loops occurs twice
@@ -304,7 +304,7 @@ function testset_isvalidgraph(g::EdgeValGraph; undef_edgevalues::Bool=false)
     end
 end
 
-function testset_isvalidgraph(g::EdgeValOutDiGraph; undef_edgevalues::Bool=false)
+function testset_isvalidgraph(g::ValOutDiGraph; undef_edgevalues::Bool=false)
     @testset "Is valid graph" begin
         @testset "g.ne has correct value" begin
             should_be = mapreduce(length, +, g.fadjlist, init=0)
@@ -324,7 +324,7 @@ function testset_isvalidgraph(g::EdgeValOutDiGraph; undef_edgevalues::Bool=false
     end
 end
 
-function testset_isvalidgraph(g::EdgeValDiGraph; undef_edgevalues::Bool=false)
+function testset_isvalidgraph(g::ValDiGraph; undef_edgevalues::Bool=false)
     @testset "Is valid graph" begin
         @testset "g.ne has correct value" begin
             should_be_forwards = mapreduce(length, +, g.fadjlist, init=0)
@@ -378,19 +378,19 @@ function testset_isvalidgraph(g::EdgeValDiGraph; undef_edgevalues::Bool=false)
     end
 end
 
-function testset_topological_equivalent(g::SimpleGraph, gv::EdgeValGraph)
+function testset_topological_equivalent(g::SimpleGraph, gv::ValGraph)
     @testset "Topological equivalent" begin
         @test g.fadjlist == gv.fadjlist
     end
 end
 
-function testset_topological_equivalent(g::SimpleDiGraph, gv::EdgeValOutDiGraph)
+function testset_topological_equivalent(g::SimpleDiGraph, gv::ValOutDiGraph)
     @testset "Topological equivalent" begin
         @test g.fadjlist == gv.fadjlist
     end
 end
 
-function testset_topological_equivalent(g::SimpleDiGraph, gv::EdgeValDiGraph)
+function testset_topological_equivalent(g::SimpleDiGraph, gv::ValDiGraph)
     @testset "Topological equivalent" begin
         @test g.fadjlist == gv.fadjlist
         @test g.badjlist == gv.badjlist

@@ -1,9 +1,12 @@
-# ===== AbstractValGraph ==========
+
+# ======================================================
+# AbstractValGraph structure
+# ======================================================
 
 """
     AbstractValGraph{V, V_VALS, E_VALS} <: AbstractGraph{V}
 
-Abstract value graph with vertex type `V`, vertex values of types `V_VALS}`
+Abstract value graph with vertex type `V`, vertex values of types `V_VALS`
 and edge values of types `E_VALS`.
 
 ### See also
@@ -11,12 +14,48 @@ and edge values of types `E_VALS`.
 """
 abstract type AbstractValGraph{V<:Integer, V_VALS, E_VALS} <: AbstractGraph{V} end
 
+#  ------------------------------------------------------
+#  specialised types
+#  ------------------------------------------------------
+
+# TODO maybe we can parametrize these types
+OneEdgeValGraph = AbstractValGraph{V, V_VALS, E_VALS} where {V, V_VALS, E_VALS <: AbstractNTuple{1}}
+
+ZeroEdgeValGraph = AbstractValGraph{V, V_VALS, E_VALS} where {V, V_VALS, E_VALS <: AbstractNTuple{0}}
+
+OneVertexValGraph = AbstractValGraph{V, V_VALS} where {V, V_VALS <: AbstractNTuple{1}}
+
+ZeroVertexValGraph = AbstractValGraph{V, V_VALS} where {V, V_VALS <: AbstractNTuple{0}}
+
+# ======================================================
+# Type parameter information
+# ======================================================
+
+#  ------------------------------------------------------
+#  eltype
+#  ------------------------------------------------------
+
 LG.eltype(::Type{<:AbstractValGraph{V}}) where {V} = V
+
 # This should not be necessary, as Base implements `eltype(x) = eltype(typeof(x))`
 # but unfortunately LightGraphs redefines `eltype(::AbstractGraph)` as not defined
 LG.eltype(g::AbstractValGraph) = eltype(typeof(g))
 
-# TODO examples
+#  ------------------------------------------------------
+#  vertexvals_type
+#  ------------------------------------------------------
+
+# TODO documentation
+vertexvals_type(::Type{<:AbstractValGraph{V, V_VALS, E_VALS}}) where {V, V_VALS, E_VALS} =
+V_VALS
+
+vertexvals_type(g::AbstractValGraph) = vertexvals_type(typeof(g))
+
+
+#  ------------------------------------------------------
+#  edgevals_type
+#  ------------------------------------------------------
+
 # TODO might also implement this for SimpleGraph
 """
 	edgevals_type(g::AbstractValGraph)
@@ -25,8 +64,6 @@ Return the types of the edgevalues of a graph `g`.
 """
 function edgevals_type end
 
-vertexvals_type(::Type{<:AbstractValGraph{V, V_VALS, E_VALS}}) where {V, V_VALS, E_VALS} = V_VALS
-vertexvals_type(g::AbstractValGraph) = vertexvals_type(typeof(g))
 
 edgevals_type(::Type{<:AbstractValGraph{V, V_VALS, E_VALS}}) where {V, V_VALS, E_VALS} = E_VALS
 edgevals_type(g::AbstractValGraph) = edgevals_type(typeof(g))
@@ -84,6 +121,45 @@ end
 hasvertexkey_or_throw(g::AbstractValGraph, key) = hasvertexkey_or_throw(typeof(g), key)
 
 
+#  ------------------------------------------------------
+#  show
+#  ------------------------------------------------------
+
+#= TODO this (show) needs an implementation
+has_named_edgevals(g::AbstractEdgeValGraph{ <: Any, <: NamedTuple}) = true
+has_named_edgevals(g::AbstractEdgeValGraph{ <: Any, <: Tuple}) = false
+
+# TODO this looks kind of ugly
+function Base.show(io::IO, g::AbstractEdgeValGraph{V, E_VALS}) where {V, E_VALS}
+    nvg = Int(nv(g))
+    neg = ne(g)
+    dir = is_directed(g) ? "directed" : "undirected"
+    name = string(nameof(typeof(g)))
+
+    types = tuple_of_types(E_VALS)
+
+    edgevalues_string = if g isa ZeroEdgeValGraph
+        "with no edge values"
+    elseif g isa OneEdgeValGraph
+        if has_named_edgevals(g)
+            "with named edge values of type $types"
+        else
+            "with edge values of type $types"
+        end
+    else
+        if has_named_edgevals(g)
+            "with multiple named edge values of types $types"
+        else
+            "with multiple edge values of types $types"
+        end
+
+    end
+
+    println(io, "{$nvg, $neg} $dir $name{$V} graph $edgevalues_string.")
+end
+=#
+
+
 # === Partial default implementation of the LightGraphs interface =====================
 
 LG.vertices(g::AbstractValGraph) = OneTo{eltype(g)}(nv(g))
@@ -102,22 +178,272 @@ LG.outneighbors(g::AbstractValGraph, u) = [v for v ∈ vertices(g) if has_edge(g
 
 LG.inneighbors(g::AbstractValGraph, v) = is_directed(g) ? [u for u ∈ vertices(g) if has_edge(g, u, v)] : outneighbors(g, v)
 
-#
-# === Accessors =====================
 
-# TODO might consider adding a check
-get_val(g::AbstractValGraph{V, Tuple{}}, v::Integer, ::Colon) where {V} = ()
-get_val(g::AbstractValGraph{V, NamedTuple{(), Tuple{}}}, v::Integer, ::Colon) where {V} = NamedTuple()
+# ======================================================
+# Modifiers
+# ======================================================
+
+#  -----------------------------------------------------
+#  add_edge!
+#  -----------------------------------------------------
+
+"""
+    add_edge!(g::AbstractValGraph, s, d, [values])
+
+Add an edge `e = (s, d, values)` to a graph `g` and set the edge values.
+
+If `g` does not have and edge values, `values` can be omitted.
+
+Return `true` if the edge was added successfully, otherwise return `false`.
+If the edge already exists, return `false` but still change the edge values.
+"""
+function add_edge! end
+
+add_edge!(g::ZeroEdgeValGraph, s, d) = add_edge!(g, s, d, edgevals_type(g)(()))
 
 
+#  -----------------------------------------------------
+#  add_vertex!
+#  -----------------------------------------------------
+
+"""
+    add_vertex!(g::AbstractValGraph, s, d, [values])
+
+Add an vertex to a graph `g` and set the vertex values.
+
+If `g` does not have and vertex values, `values` can be omitted.
+
+Return `true` if the vertex was added successfully, otherwise return `false`.
+If the vertex already exists, return `false` but still change the vertex values.
+"""
+function add_vertex! end
+
+add_vertex(g::ZeroVertexValGraph) = add_vertex!(g, vertexvals_type(g)(()))
 
 
-get_val(g::AbstractValGraph{V, V_VALS, Tuple{}}, s::Integer, d::Integer, ::Colon) where {V, V_VALS} = ()
-get_val(g::AbstractValGraph{V, V_VALS, NamedTuple{(), Tuple{}}}, s::Integer, d::Integer, ::Colon) where {V, V_VALS} = NamedTuple()
+# ======================================================
+# Accessors
+# ======================================================
 
-get_val(g::AbstractValGraph, s::Integer, d::Integer, key::Union{Integer, Symbol}) = get_val(g, s, d, :)[key]
+#  -----------------------------------------------------
+#  get_vertexval
+#  -----------------------------------------------------
 
-get_val_or(g::AbstractValGraph, s::Integer, d::Integer, key::Union{Integer, Symbol}, alternative) = has_edge(g, s, d) ? get_val(g, s, d, key) : alternative
+# TODO documentation
+get_vertexval(g::AbstractValGraph, v, key::Symbol) =
+    get_vertexval(g, v, Base.fieldindex(key, vertexvals_type(g)))
+
+get_vertexval(g::OneVertexValGraph, v) = get_vertexval(g, v, 1)
+
+function get_vertexval(g::AbstractValGraph, v, ::Colon)
+
+    V_VALS = vertexvals_type(g)
+    return V_VALS(get_vertexval(g, v, i) for i in OneTo(length(V_VALS.types)))
+end
+
+
+#  -----------------------------------------------------
+#  get_edgeval
+#  -----------------------------------------------------
+
+"""
+    get_edgeval(g::AbstractValGraph, s, d, key)
+
+Return the value associated with the edge `s -> d` for the key `key` in `g`.
+
+Throw an exception if the graph does not contain such an edge or if the key is not a valid edge key.
+
+For graphs that only have one value per edge, `key` can be omitted.
+
+### See also
+[`get_edgeval_or`](@ref), [`set_val!`](@ref)
+
+### Examples
+```jldoctest
+julia> gv = ValDiGraph((s, d) -> (rand(),), path_digraph(3), (a=Float64,))
+{3, 2} directed ValDiGraph{Int64} graph with named edge values of type (a = Float64,).
+
+julia> get_edgeval(gv, 1, 2, :a)
+0.6238826396606063
+
+julia> get_edgeval(gv, 1, 2, 1)
+0.6238826396606063
+
+julia> get_edgeval(gv, 1, 2)
+0.6238826396606063
+
+julia> get_edgeval(gv, 1, 3)
+ERROR: No such edge
+
+julia> get_edgeval(gv, 1, 2, :b)
+ERROR: type NamedTuple has no field b
+```
+"""
+get_edgeval(g::AbstractValGraph, s, d, key::Symbol) =
+    get_edgeval(g, s, d, Base.fieldindex(key, edgevals_type(g)))
+
+get_edgeval(g::OneEdgeValGraph, s, d) = get_edgeval(g, s, d, 1)
+
+"""
+    get_edgeval(g::AbstractValGraph, s, d, :)
+
+Return all values associated with the edge `s -> d` in `g`.
+
+Throw an exception if the graph does not contain such an edge.
+
+### See also
+[`get_edgeval_or`](@ref), [`set_val!`](@ref)
+
+### Examples
+```jldoctest
+julia> gv = ValDiGraph((s, d) -> (rand(), 10), path_digraph(3), (a=Float64, b=Int))
+{3, 2} directed ValDiGraph{Int64} graph with multiple named edge values of types (a = Float64, b = Int64).
+
+julia> get_edgeval(gv, 1, 2, :)
+(a = 0.38605078026294826, b = 10)
+
+julia> get_edgeval(gv, 1, 3, :)
+ERROR: Values not found
+```
+"""
+function get_edgeval(g::AbstractValGraph, s, d, ::Colon)
+
+    E_VALS = edgevals_type(g)
+    return E_VALS(get_edgeval(g, s, d, i) for i in OneTo(length(E_VALS.types)))
+end
+
+#  -----------------------------------------------------
+#  get_edgeval_or
+#  -----------------------------------------------------
+
+"""
+    get_edgeval_or(g::ValGraph, s, d, alternative)
+    get_edgeval_or(g::ValDiGraph, s, d, alternative)
+    get_edgeval_or(g::ValOutDiGraph, s, d, alternative)
+
+Return all values associated with the edge `s -> d` in `g`.
+
+If there is no such edge return `alternative`.
+
+### See also
+[`get_edgeval`](@ref), [`set_edgeval!`](@ref)
+
+### Examples
+```jldoctest
+julia> gv = ValDiGraph((s, d) -> (rand(), 10), path_digraph(3), (a=Float64, b=Int))
+{3, 2} directed ValDiGraph{Int64} graph with multiple named edge values of types (a = Float64, b = Int64).
+
+julia> get_edgeval_or(gv, 1, 2, :, missing)
+(a = 0.34307617867033446, b = 10)
+
+julia> get_edgeval_or(gv, 1, 3, :, missing)
+missing
+```
+"""
+get_edgeval_or(g::AbstractValGraph, s, d, key, alternative) =
+    has_edge(g, s, d) ? get_edgeval(g, s, d, key) : alternative
+
+get_edgeval_or(g::OneEdgeValGraph, s, d, alternative) = get_edgeval(g, s, d, 1, alternative)
+
+
+#  -----------------------------------------------------
+#  set_edgeval!
+#  -----------------------------------------------------
+
+set_edgeval!(g::OneEdgeValGraph, s, d, value) = set_edgeval!(g, s, d, 1, value)
+
+set_edgeval!(g::AbstractValGraph, s, d, key::Symbol, value) =
+    set_edgeval!(g, s, d, Base.fieldindex(key, E_VALS), value)
+
+"""
+    set_edgeval!(g::AbstractValGraph, s, d, :, values)
+
+Set the values of the edge `e: s -> d` to `values`. Return `true` if such an edge exists and
+`false` otherwise.
+"""
+function set_edgeval!(g::AbstractValGraph, s, d, ::Colon, values)
+
+    has_edge(g, s, d) || return false
+
+    E_VALS = edgevals_type(g)
+
+    # TODO currently we cannot convert from tuples to named tuples or vice versa
+    values = convert(E_VALS, values)
+    for (i, value) in values
+        set_edgeval!(g, s, d, i, value)
+    end
+
+    return true
+end
+
+
+#  ------------------------------------------------------
+#  set_vertexval!
+#  ------------------------------------------------------
+
+set_vertexval!(g::OneVertexValGraph, v, value) = set_vertexval!(g, v, 1, value)
+
+set_vertexval!(g::AbstractValGraph, v, key::Symbol, value) =
+    set_vertexval!(g, v, Base.fieldindex(key, vertexvals_type(g)), value)
+
+"""
+    set_vertexval!(g::AbstractValGraph, v, :, values)
+
+Set the values of the vertex `v` to `values`. Return `true` if such an vertex exists and
+`false` otherwise.
+"""
+function set_vertexval!(g::AbstractValGraph, v, ::Colon, values)
+
+    has_vertex(g, v) || return false
+
+    V_VALS = vertexvals_type(g)
+
+    # TODO currently we cannot convert from tuples to named tuples or vice versa
+    values = convert(V_VALS, values)
+    for (i, value) in values
+        set_vertexval!(g, v, i, value)
+    end
+
+    return true
+end
+
+#  ------------------------------------------------------
+#  outedgevals
+#  ------------------------------------------------------
+
+"""
+    outedgevals(g::AbstractValGraph, v [, key])
+
+Return an iterator of edge values of outgoing edges from `v` to its neighbors.
+
+If `g` has multiple edge values, the key cannot be omitted.
+The order of the neighbors is the same as for `outneighbors(g, v)`.
+"""
+function outedgevals end
+
+outedgevals(g::OneEdgeValGraph, v) = outedgevals(g, v, 1)
+
+outedgevals(g::AbstractValGraph, v, key::Symbol) =
+    outedgevals(g, v, Base.fieldindex(key, edgevals_type(g)))
+
+outedgevals(g::AbstractValGraph, u, key::Integer) =
+    [get_edgeval(g, u, v, key) for v in outneighbors(g, u)]
+
+
+#  ------------------------------------------------------
+#  inedgevals
+#  ------------------------------------------------------
+
+# TODO documentation
+function inedgevals end
+
+inedgevals(g::OneEdgeValGraph, v) = inedgevals(g, v, 1)
+
+inedgevals(g::AbstractValGraph, v, key::Symbol) =
+    inedgevals(g, v, Base.fieldindex(key, edgevals_type(g)))
+
+inedgevals(g::AbstractValGraph, v, key::Integer) =
+    [get_edgeval(g, u, v, key) for v in inneighbors(g, v)]
 
 
 # === Edge Iterator =====================
@@ -157,7 +483,7 @@ function Base.iterate(iter::ValEdgeIter, state)
             v = verts[j]
             if has_edge(graph, u, v)
                 new_state = (vertices=verts, i=i, j=j+1)
-                edge = eltype(iter)(u, v, get_val(graph, u, v, :))
+                edge = eltype(iter)(u, v, get_edgeval(graph, u, v, :))
                 return (edge, new_state)
             end
             j += 1
@@ -192,7 +518,7 @@ function Base.iterate(iter::ValEdgeIter, state)
             end
             dsts = iterate(vertices(g), dsts_state)
         end
-        srcs = iterate(vertices(g), 
+        srcs = iterate(vertices(g),
 
     end
 end
@@ -200,21 +526,6 @@ end
 
 
 
-# ===== AbstractEdgeValGraph ==========
 
-abstract type AbstractEdgeValGraph{V<:Integer, E_VALS} <: AbstractValGraph{V, Tuple{}, E_VALS} end
-
-OneEdgeValGraph{V, E_VAL} = AbstractEdgeValGraph{V, E_VALS} where E_VALS <: AbstractNTuple{1, E_VAL}
-
-ZeroEdgeValGraph{V} = AbstractEdgeValGraph{V, E_VALS} where E_VALS <: AbstractNTuple{0}
-
-const default_eltype = Int32
-
-LG.edgetype(G::Type{<:AbstractEdgeValGraph{V, E_VALS}}) where {V, E_VALS} =
-    is_directed(G) ? ValDiEdge{V, E_VALS} : ValEdge{V, E_VALS}
-
-LG.edges(g::AbstractEdgeValGraph) = ValEdgeIter(g)
-
-LG.nv(g::AbstractEdgeValGraph) = eltype(g)(length(g.fadjlist))
 
 

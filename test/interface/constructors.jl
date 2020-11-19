@@ -3,19 +3,19 @@ using SimpleValueGraphs.AbstractTuples
 import SimpleValueGraphs: tuple_of_types, default_edgeval_types, default_eltype
 
 
-function testset_toplogical_equivalent(g::SimpleGraph, gv::EdgeValGraph)
+function testset_toplogical_equivalent(g::SimpleGraph, gv::ValGraph)
     @testset "Topological equivalent" begin
         @test all(lr -> lr[1] == lr[2], zip(g.fadjlist, gv.fadjlist))
     end
 end
 
-function testset_toplogical_equivalent(g::SimpleDiGraph, gv::EdgeValOutDiGraph)
+function testset_toplogical_equivalent(g::SimpleDiGraph, gv::ValOutDiGraph)
     @testset "Topological equivalent" begin
         @test all(lr -> lr[1] == lr[2], zip(g.fadjlist, gv.fadjlist))
     end
 end
 
-function testset_toplogical_equivalent(g::SimpleDiGraph, gv::EdgeValDiGraph)
+function testset_toplogical_equivalent(g::SimpleDiGraph, gv::ValDiGraph)
     @testset "Topological equivalent" begin
         @test all(lr -> lr[1] == lr[2], zip(g.fadjlist, gv.fadjlist))
         @test all(lr -> lr[1] == lr[2], zip(g.badjlist, gv.badjlist))
@@ -23,9 +23,9 @@ function testset_toplogical_equivalent(g::SimpleDiGraph, gv::EdgeValDiGraph)
 end
 
 
-# EdgeValGraph{Int, Tuple{Float64}}(10)
+# ValGraph{Int, Tuple{Float64}}(10)
 @testset "Constructor $G{\$V, \$E_VALS}(\$n)" for
-    G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
+    G in (ValGraph, ValOutDiGraph, ValDiGraph)
 
     @testset "Params: V = $V, E_VALS = $E_VALS" for
          V in TEST_VERTEX_TYPES_SMALL,
@@ -45,9 +45,9 @@ end
 end
 
 
-# EdgeValGraph(10, (Float64, ))
+# ValGraph(10, (Float64, ))
 @testset "Constructor $G(\$n::\$V, \$edgeval_types)" for
-    G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
+    G in (ValGraph, ValOutDiGraph, ValDiGraph)
 
     @testset "Params n = $n, V = $V; edgeval_types = $edgeval_types" for
                 V in TEST_VERTEX_TYPES_SMALL,
@@ -72,9 +72,9 @@ end
 
 
 
-# EdgeValGraph(10)
+# ValGraph(10)
 @testset "Constructor $G(\$n::\$V)" for
-    G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
+    G in (ValGraph, ValOutDiGraph, ValDiGraph)
 
     @testset "Params n = $n, V = $V" for
         V in TEST_VERTEX_TYPES_SMALL,
@@ -99,9 +99,9 @@ end
     end
 end
 
-# EdgeValGraph(undef, gs, (Float64,))
+# ValGraph(undef, gs, (Float64,))
 @testset "Constructor $G(undef, \$gs, \$edgeval_types)" for
-    G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
+    G in (ValGraph, ValOutDiGraph, ValDiGraph)
 
     GS = is_directed(G) ? SimpleDiGraph : SimpleGraph
 
@@ -126,9 +126,9 @@ end
     end
 end
 
-# EdgeValGraph(undef, gs)
+# ValGraph(undef, gs)
 @testset "Constructor $G(undef, \$gs)" for
-    G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
+    G in (ValGraph, ValOutDiGraph, ValDiGraph)
 
     GS = is_directed(G) ? SimpleDiGraph : SimpleGraph
 
@@ -154,9 +154,9 @@ end
 
 
 
-# EdgeValGraph((s, d) -> (f(s, d),), gs, (Float64,))
+# ValGraph((s, d) -> (f(s, d),), gs, (Float64,))
 @testset "Constructor $G(f, \$gs, \$edgeval_types)" for
-    G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
+    G in (ValGraph, ValOutDiGraph, ValDiGraph)
 
     GS = is_directed(G) ? SimpleDiGraph : SimpleGraph
 
@@ -165,7 +165,7 @@ end
                 V in TEST_VERTEX_TYPES_SMALL,
            E_VALS in TEST_EDGEVAL_TYPES_SMALL,
        (gs, info) in make_testgraphs(GS{V})
-  
+
 
         n = nv(gs)
         A = rand_sample(E_VALS, n, n)

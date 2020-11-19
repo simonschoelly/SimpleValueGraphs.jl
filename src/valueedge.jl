@@ -84,25 +84,25 @@ LG.src(e::AbstractValEdge) = e.src
 LG.dst(e::AbstractValEdge) = e.dst
 
 """
-    get_val(e::AbstractValEdge, :)
+    get_edgeval(e::AbstractValEdge, :)
 Return the values attached to the edg;e `e`.
 
 # Examples
 
 ```jldoctest
 julia> e = ValEdge(1, 2, ("xyz", 123));
-julia> get_val(e, :)
+julia> get_edgeval(e, :)
 ("xyz", 123)
 
 julia> e = ValDiEdge(1, 2, (weight=2.5,));
-julia> get_val(e, :)
+julia> get_edgeval(e, :)
 (weight = 2.5,)
 ```
 """
-get_val(e::AbstractValEdge, ::Colon) = e.vals
+get_edgeval(e::AbstractValEdge, ::Colon) = e.vals
 
 """
-    get_val(e::AbstractValEdge, key)
+    get_edgeval(e::AbstractValEdge, key)
 
 Return the value attached to the edge `e` for the key `key`.
 
@@ -110,19 +110,19 @@ Return the value attached to the edge `e` for the key `key`.
 ```jldoctest
 julia> e = ValEdge(1, 2, (a=11.0, ));
 
-julia> get_val(e, 1) # use integer key
+julia> get_edgeval(e, 1) # use integer key
 11.0
 
-julia> get_val(e, :a) # use symbolic key
+julia> get_edgeval(e, :a) # use symbolic key
 11.0
 
 ```
 """
-get_val(e::AbstractValEdge, key) = e.vals[key]
+get_edgeval(e::AbstractValEdge, key) = e.vals[key]
 
 
 LG.reverse(e::ValEdge) = e
-LG.reverse(e::ValDiEdge) = ValDiEdge(dst(e), src(e), get_val(e, :))
+LG.reverse(e::ValDiEdge) = ValDiEdge(dst(e), src(e), get_edgeval(e, :))
 
 
 LG.is_directed(::Type{<:ValEdge}) = false
@@ -131,7 +131,7 @@ LG.is_directed(e::AbstractValEdge) = is_directed(typeof(e))
 
 function Base.show(io::IO, e::AbstractValEdge)
     isdir = is_directed(e)
-    e_keys = keys(get_val(e, :))
+    e_keys = keys(get_edgeval(e, :))
     has_symbol_keys = eltype(e_keys) === Symbol
 
     print(io, isdir ? "ValDiEdge" : "ValEdge")
@@ -139,10 +139,10 @@ function Base.show(io::IO, e::AbstractValEdge)
     print(io, " $(src(e)) $arrow $(dst(e))")
 
     if length(e_keys) == 1
-        print(io, " with value " * (has_symbol_keys ? "$(e_keys[1]) = $(get_val(e, 1))" :
-                                                      "$(get_val(e, 1))"))
+        print(io, " with value " * (has_symbol_keys ? "$(e_keys[1]) = $(get_edgeval(e, 1))" :
+                                                      "$(get_edgeval(e, 1))"))
     elseif length(e_keys) > 1
-        print(io, " with values $(get_val(e, :))")
+        print(io, " with values $(get_edgeval(e, :))")
     end
 
     println(io)

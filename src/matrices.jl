@@ -63,12 +63,12 @@ Create an `AdjacencyMatrix` view from a graph `g`.
 ### Examples
 
 ```jldoctest
-julia> gv = EdgeValGraph((s, d) -> (1.0, ), star_graph(4), (Float64, ))
-{4, 3} undirected EdgeValGraph{Int64} graph with edge values of type (Float64,).
+julia> gv = ValGraph((s, d) -> (1.0, ), star_graph(4), (Float64, ))
+{4, 3} undirected ValGraph{Int64} graph with edge values of type (Float64,).
 
 
 julia> adjacency_matrix(gv)
-4×4 AdjacencyMatrix{EdgeValGraph{Int64,Tuple{Float64},Tuple{Array{Array{Float64,1},1}}}}:
+4×4 AdjacencyMatrix{ValGraph{Int64,Tuple{Float64},Tuple{Array{Array{Float64,1},1}}}}:
  0  1  1  1
  1  0  0  0
  1  0  0  0
@@ -77,11 +77,11 @@ julia> adjacency_matrix(gv)
 """
 LG.adjacency_matrix(g::AbstractValGraph) = AdjacencyMatrix(g)
 
-LinearAlgebra.ishermitian(::AdjacencyMatrix{<:EdgeValGraph}) = true
-LinearAlgebra.issymmetric(::AdjacencyMatrix{<:EdgeValGraph}) = true
+LinearAlgebra.ishermitian(::AdjacencyMatrix{<:ValGraph}) = true
+LinearAlgebra.issymmetric(::AdjacencyMatrix{<:ValGraph}) = true
 
-LinearAlgebra.adjoint(matrix::AdjacencyMatrix{<:EdgeValGraph}) = matrix
-LinearAlgebra.transpose(matrix::AdjacencyMatrix{<:EdgeValGraph}) = matrix
+LinearAlgebra.adjoint(matrix::AdjacencyMatrix{<:ValGraph}) = matrix
+LinearAlgebra.transpose(matrix::AdjacencyMatrix{<:ValGraph}) = matrix
 
 #  ======================================================
 #  ValMatrix
@@ -97,7 +97,7 @@ when the underlying graph changes. The view itself is immutable. Convert
 to a `Matrix` or `SparseMatrixCSC` to get a mutable matrix that does
 not change when the graph does.
 """
-struct ValMatrix{Tv, G <: AbstractGraph, key} <: AbstractSparseMatrix{Tv, Int}
+struct ValMatrix{Tv, G <: AbstractValGraph, key} <: AbstractSparseMatrix{Tv, Int}
 
     graph::G
     zero_value::Tv
@@ -115,11 +115,11 @@ are represented by `zero_value` in the matrix.
 
 ### Examples
 ```jldoctest
-julia> gv = EdgeValDiGraph((s, d) -> (rand(), "\$s-\$d"), path_digraph(3), (a=Float64, b=String))
-{3, 2} directed EdgeValDiGraph{Int64} graph with multiple named edge values of types (a = Float64, b = String).
+julia> gv = ValDiGraph((s, d) -> (rand(), "\$s-\$d"), path_digraph(3), (a=Float64, b=String))
+{3, 2} directed ValDiGraph{Int64} graph with multiple named edge values of types (a = Float64, b = String).
 
 julia> ValMatrix(gv, 1, 0.0)
-3×3 ValMatrix{Float64,EdgeValDiGraph{Int64,NamedTuple{(:a, :b),Tuple{Float64,String}},NamedTuple{(:a, :b),Tuple{Array{Array{Float64,1},1},Array{Array{String,1},1}}}},1}:
+3×3 ValMatrix{Float64,ValDiGraph{Int64,NamedTuple{(:a, :b),Tuple{Float64,String}},NamedTuple{(:a, :b),Tuple{Array{Array{Float64,1},1},Array{Array{String,1},1}}}},1}:
  0.0  0.706577  0.0
  0.0  0.0       0.680497
  0.0  0.0       0.0
@@ -131,9 +131,9 @@ julia> ValMatrix(gv, 1, 0.0)
   nothing  nothing  nothing
 ```
 """
-function ValMatrix(g::AbstractValGraph{V, V_VALS, E_VALS}, key::Union{Integer, Symbol}, zero_value) where {V, V_VALS, E_VALS}
+function ValMatrix(g::AbstractValGraph, key::Union{Integer, Symbol}, zero_value)
 
-    T = E_VAL_for_key(E_VALS, key)
+    T = E_VAL_for_key(edgevals_type(g), key)
     Z = typeof(zero_value)
     Tv = Union{T, Z}
 
@@ -141,25 +141,29 @@ function ValMatrix(g::AbstractValGraph{V, V_VALS, E_VALS}, key::Union{Integer, S
 end
 
 function Base.size(matrix::ValMatrix)
+
     nvg = Int(nv(matrix.graph))
     return (nvg, nvg)
 end
 
 function Base.getindex(matrix::ValMatrix{Tv, G, key}, s, d) where {Tv, G, key}
-    return get_val_or(matrix.graph, s, d, key, matrix.zero_value)
+
+    return get_edgeval_or(matrix.graph, s, d, key, matrix.zero_value)
 end
 
 
-LinearAlgebra.ishermitian(::ValMatrix{ <: Real, <:EdgeValGraph}) = true
-LinearAlgebra.issymmetric(::ValMatrix{ <: Any, <:EdgeValGraph}) = true
+LinearAlgebra.ishermitian(::ValMatrix{ <: Real, <: ValGraph}) = true
+LinearAlgebra.issymmetric(::ValMatrix{ <: Any, <: ValGraph}) = true
 
-LinearAlgebra.adjoint(matrix::ValMatrix{ <: Real, <:EdgeValGraph}) = matrix
-LinearAlgebra.transpose(matrix::ValMatrix{ <: Any, <:EdgeValGraph}) = matrix
+LinearAlgebra.adjoint(matrix::ValMatrix{ <: Real, <: ValGraph}) = matrix
+LinearAlgebra.transpose(matrix::ValMatrix{ <: Any, <: ValGraph}) = matrix
 
 ### weights
 
 """
-    weights(g::AbstractEdgeValGraph[, key]; zerovalue)
+    weights(g::ValGraph[, key]; zerovalue)
+    weights(g::ValOutDiGraph[, key]; zerovalue)
+    weights(g::ValDoGraph[, key]; zerovalue)
 
 
 Return a matrix where entry (i,j) is the value of the edge `i -- j` for the specific `key` in `g`.
@@ -173,12 +177,28 @@ without any edge values.
 """
 function weights end
 
-LG.weights(g::AbstractValGraph{V, V_VALS, <: AbstractNTuple{0}}) where {V, V_VALS} = LG.DefaultDistance(nv(g))
+LG.weights(g::ValGraph{V, V_VALS, <: AbstractNTuple{0}}) where {V, V_VALS} = LG.DefaultDistance(nv(g))
+LG.weights(g::ValOutDiGraph{V, V_VALS, <: AbstractNTuple{0}}) where {V, V_VALS} = LG.DefaultDistance(nv(g))
+LG.weights(g::ValDiGraph{V, V_VALS, <: AbstractNTuple{0}}) where {V, V_VALS} = LG.DefaultDistance(nv(g))
 
-LG.weights(g::AbstractValGraph{V, V_VALS, <: AbstractNTuple{1}}; kwargs...) where {V, V_VALS} = LG.weights(g, 1; kwargs...)
+LG.weights(g::ValGraph{V, V_VALS, <: AbstractNTuple{1}}; kwargs...) where {V, V_VALS} = LG.weights(g, 1; kwargs...)
+LG.weights(g::ValOutDiGraph{V, V_VALS, <: AbstractNTuple{1}}; kwargs...) where {V, V_VALS} = LG.weights(g, 1; kwargs...)
+LG.weights(g::ValDiGraph{V, V_VALS, <: AbstractNTuple{1}}; kwargs...) where {V, V_VALS} = LG.weights(g, 1; kwargs...)
 
-function LG.weights(g::AbstractValGraph, key; zerovalue=zero(E_VAL_for_key(edgevals_type(g), key)))
+function LG.weights(g::ValGraph, key; zerovalue=zero(E_VAL_for_key(edgevals_type(g), key)))
 
     return ValMatrix(g, key, zerovalue)
 end
+
+function LG.weights(g::ValOutDiGraph, key; zerovalue=zero(E_VAL_for_key(edgevals_type(g), key)))
+
+    return ValMatrix(g, key, zerovalue)
+end
+
+function LG.weights(g::ValDiGraph, key; zerovalue=zero(E_VAL_for_key(edgevals_type(g), key)))
+
+    return ValMatrix(g, key, zerovalue)
+end
+
+
 

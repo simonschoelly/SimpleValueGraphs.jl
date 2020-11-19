@@ -2,7 +2,7 @@
 
 @testset "add_edge! 1" begin
 
-    g1 = EdgeValGraph{Int, Tuple{Int}}(3)
+    g1 = ValGraph{Int, Tuple{Int}}(3)
     # adding first edge succeed
     @test add_edge!(g1, 1, 2, (10, ))
     @test ne(g1) == 1
@@ -37,8 +37,8 @@
 end
 
 @testset "add_edge! 2" begin
-    
-    g1 = EdgeValDiGraph{Int, NamedTuple{(:a, :b), Tuple{Char, Float64}}}(4)
+
+    g1 = ValDiGraph{Int, NamedTuple{(:a, :b), Tuple{Char, Float64}}}(4)
     # adding first edge succeed
     @test add_edge!(g1, 1, 2, (a='x', b=1.0))
     @test ne(g1) == 1
@@ -62,7 +62,7 @@ end
 
 @testset "add_edge! 3" begin
 
-    g1 = EdgeValOutDiGraph{Int, NamedTuple{(:a, :b), Tuple{Char, Float64}}}(4)
+    g1 = ValOutDiGraph{Int, NamedTuple{(:a, :b), Tuple{Char, Float64}}}(4)
     # adding first edge succeed
     @test add_edge!(g1, 1, 2, (a='x', b=1.0))
     @test ne(g1) == 1
@@ -85,7 +85,7 @@ end
 end
 
 @testset "rem_edge! 1" begin
-    g = EdgeValGraph{Int, NamedTuple{(:a,), Tuple{Int}}}(3)
+    g = ValGraph{Int, NamedTuple{(:a,), Tuple{Int}}}(3)
 
     # removing non existing edge should return false
     @test !rem_edge!(g, 1, 2)
@@ -117,7 +117,7 @@ end
 end
 
 @testset "rem_edge! 2" begin
-    g = EdgeValDiGraph{Int, Tuple{Float64, Float64}}(4)
+    g = ValDiGraph{Int, Tuple{Float64, Float64}}(4)
 
     # removing non existing edge should return false
     @test !rem_edge!(g, 1, 1)
@@ -149,7 +149,7 @@ end
 end
 
 @testset "rem_edge! 3" begin
-    g = EdgeValOutDiGraph{Int, Tuple{Float64, Float64}}(4)
+    g = ValOutDiGraph{Int, Tuple{Float64, Float64}}(4)
 
     # removing non existing edge should return false
     @test !rem_edge!(g, 1, 1)

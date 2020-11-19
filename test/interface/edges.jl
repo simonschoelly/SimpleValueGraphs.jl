@@ -6,10 +6,10 @@
 end
 
 
-@testset "Edge Constructors" for 
+@testset "Edge Constructors" for
     V       in TEST_VERTEX_TYPES_SMALL,
     E_VALS  in TEST_EDGEVAL_TYPES_SMALL,
-    u       in V[1, 2, typemax(V)], 
+    u       in V[1, 2, typemax(V)],
     v       in V[1, 2, typemax(V)]
 
     values = rand_sample(E_VALS)
@@ -43,7 +43,7 @@ end
 @testset "edge access functions" for
     V       in TEST_VERTEX_TYPES_SMALL,
     E_VALS  in TEST_EDGEVAL_TYPES_SMALL,
-    u       in V[1, 2], 
+    u       in V[1, 2],
     v       in V[1, 2]
 
     values = rand_sample(E_VALS)
@@ -51,7 +51,7 @@ end
     e = ValEdge(u, v, values)
     e_rev = ValEdge(v, u, values)
     @testset "e == ValEdge($V($u), $V($v), $values)" begin
-        
+
         @testset "src, dst" begin
             @test issetequal((src(e), dst(e)), (u, v))
             @test issetequal((src(e_rev), dst(e_rev)), (u, v))
@@ -59,22 +59,22 @@ end
             @test dst(e) isa V
         end
 
-        @testset "get_val(e, :)" begin
-            @test get_val(e, :) == values
-            @test get_val(e, :) isa E_VALS
+        @testset "get_edgeval(e, :)" begin
+            @test get_edgeval(e, :) == values
+            @test get_edgeval(e, :) isa E_VALS
         end
 
-        @testset "get_val(e, $key)" for
+        @testset "get_edgeval(e, $key)" for
             key in (keys(values) ∪ Base.OneTo(length(values))) # number & symbols
 
-            @test get_val(e, key) == values[key]
-            key isa Integer && @test get_val(e, key) isa E_VALS.types[key]
+            @test get_edgeval(e, key) == values[key]
+            key isa Integer && @test get_edgeval(e, key) isa E_VALS.types[key]
         end
     end
 
     e = ValDiEdge(u, v, values)
     @testset "e == ValDiEdge($V($u), $V($v), $values)" begin
-        
+
         @testset "src, dst" begin
             @test src(e) == u
             @test dst(e) == v
@@ -82,17 +82,17 @@ end
             @test dst(e) isa V
         end
 
-        @testset "get_val(e, :)" begin
-            @test get_val(e, :) == values
-            @test get_val(e, :) isa E_VALS
+        @testset "get_edgeval(e, :)" begin
+            @test get_edgeval(e, :) == values
+            @test get_edgeval(e, :) isa E_VALS
         end
 
-        @testset "get_val(e, $key)" for
+        @testset "get_edgeval(e, $key)" for
             key in (keys(values) ∪ Base.OneTo(length(values))) # number & symbols
 
-            @test get_val(e, key) == values[key]
-            @test get_val(e, key) == get_val(e, :)[key]
-            key isa Integer && @test get_val(e, key) isa E_VALS.types[key]
+            @test get_edgeval(e, key) == values[key]
+            @test get_edgeval(e, key) == get_edgeval(e, :)[key]
+            key isa Integer && @test get_edgeval(e, key) isa E_VALS.types[key]
         end
     end
 
@@ -104,28 +104,28 @@ end
     @testset "edge == $e" for
         V       in TEST_VERTEX_TYPES_SMALL,
         E_VALS  in TEST_EDGEVAL_TYPES_SMALL,
-        u       in V[1, 2], 
+        u       in V[1, 2],
         v       in V[1, 2],
         e       in ( ValEdge(u, v, rand_sample(E_VALS)), )
 
         e_rev = reverse(e)
         @test src(e) == src(e_rev)
         @test dst(e) == dst(e_rev)
-        @test get_val(e, :) == get_val(e_rev, :)
+        @test get_edgeval(e, :) == get_edgeval(e_rev, :)
         @test typeof(e) == typeof(e_rev)
     end
 
     @testset "edge == $e" for
         V       in TEST_VERTEX_TYPES_SMALL,
         E_VALS  in TEST_EDGEVAL_TYPES_SMALL,
-        u       in V[1, 2], 
+        u       in V[1, 2],
         v       in V[1, 2],
         e       in ( ValDiEdge(u, v, rand_sample(E_VALS)), )
 
         e_rev = reverse(e)
         @test src(e) == dst(e_rev)
         @test dst(e) == src(e_rev)
-        @test get_val(e, :) == get_val(e_rev, :)
+        @test get_edgeval(e, :) == get_edgeval(e_rev, :)
         @test typeof(e) == typeof(e_rev)
     end
 

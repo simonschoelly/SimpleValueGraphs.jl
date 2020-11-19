@@ -7,7 +7,7 @@ using LightGraphs: DefaultDistance
 
     @testset "AdjacencyMatrix" begin
 
-        for G      in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph),
+        for G      in (ValGraph, ValOutDiGraph, ValDiGraph),
             V      in TEST_VERTEX_TYPES_SMALL,
             E_VALS in TEST_EDGEVAL_TYPES_SMALL,
             gs     in make_testgraphs(is_directed(G) ? SimpleDiGraph{V} : SimpleGraph{V})
@@ -33,7 +33,7 @@ using LightGraphs: DefaultDistance
                     end
                 end
 
-                if g isa EdgeValGraph
+                if g isa ValGraph
                     @testset "ishermitian" begin
                         @test ishermitian(a)
                     end
@@ -57,7 +57,7 @@ using LightGraphs: DefaultDistance
     end
 
     @testset "ValMatrix" begin
-        for G      in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph),
+        for G      in (ValGraph, ValOutDiGraph, ValDiGraph),
             V      in TEST_VERTEX_TYPES_SMALL,
             E_VALS in TEST_EDGEVAL_TYPES_SMALL,
             gs     in make_testgraphs(is_directed(G) ? SimpleDiGraph{V} : SimpleGraph{V})
@@ -81,25 +81,25 @@ using LightGraphs: DefaultDistance
                             end
                         end
 
-                        if E_VAL_for_key(E_VALS, key) <: Real && zv isa Real && g isa EdgeValGraph
+                        if E_VAL_for_key(E_VALS, key) <: Real && zv isa Real && g isa ValGraph
                             @testset "ishermitian" begin
                                 @test ishermitian(M) == true
                             end
                         end
 
-                        if g isa EdgeValGraph
+                        if g isa ValGraph
                             @testset "issymmetric" begin
                                 @test issymmetric(M) == true
                             end
                         end
 
-                        if E_VAL_for_key(E_VALS, key) <: Real && zv isa Real && g isa EdgeValGraph
+                        if E_VAL_for_key(E_VALS, key) <: Real && zv isa Real && g isa ValGraph
                             @testset "isadjoint" begin
                                 @test adjoint(M) === M
                             end
                         end
 
-                        if g isa EdgeValGraph
+                        if g isa ValGraph
                             @testset "transpose" begin
                                 @test transpose(M) === M
                             end
@@ -142,12 +142,12 @@ using LightGraphs: DefaultDistance
     end
 
     @testset "weights for value graphs without values" for
-        G      in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph),
+        G      in (ValGraph, ValOutDiGraph, ValDiGraph),
         V      in TEST_VERTEX_TYPES_SMALL,
         E_VALS in (Tuple{}, NamedTuple{(), Tuple{}}),
         gs     in make_testgraphs(is_directed(G) ? SimpleDiGraph{V} : SimpleGraph{V})
 
-        g = G{V, E_VALS}((s, d) -> rand_sample(E_VALS), gs.graph)
+        g = G{V, Tuple{}, E_VALS}((s, d) -> rand_sample(E_VALS), gs.graph)
 
         @test weights(g) == DefaultDistance(nv(g))
     end

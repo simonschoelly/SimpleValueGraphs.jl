@@ -1,10 +1,13 @@
 
-#  ======================================================
-#  Structures
-#  ======================================================
+
+
+# ======================================================
+# Structures
+# ======================================================
+
 
 """
-    EdgeValGraph{V <: Integer, E_VALS <: AbstractTuple, E_VALS_C}
+    ValGraph{V <: Integer, V_VALS, E_VALS, V_VALS_C, E_VALS_C}
 
 A type representing an undirected simple graph with edge values.
 
@@ -12,18 +15,21 @@ The element type `V` specifies the type of the vertex indices and `E_VAL`
 specifies the type of the edge values. User should usually not specify `E_VAL_C`
 by themself but rather let a constructor do that.
 """
-mutable struct EdgeValGraph{  V <: Integer,
+mutable struct ValGraph{  V <: Integer,
+                            V_VALS <: AbstractTuple,
                             E_VALS <: AbstractTuple,
+                            V_VALS_C,
                             E_VALS_C
-                         } <: AbstractEdgeValGraph{V, E_VALS}
+                        } <: AbstractValGraph{V, V_VALS, E_VALS}
 
     ne::Int
     fadjlist::Adjlist{V}
+    vertexvals::V_VALS_C
     edgevals::E_VALS_C
 end
 
 """
-    EdgeValOutDiGraph{V <: Integer, E_VAL <: AbstractTuple, E_VAL_C}
+    ValOutDiGraph{V <: Integer, V_VALS, E_VALS, V_VALS_C, E_VALS_C}
 
 A type representing a directed simple graph with edge values.
 
@@ -31,19 +37,22 @@ The element type `V` specifies the type of the vertex indices and `E_VAL`
 specifies the type of the edge values. User should usually not specify `E_VAL_C`
 by themself but rather let a constructor do that.
 """
-mutable struct EdgeValOutDiGraph{ V <: Integer,
+mutable struct ValOutDiGraph{ V <: Integer,
+                                V_VALS <: AbstractTuple,
                                 E_VALS <: AbstractTuple,
+                                V_VALS_C,
                                 E_VALS_C
-                              } <: AbstractEdgeValGraph{V, E_VALS}
+                              } <: AbstractValGraph{V, V_VALS, E_VALS}
 
     ne::Int
     fadjlist::Adjlist{V}
+    vertexvals::V_VALS_C
     edgevals::E_VALS_C
 end
 
 
 """
-    EdgeValDiGraph{V <: Integer, E_VAL <: AbstractTuple, E_VAL_C}
+    ValDiGraph{V <: Integer, V_VALS, E_VALS, V_VALS_C, E_VALS_C}
 
 A type representing a directed simple graph with edge values.
 
@@ -51,23 +60,36 @@ The element type `V` specifies the type of the vertex indices and `E_VAL`
 specifies the type of the edge values. User should usually not specify `E_VAL_C`
 but rather let a constructor do that.
 """
-mutable struct EdgeValDiGraph{    V <: Integer,
+mutable struct ValDiGraph{    V <: Integer,
+                                V_VALS <: AbstractTuple,
                                 E_VALS <: AbstractTuple,
+                                V_VALS_C,
                                 E_VALS_C
-                           } <: AbstractEdgeValGraph{V, E_VALS}
+                           } <: AbstractValGraph{V, V_VALS, E_VALS}
 
     ne::Int
     fadjlist::Adjlist{V}
     badjlist::Adjlist{V}
+    vertexvals::V_VALS_C
     edgevals::E_VALS_C
     redgevals::E_VALS_C
 end
 
-#  ======================================================
-#  Constructors
-#  ======================================================
+# ======================================================
+# Constructors
+# ======================================================
 
-# TODO this helpers maybe belong somewhere else and need a better name
+#  ------------------------------------------------------
+#  helpers
+#  ------------------------------------------------------
+
+"""
+The default eltype to use in a graph constructor when no eltype
+is specified.
+"""
+const default_eltype = Int32
+
+# TODO these helpers maybe belong somewhere else and need a better name
 construct_E_VAL(edgeval_types::Tuple) = Tuple{ (T for T in edgeval_types)... }
 construct_E_VAL(edgeval_types::NamedTuple) =
     NamedTuple{ Tuple(typeof(edgeval_types).names), Tuple{ (T for T in edgeval_types)... }}
@@ -82,122 +104,116 @@ function create_edgevals(n, E_VAL::Type{<:NamedTuple})
     return NamedTuple{Tuple(E_VAL.names)}(Tuple( Adjlist{T}(n) for T in E_VAL.types ))
 end
 
+function create_vertexvals(n, V_VALS::Type{<:NTuple{0}}, ::Nothing)
+    return tuple()
+end
+
+function create_vertexvals(n, V_VALS::Type{<:NamedNTuple{0}}, ::Nothing)
+    return NamedTuple()
+end
+
+function create_vertexvals(n, V_VALS::Type{<:Tuple}, ::UndefInitializer)
+    return Tuple( Vector{T}(undef, n) for T in V_VALS.types )
+end
+
+function create_vertexvals(n, V_VALS::Type{<:NamedTuple}, ::UndefInitializer)
+    return NamedTuple{Tuple(V_VALS.names)}(Tuple( Vector{T}(undef, n) for T in V_VALS.types ))
+end
+
+function create_vertexvals(n, V_VALS::Type{<:AbstractTuple}, f::Function)
+    vertexvals = Tuple( Vector{T}(undef, n) for T in V_VALS.types )
+    for v in 1:n
+        t = f(v)
+        for i in 1:length(V_VALS.types)
+            vertexvals[i][v] = t[i]
+        end
+    end
+    return vertexvals
+end
+
 
 #  ------------------------------------------------------
 #  Constructors for empty graphs
 #  ------------------------------------------------------
 
 """
-    EdgeValGraph{V = $default_eltype}(n; edgeval_types=$(default_edgeval_types))
-    EdgeValGraph{V, E_VAL}(n)
+    ValGraph{V = $default_eltype}(n; vertexval_types=(), edgeval_types=(), vertexval_initializer=nothing)
+    ValGraph{V, V_VALS, E_VALS}(n, vertexval_initializer=nothing)
 
-Construct a `EdgeValGraph` with `n` vertices and 0 edges with of types
+Construct a `ValGraph` with `n` vertices and 0 edges with of types
 `edgeval_types`.
 
 If omitted, the element type `V` is $(default_eltype).
 """
-function EdgeValGraph{V, E_VAL}(n::Integer) where {V <: Integer, E_VAL <: AbstractTuple}
+function ValGraph{V, V_VALS, E_VALS}(n::Integer, vertexval_initializer=nothing) where {V <: Integer, V_VALS <: AbstractTuple, E_VALS <: AbstractTuple}
 
     fadjlist = Adjlist{V}(n)
-    edgevals = create_edgevals(n, E_VAL)
-    E_VAL_C = typeof(edgevals)
+    vertexvals = create_vertexvals(n, V_VALS, vertexval_initializer)
+    edgevals = create_edgevals(n, E_VALS)
+    V_VALS_C = typeof(vertexvals)
+    E_VALS_C = typeof(edgevals)
 
-    return EdgeValGraph{V, E_VAL, E_VAL_C}(0, fadjlist, edgevals)
+    return ValGraph{V, V_VALS, E_VALS, V_VALS_C, E_VALS_C}(0, fadjlist, vertexvals, edgevals)
 end
 
 """
-    EdgeValOutDiGraph{V = $default_eltype}(n; edgeval_types=$(default_edgeval_types))
-    EdgeValOutDiGraph{V, E_VALS}(n)
+    ValOutDiGraph{V = $default_eltype}(n; vertexval_types=(), edgeval_types=(), vertexval_initializer=nothing)
+    ValOutDiGraph{V, V_VALS, E_VALS}(n, vertexval_initializer=nothing)
 
-Construct a `EdgeValOutDiGraph` with `n` vertices and 0 edges of types
+Construct a `ValOutDiGraph` with `n` vertices and 0 edges of types
 `edgeval_types`.
 If omitted, the element type `V` is $(default_eltype).
 
 """
-function EdgeValOutDiGraph{V, E_VAL}(n::Integer) where {V<:Integer, E_VAL}
+function ValOutDiGraph{V, V_VALS, E_VALS}(n::Integer, vertexval_initializer=nothing) where {V<:Integer, V_VALS, E_VALS}
 
     fadjlist = Adjlist{V}(n)
-    edgevals = create_edgevals(n, E_VAL)
-    E_VAL_C = typeof(edgevals)
+    vertexvals = create_vertexvals(n, V_VALS, vertexval_initializer)
+    edgevals = create_edgevals(n, E_VALS)
+    V_VALS_C = typeof(vertexvals)
+    E_VALS_C = typeof(edgevals)
 
-    return EdgeValOutDiGraph{V, E_VAL, E_VAL_C}(0, fadjlist, edgevals)
+    return ValOutDiGraph{V, V_VALS, E_VALS, V_VALS_C, E_VALS_C}(0, fadjlist, vertexvals, edgevals)
 end
 
 
 """
-    EdgeValDiGraph{V = $default_eltype}(n; edgeval_types=$(default_edgeval_types))
-    EdgeValDiGraph{V, E_VALS}(n)
+    ValDiGraph{V = $default_eltype}(n; vertexval_types=(), edgeval_types=(), vertexval_initializer=nothing)
+    ValDiGraph{V, E_VALS}(n, vertexval_initializer=nothing)
 
-Construct a `EdgeValDiGraph` with `n` vertices and 0 edges with value-types
+Construct a `ValDiGraph` with `n` vertices and 0 edges with value-types
 `edgeval_types`.
 
 If omitted, the element type `V` is $(default_eltype).
 """
-function EdgeValDiGraph{V, E_VAL}(n::Integer) where {V<:Integer, E_VAL}
+function ValDiGraph{V, V_VALS, E_VALS}(n::Integer, vertexval_initializer=nothing) where {V<:Integer, V_VALS, E_VALS}
+
     fadjlist = Adjlist{V}(n)
     badjlist = Adjlist{V}(n)
+    vertexvals = create_vertexvals(n, V_VALS, vertexval_initializer)
     edgevals = create_edgevals(n, E_VAL)
     redgevals = create_edgevals(n, E_VAL)
-    E_VAL_C = typeof(edgevals)
+    E_VALS_C = typeof(edgevals)
 
-    return EdgeValDiGraph{V, E_VAL, E_VAL_C}(
-                0, fadjlist, badjlist, edgevals, redgevals)
+    return ValDiGraph{V, V_VALS, E_VALS, V_VALS_C, E_VALS_C}(
+                0, fadjlist, badjlist, vertexvals, edgevals, redgevals)
 end
 
 
-for G in (:EdgeValGraph, :EdgeValOutDiGraph, :EdgeValDiGraph)
-    @eval function $G(n; edgeval_types::AbstractTupleOfTypes=default_edgeval_types)
-        E_VAL = construct_E_VAL(edgeval_types)
-        return $G{default_eltype, E_VAL}(n)
+for G in (:ValGraph, :ValOutDiGraph, :ValDiGraph)
+    @eval function $G(n; vertexval_types::AbstractTupleOfTypes=(), edgeval_types::AbstractTupleOfTypes=(), vertexval_initializer=nothing)
+        V_VALS = construct_E_VAL(vertexval_types)
+        E_VALS = construct_E_VAL(edgeval_types)
+        return $G{default_eltype, V_VALS, E_VALS}(n, vertexval_initializer)
     end
 
-    @eval function $G{V}(n; edgeval_types::AbstractTupleOfTypes=default_edgeval_types) where {V <: Integer}
-        E_VAL = construct_E_VAL(edgeval_types)
-        return $G{V, E_VAL}(V(n))
+    @eval function $G{V}(n; vertexval_types::AbstractTupleOfTypes=(), edgeval_types::AbstractTupleOfTypes=(), vertexval_initializer=nothing) where {V <: Integer}
+        V_VALS = construct_E_VAL(vertexval_types)
+        E_VALS = construct_E_VAL(edgeval_types)
+        return $G{V, E_VALS, V_VALS}(V(n), vertexval_initializer)
     end
 end
 
-
-
-
-
-
-
-#  ------------------------------------------------------
-#  show
-#  ------------------------------------------------------
-
-has_named_edgevals(g::AbstractEdgeValGraph{ <: Any, <: NamedTuple}) = true
-has_named_edgevals(g::AbstractEdgeValGraph{ <: Any, <: Tuple}) = false
-
-# TODO this looks kind of ugly
-function Base.show(io::IO, g::AbstractEdgeValGraph{V, E_VALS}) where {V, E_VALS}
-    nvg = Int(nv(g))
-    neg = ne(g)
-    dir = is_directed(g) ? "directed" : "undirected"
-    name = string(nameof(typeof(g)))
-
-    types = tuple_of_types(E_VALS)
-
-    edgevalues_string = if g isa ZeroEdgeValGraph
-        "with no edge values"
-    elseif g isa OneEdgeValGraph
-        if has_named_edgevals(g)
-            "with named edge values of type $types"
-        else
-            "with edge values of type $types"
-        end
-    else
-        if has_named_edgevals(g)
-            "with multiple named edge values of types $types"
-        else
-            "with multiple edge values of types $types"
-        end
-
-    end
-
-    println(io, "{$nvg, $neg} $dir $name{$V} graph $edgevalues_string.")
-end
 
 # =========================================================
 # Interface
@@ -207,26 +223,26 @@ end
 #  ne
 #  ------------------------------------------------------
 
-LG.ne(g::AbstractEdgeValGraph) = g.ne
+LG.nv(g::ValGraph) = eltype(g)(length(g.fadjlist))
+LG.nv(g::ValOutDiGraph) = eltype(g)(length(g.fadjlist))
+LG.nv(g::ValDiGraph) = eltype(g)(length(g.fadjlist))
+
+#  ------------------------------------------------------
+#  ne
+#  ------------------------------------------------------
+
+LG.ne(g::ValGraph) = g.ne
+LG.ne(g::ValDiGraph) = g.ne
+LG.ne(g::ValOutDiGraph) = g.ne
 
 #  ------------------------------------------------------
 #  add_edge!
 #  ------------------------------------------------------
 
-"""
-    add_edge!(g::AbstractEdgeValGraph{V, E_VALS}, s, d, values)
-
-Add an edge `e = (s, d, values)` to a graph `g` and set the edge values.
-
-Return `true` if the edge was added successfully, otherwise return `false`.
-If the edge already exists, return `false` but still change the edge values.
-"""
-function add_edge! end
-
-function LG.add_edge!(g::EdgeValGraph{V, E_VALS},
+function LG.add_edge!(g::ValGraph{V, V_VALS, E_VALS},
                    s::Integer,
                    d::Integer,
-                   values::E_VALS) where {V, E_VALS}
+                   values::E_VALS) where {V, V_VALS, E_VALS}
 
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
@@ -256,10 +272,10 @@ function LG.add_edge!(g::EdgeValGraph{V, E_VALS},
     return true # edge successfully added
 end
 
-function LG.add_edge!(g::EdgeValOutDiGraph{V, E_VALS},
+function LG.add_edge!(g::ValOutDiGraph{V, V_VALS, E_VALS},
                    s::Integer,
                    d::Integer,
-                   value::E_VALS) where {V, E_VALS}
+                   value::E_VALS) where {V, V_VALS, E_VALS}
 
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
@@ -278,10 +294,10 @@ function LG.add_edge!(g::EdgeValOutDiGraph{V, E_VALS},
     return true # edge successfully added
 end
 
-function LG.add_edge!(g::EdgeValDiGraph{V, E_VALS},
+function LG.add_edge!(g::ValDiGraph{V, V_VALS, E_VALS},
                    s::Integer,
                    d::Integer,
-                   value::E_VALS) where {V, E_VALS}
+                   value::E_VALS) where {V, V_VALS, E_VALS}
 
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
@@ -309,7 +325,7 @@ end
 #  rem_edge!
 #  ------------------------------------------------------
 
-function LG.rem_edge!(g::EdgeValGraph, s::Integer, d::Integer)
+function LG.rem_edge!(g::ValGraph, s::Integer, d::Integer)
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
     edgevals = g.edgevals
@@ -330,7 +346,7 @@ function LG.rem_edge!(g::EdgeValGraph, s::Integer, d::Integer)
     return true
 end
 
-function LG.rem_edge!(g::EdgeValOutDiGraph, s::Integer, d::Integer)
+function LG.rem_edge!(g::ValOutDiGraph, s::Integer, d::Integer)
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
     edgevals = g.edgevals
@@ -345,7 +361,7 @@ function LG.rem_edge!(g::EdgeValOutDiGraph, s::Integer, d::Integer)
 end
 
 
-function LG.rem_edge!(g::EdgeValDiGraph, s::Integer, d::Integer)
+function LG.rem_edge!(g::ValDiGraph, s::Integer, d::Integer)
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
     @inbounds list = g.fadjlist[s]
@@ -365,17 +381,16 @@ function LG.rem_edge!(g::EdgeValDiGraph, s::Integer, d::Integer)
 end
 
 #  ------------------------------------------------------
+#  add_vertex!
+#  ------------------------------------------------------
+
+# TODO
+
+#  ------------------------------------------------------
 #  has_edge
 #  ------------------------------------------------------
 
-"""
-    has_edge!(g::AbstractEdgeValGraph, s, d)
-
-Return `true` if `g` has an edge from node `s` to `d`.
-"""
-function has_edge end
-
-function LG.has_edge(g::EdgeValGraph, s::Integer, d::Integer)
+function LG.has_edge(g::ValGraph, s::Integer, d::Integer)
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
     @inbounds list_s = g.fadjlist[s]
@@ -387,7 +402,7 @@ function LG.has_edge(g::EdgeValGraph, s::Integer, d::Integer)
     return LightGraphs.insorted(d, list_s)
 end
 
-function LG.has_edge(g::EdgeValOutDiGraph, s::Integer, d::Integer)
+function LG.has_edge(g::ValOutDiGraph, s::Integer, d::Integer)
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
     @inbounds list_s = g.fadjlist[s]
@@ -395,7 +410,7 @@ function LG.has_edge(g::EdgeValOutDiGraph, s::Integer, d::Integer)
     return LightGraphs.insorted(d, list_s)
 end
 
-function LG.has_edge(g::EdgeValDiGraph, s::Integer, d::Integer)
+function LG.has_edge(g::ValDiGraph, s::Integer, d::Integer)
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
     @inbounds list_fadj = g.fadjlist[s]
@@ -407,58 +422,12 @@ function LG.has_edge(g::EdgeValDiGraph, s::Integer, d::Integer)
     return LightGraphs.insorted(d, list_fadj)
 end
 
-
 #  ------------------------------------------------------
-#  get_val
+#  get_edgeval
 #  ------------------------------------------------------
 
-get_val(g::OneEdgeValGraph, s::Integer, d::Integer) =
-    get_val(g, s, d, 1)
 
-function get_val(
-            g::AbstractEdgeValGraph{V, E_VALS},
-            s::Integer,
-            d::Integer,
-            key::Symbol) where {V, E_VALS}
-
-    return get_val(g, s, d, Base.fieldindex(E_VALS, key))
-end
-
-
-"""
-    get_val(g::AbstractEdgeValGraph, s, d, key)
-
-Return the value assoicated with the edge `s -> d` for the key `key` in `g`.
-
-Throw an exception if the graph does not contain such an edge or if the key is not a valid edge key.
-
-For graphs that only have one value per edge, `key` can be omitted.
-
-### See also
-[`get_val_or`](@ref), [`set_val!`](@ref)
-
-### Examples
-```jldoctest
-julia> gv = EdgeValDiGraph((s, d) -> (rand(),), path_digraph(3), (a=Float64,))
-{3, 2} directed EdgeValDiGraph{Int64} graph with named edge values of type (a = Float64,).
-
-julia> get_val(gv, 1, 2, :a)
-0.6238826396606063
-
-julia> get_val(gv, 1, 2, 1)
-0.6238826396606063
-
-julia> get_val(gv, 1, 2)
-0.6238826396606063
-
-julia> get_val(gv, 1, 3)
-ERROR: No such edge
-
-julia> get_val(gv, 1, 2, :b)
-ERROR: type NamedTuple has no field b
-```
-"""
-function get_val(g::EdgeValGraph, s::Integer, d::Integer, key::Integer)
+function get_edgeval(g::ValGraph, s::Integer, d::Integer, key::Integer)
 
     hasedgekey_or_throw(g, key) # TODO might be sufficient to just check index
 
@@ -480,7 +449,7 @@ function get_val(g::EdgeValGraph, s::Integer, d::Integer, key::Integer)
     error("No such edge")
 end
 
-function get_val(g::EdgeValOutDiGraph, s::Integer, d::Integer, key::Integer)
+function get_edgeval(g::ValOutDiGraph, s::Integer, d::Integer, key::Integer)
 
    hasedgekey_or_throw(g, key)
 
@@ -494,7 +463,7 @@ function get_val(g::EdgeValOutDiGraph, s::Integer, d::Integer, key::Integer)
     error("No such edge")
 end
 
-function get_val(g::EdgeValDiGraph, s::Integer, d::Integer, key::Integer)
+function get_edgeval(g::ValDiGraph, s::Integer, d::Integer, key::Integer)
 
     hasedgekey_or_throw(g, key)
 
@@ -508,22 +477,7 @@ function get_val(g::EdgeValDiGraph, s::Integer, d::Integer, key::Integer)
     error("No such edge")
 end
 
-# TODO document
-get_val_or(g::OneEdgeValGraph, s::Integer, d::Integer, alternative) =
-    get_val_or(g, s, d, 1, alternative)
-
-function get_val_or(
-            g::AbstractEdgeValGraph{V, E_VALS},
-            s::Integer,
-            d::Integer,
-            key::Symbol,
-            alternative) where {V, E_VALS}
-
-    return get_val_or(g, s, d, Base.fieldindex(E_VALS, key), alternative)
-end
-
-
-function get_val_or(g::EdgeValGraph, s::Integer, d::Integer, key::Integer, alternative)
+function get_edgeval_or(g::ValGraph, s::Integer, d::Integer, key::Integer, alternative)
 
     hasedgekey_or_throw(g, key)
 
@@ -544,7 +498,7 @@ function get_val_or(g::EdgeValGraph, s::Integer, d::Integer, key::Integer, alter
     return alternative
 end
 
-function get_val_or(g::EdgeValOutDiGraph, s::Integer, d::Integer, key::Integer, alternative)
+function get_edgeval_or(g::ValOutDiGraph, s::Integer, d::Integer, key::Integer, alternative)
 
     hasedgekey_or_throw(g, key)
 
@@ -558,7 +512,7 @@ function get_val_or(g::EdgeValOutDiGraph, s::Integer, d::Integer, key::Integer, 
     return alternative
 end
 
-function get_val_or(g::EdgeValDiGraph, s::Integer, d::Integer, key::Integer, alternative)
+function get_edgeval_or(g::ValDiGraph, s::Integer, d::Integer, key::Integer, alternative)
 
     hasedgekey_or_throw(g, key)
 
@@ -573,32 +527,7 @@ function get_val_or(g::EdgeValDiGraph, s::Integer, d::Integer, key::Integer, alt
 end
 
 
-
-
-
-"""
-    get_val(g::AbstractEdgeValGraph, s, d, :)
-
-Return all values assoicated with the edge `s -> d` in `g`.
-
-Throw an exception if the graph does not contain such an edge.
-
-### See also
-[`get_val_or`](@ref), [`set_val!`](@ref)
-
-### Examples
-```jldoctest
-julia> gv = EdgeValDiGraph((s, d) -> (rand(), 10), path_digraph(3), (a=Float64, b=Int))
-{3, 2} directed EdgeValDiGraph{Int64} graph with multiple named edge values of types (a = Float64, b = Int64).
-
-julia> get_val(gv, 1, 2, :)
-(a = 0.38605078026294826, b = 10)
-
-julia> get_val(gv, 1, 3, :)
-ERROR: Values not found
-```
-"""
-function get_val(g::EdgeValGraph{V, E_VAL}, s::Integer, d::Integer, ::Colon) where {V, E_VAL}
+function get_edgeval(g::ValGraph, s::Integer, d::Integer, ::Colon)
 
     verts = vertices(g)
     (s in verts && d in verts) || error("Values not found")
@@ -610,12 +539,12 @@ function get_val(g::EdgeValGraph{V, E_VAL}, s::Integer, d::Integer, ::Colon) whe
     end
     index = searchsortedfirst(list_s, d)
     @inbounds if index <= length(list_s) && list_s[index] == d
-        return values_for_index(g.edgevals, E_VAL, s, index)
+        return values_for_index(g.edgevals, edgevals_type(g), s, index)
     end
     error("Values not found")
 end
 
-function get_val(g::EdgeValOutDiGraph{V, E_VAL}, s::Integer, d::Integer, ::Colon) where {V, E_VAL}
+function get_edgeval(g::ValOutDiGraph, s::Integer, d::Integer, ::Colon)
 
     verts = vertices(g)
     (s in verts && d in verts) ||  error("Values not found")
@@ -623,14 +552,13 @@ function get_val(g::EdgeValOutDiGraph{V, E_VAL}, s::Integer, d::Integer, ::Colon
     @inbounds list_s = g.fadjlist[s]
     index = searchsortedfirst(list_s, d)
     @inbounds if index <= length(list_s) && list_s[index] == d
-        return values_for_index(g.edgevals, E_VAL, s, index)
+        return values_for_index(g.edgevals, edgevals_type(g), s, index)
     end
     error("Values not found")
 end
 
 # TODO could probably be made faster by checking the shorter list
-function get_val(g::EdgeValDiGraph{V, E_VAL}, s::Integer, d::Integer, ::Colon) where
-{V, E_VAL}
+function get_edgeval(g::ValDiGraph, s::Integer, d::Integer, ::Colon)
 
     verts = vertices(g)
     (s in verts && d in verts) || error("Values not found")
@@ -638,34 +566,17 @@ function get_val(g::EdgeValDiGraph{V, E_VAL}, s::Integer, d::Integer, ::Colon) w
     @inbounds list = g.fadjlist[s]
     index = searchsortedfirst(list, d)
     @inbounds if index <= length(list) && list[index] == d
-        return values_for_index(g.edgevals, E_VAL, s, index)
+        return values_for_index(g.edgevals, edgevals_type(g), s, index)
     end
     error("Values not found")
 end
 
-"""
-    get_val_or(g::AbstractEdgeValGraph, s, d, alterative)
 
-Return all values assoicated with the edge `s -> d` in `g`.
+#  -----------------------------------------------------
+#  get_edgeval_or
+#  -----------------------------------------------------
 
-If there is no such edge return `alternative`.
-
-### See also
-[`get_val`](@ref), [`set_val!`](@ref)
-
-### Examples
-```jldoctest
-julia> gv = EdgeValDiGraph((s, d) -> (rand(), 10), path_digraph(3), (a=Float64, b=Int))
-{3, 2} directed EdgeValDiGraph{Int64} graph with multiple named edge values of types (a = Float64, b = Int64).
-
-julia> get_val_or(gv, 1, 2, :, missing)
-(a = 0.34307617867033446, b = 10)
-
-julia> get_val_or(gv, 1, 3, :, missing)
-missing
-```
-"""
-function get_val_or(g::EdgeValGraph{V, E_VAL}, s::Integer, d::Integer, ::Colon, alternative) where {V, E_VAL}
+function get_edgeval_or(g::ValGraph, s::Integer, d::Integer, ::Colon, alternative)
 
     verts = vertices(g)
     (s in verts && d in verts) || return alternative
@@ -677,12 +588,12 @@ function get_val_or(g::EdgeValGraph{V, E_VAL}, s::Integer, d::Integer, ::Colon, 
     end
     index = searchsortedfirst(list_s, d)
     @inbounds if index <= length(list_s) && list_s[index] == d
-        return values_for_index(g.edgevals, E_VAL, s, index)
+        return values_for_index(g.edgevals, edgevals_type(g), s, index)
     end
     return alternative
 end
 
-function get_val_or(g::EdgeValOutDiGraph{V, E_VAL}, s::Integer, d::Integer, ::Colon, alternative) where {V, E_VAL}
+function get_edgeval_or(g::ValOutDiGraph, s::Integer, d::Integer, ::Colon, alternative)
 
     verts = vertices(g)
     (s in verts && d in verts) ||  return alternative
@@ -690,14 +601,13 @@ function get_val_or(g::EdgeValOutDiGraph{V, E_VAL}, s::Integer, d::Integer, ::Co
     @inbounds list_s = g.fadjlist[s]
     index = searchsortedfirst(list_s, d)
     @inbounds if index <= length(list_s) && list_s[index] == d
-        return values_for_index(g.edgevals, E_VAL, s, index)
+        return values_for_index(g.edgevals, edgevals_type(g), s, index)
     end
     return alternative
 end
 
 # TODO could probably be made faster by checking the shorter list
-function get_val_or(g::EdgeValDiGraph{V, E_VAL}, s::Integer, d::Integer, ::Colon, alternative) where
-{V, E_VAL}
+function get_edgeval_or(g::ValDiGraph, s::Integer, d::Integer, ::Colon, alternative)
 
     verts = vertices(g)
     (s in verts && d in verts) || return alternative
@@ -705,24 +615,17 @@ function get_val_or(g::EdgeValDiGraph{V, E_VAL}, s::Integer, d::Integer, ::Colon
     @inbounds list = g.fadjlist[s]
     index = searchsortedfirst(list, d)
     @inbounds if index <= length(list) && list[index] == d
-        return values_for_index(g.edgevals, E_VAL, s, index)
+        return values_for_index(g.edgevals, edgevals_type(g), s, index)
     end
     return alternative
 end
 
 
 #  ------------------------------------------------------
-#  set_val!
+#  set_edgeval!
 #  ------------------------------------------------------
 
-set_val!(g::OneEdgeValGraph, s::Integer, d::Integer, value) =
-    set_val!(g, s, d, 1, value)
-
-set_val!(g::AbstractEdgeValGraph{V, E_VALS}, s::Integer, d::Integer, key::Symbol, value) where {V, E_VALS} =
-    set_val!(g, s, d, Base.fieldindex(E_VALS, key), value)
-
-
-function set_val!(g::EdgeValGraph, s::Integer, d::Integer, key::Integer, value)
+function set_edgeval!(g::ValGraph, s::Integer, d::Integer, key::Integer, value)
 
     hasedgekey_or_throw(g, key)
 
@@ -743,7 +646,7 @@ function set_val!(g::EdgeValGraph, s::Integer, d::Integer, key::Integer, value)
     return true
 end
 
-function set_val!(g::EdgeValOutDiGraph, s::Integer, d::Integer, key::Integer, value)
+function set_edgeval!(g::ValOutDiGraph, s::Integer, d::Integer, key::Integer, value)
 
     hasedgekey_or_throw(g, key)
 
@@ -761,7 +664,7 @@ function set_val!(g::EdgeValOutDiGraph, s::Integer, d::Integer, key::Integer, va
 
 end
 
-function set_val!(g::EdgeValDiGraph, s::Integer, d::Integer, key::Integer, value)
+function set_edgeval!(g::ValDiGraph, s::Integer, d::Integer, key::Integer, value)
 
     hasedgekey_or_throw(g, key)
 
@@ -784,14 +687,7 @@ function set_val!(g::EdgeValDiGraph, s::Integer, d::Integer, key::Integer, value
     return true
 end
 
-
-"""
-    set_val!(g::AbstractEdgeValGraph, s, d, allkeys, values)
-    set_val!(g::AbstractEdgeValGraph, e, allkeys, values)
-Set the values of the edge `e: s -> d` to `values`. Return `true` if such an edge exists and
-`false` otherwise.
-"""
-function set_val!(g::EdgeValGraph, s::Integer, d::Integer, ::Colon, values)
+function set_edgeval!(g::ValGraph, s::Integer, d::Integer, ::Colon, values)
     verts = vertices(g)
     (s in verts && d in verts) || return false
     @inbounds list = g.fadjlist[s]
@@ -807,7 +703,7 @@ function set_val!(g::EdgeValGraph, s::Integer, d::Integer, ::Colon, values)
     return true
 end
 
-function set_val!(g::EdgeValOutDiGraph, s::Integer, d::Integer, ::Colon, values)
+function set_edgeval!(g::ValOutDiGraph, s::Integer, d::Integer, ::Colon, values)
     verts = vertices(g)
     (s in verts && d in verts) || return false
     @inbounds list = g.fadjlist[s]
@@ -819,7 +715,7 @@ function set_val!(g::EdgeValOutDiGraph, s::Integer, d::Integer, ::Colon, values)
     return true
 end
 
-function set_val!(g::EdgeValDiGraph, s::Integer, d::Integer, ::Colon, values)
+function set_edgeval!(g::ValDiGraph, s::Integer, d::Integer, ::Colon, values)
     verts = vertices(g)
     (s in verts && d in verts) || return false
     @inbounds list = g.fadjlist[s]
@@ -835,75 +731,53 @@ function set_val!(g::EdgeValDiGraph, s::Integer, d::Integer, ::Colon, values)
     return true
 end
 
-#=
-set_val!(g::AbstractEdgeValGraph, e::SimpleEdge, u) = set_val!(g, src(e), dst(e), u)
-=#
 
 #  ------------------------------------------------------
 #  is_directed
 #  ------------------------------------------------------
 
-LG.is_directed(::Type{<:EdgeValGraph}) = false
-LG.is_directed(::Type{<:EdgeValOutDiGraph}) = true
-LG.is_directed(::Type{<:EdgeValDiGraph}) = true
+LG.is_directed(::Type{<:ValGraph}) = false
+LG.is_directed(::Type{<:ValOutDiGraph}) = true
+LG.is_directed(::Type{<:ValDiGraph}) = true
 
 #  ------------------------------------------------------
 #  outneighbors
 #  ------------------------------------------------------
 
-LG.outneighbors(g::AbstractEdgeValGraph, v::Integer) = g.fadjlist[v]
+LG.outneighbors(g::ValGraph, v::Integer) = g.fadjlist[v]
+LG.outneighbors(g::ValDiGraph, v::Integer) = g.fadjlist[v]
+LG.outneighbors(g::ValOutDiGraph, v::Integer) = g.fadjlist[v]
 
 #  ------------------------------------------------------
 #  inneighbors
 #  ------------------------------------------------------
 
-LG.inneighbors(g::EdgeValGraph, v::Integer) = outneighbors(g, v)
-LG.inneighbors(g::EdgeValDiGraph, v::Integer) = g.badjlist[v]
+LG.inneighbors(g::ValGraph, v::Integer) = outneighbors(g, v)
+LG.inneighbors(g::ValDiGraph, v::Integer) = g.badjlist[v]
 
 #  ------------------------------------------------------
 #  outedgevals
 #  ------------------------------------------------------
 
-"""
-    outedgevals(g::AbstractEdgeValGraph, v [, key])
-
-Return an iterator of edge values of outgoing edges from `v` to its neighbors.
-
-If `g` has multiple edge values, the key cannot be omitted.
-The order of the neighbors is the same as for `outneighbors(g, v)`.
-"""
-outedgevals(g::OneEdgeValGraph, v::Integer) = outedgevals(g, v, 1)
-
-outedgevals(g::AbstractEdgeValGraph, v::Integer, key) = g.edgevals[key][v]
+outedgevals(g::ValGraph, v::Integer, key::Integer) = g.edgevals[key][v]
+outedgevals(g::ValDiGraph, v::Integer, key::Integer) = g.edgevals[key][v]
+outedgevals(g::ValOutDiGraph, v::Integer, key::Integer) = g.edgevals[key][v]
 
 
 #  ------------------------------------------------------
 #  inedgevals
 #  ------------------------------------------------------
 
-"""
-    inedgevals(g::EdgeValGraph, v [, key])
-
-Return an iterator of edge values of incoming edges the neighbors of `v`.
-
-If `g` has multiple edge values, the key cannot be omitted.
-The order of the neighbors is the same as for `inneighbors(g, v)`.
-
-This function does not work for graphs of the type `EdgeValOutDiGraph`.
-"""
-inedgevals(g::OneEdgeValGraph, v::Integer) = inedgevals(g, v, 1)
-
-inedgevals(g::EdgeValGraph, v::Integer, key) = outedgevals(g, v, key)
-
-inedgevals(g::EdgeValDiGraph, v::Integer, key) = g.redgevals[key][v]
-
+inedgevals(g::ValGraph, v::Integer, key::Integer) = outedgevals(g, v, key)
+inedgevals(g::ValDiGraph, v::Integer, key::Integer) = g.redgevals[key][v]
 
 # ====================================================================
 # Iterators
 # ====================================================================
 
 
-@inline function Base.iterate(eit::ValEdgeIter{<:EdgeValGraph{V, E_VAL}}, state=(one(V), 1) ) where {V, E_VAL}
+@inline function Base.iterate(eit::ValEdgeIter{<:ValGraph}, state=(one(V), 1))
+
     g = eit.graph
     fadjlist = g.fadjlist
     edgevals = g.edgevals
@@ -917,7 +791,7 @@ inedgevals(g::EdgeValDiGraph, v::Integer, key) = g.redgevals[key][v]
             i = searchsortedfirst(fadjlist[u], u)
             continue
         end
-        e = ValEdge(u, list_u[i], values_for_index(edgevals, E_VAL, u, i))
+        e = ValEdge(u, list_u[i], values_for_index(edgevals, edgevals_type(g), u, i))
         state = (u, i + 1)
         return e, state
     end
@@ -926,15 +800,15 @@ inedgevals(g::EdgeValDiGraph, v::Integer, key) = g.redgevals[key][v]
 
     @inbounds (n == 0 || i > length(fadjlist[n])) && return nothing
 
-    e = ValEdge(n, n, values_for_index(edgevals, E_VAL, u, i))
+    e = ValEdge(n, n, values_for_index(edgevals, edgevals_type(g), u, i))
     state = (u, i + 1)
     return e, state
 end
 
 function Base.iterate(
-            iter::ValEdgeIter{<:Union{EdgeValOutDiGraph{V, E_VAL}, EdgeValDiGraph{V, E_VAL}}},
+            iter::ValEdgeIter{<:Union{ValOutDiGraph, ValDiGraph}},
             state=(one(V), 1)
-    ) where {V, E_VAL}
+    ) where {V, V_VALS, E_VALS}
 
     g = iter.graph
     fadjlist = g.fadjlist
@@ -950,7 +824,7 @@ function Base.iterate(
             i = 1
             continue
         end
-        e = ValDiEdge(u, fadjlist[u][i], values_for_index(edgevals, E_VAL, u, i))
+        e = ValDiEdge(u, fadjlist[u][i], values_for_index(edgevals, edgevals_type(g), u, i))
         return e, (u, i + 1)
     end
 
