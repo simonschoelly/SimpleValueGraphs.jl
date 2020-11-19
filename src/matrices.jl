@@ -161,9 +161,7 @@ LinearAlgebra.transpose(matrix::ValMatrix{ <: Any, <: ValGraph}) = matrix
 ### weights
 
 """
-    weights(g::ValGraph[, key]; zerovalue)
-    weights(g::ValOutDiGraph[, key]; zerovalue)
-    weights(g::ValDoGraph[, key]; zerovalue)
+    weights(g::AbstractValGraph[, key]; zerovalue)
 
 
 Return a matrix where entry (i,j) is the value of the edge `i -- j` for the specific `key` in `g`.
@@ -177,28 +175,12 @@ without any edge values.
 """
 function weights end
 
-LG.weights(g::ValGraph{V, V_VALS, <: AbstractNTuple{0}}) where {V, V_VALS} = LG.DefaultDistance(nv(g))
-LG.weights(g::ValOutDiGraph{V, V_VALS, <: AbstractNTuple{0}}) where {V, V_VALS} = LG.DefaultDistance(nv(g))
-LG.weights(g::ValDiGraph{V, V_VALS, <: AbstractNTuple{0}}) where {V, V_VALS} = LG.DefaultDistance(nv(g))
+LG.weights(g::AbstractValGraph{V, V_VALS, <: AbstractNTuple{0}}) where {V, V_VALS} = LG.DefaultDistance(nv(g))
 
-LG.weights(g::ValGraph{V, V_VALS, <: AbstractNTuple{1}}; kwargs...) where {V, V_VALS} = LG.weights(g, 1; kwargs...)
-LG.weights(g::ValOutDiGraph{V, V_VALS, <: AbstractNTuple{1}}; kwargs...) where {V, V_VALS} = LG.weights(g, 1; kwargs...)
-LG.weights(g::ValDiGraph{V, V_VALS, <: AbstractNTuple{1}}; kwargs...) where {V, V_VALS} = LG.weights(g, 1; kwargs...)
+LG.weights(g::AbstractValGraph{V, V_VALS, <: AbstractNTuple{1}}; kwargs...) where {V, V_VALS} = LG.weights(g, 1; kwargs...)
 
-function LG.weights(g::ValGraph, key; zerovalue=zero(E_VAL_for_key(edgevals_type(g), key)))
+function LG.weights(g::AbstractValGraph, key; zerovalue=zero(E_VAL_for_key(edgevals_type(g), key)))
 
     return ValMatrix(g, key, zerovalue)
 end
-
-function LG.weights(g::ValOutDiGraph, key; zerovalue=zero(E_VAL_for_key(edgevals_type(g), key)))
-
-    return ValMatrix(g, key, zerovalue)
-end
-
-function LG.weights(g::ValDiGraph, key; zerovalue=zero(E_VAL_for_key(edgevals_type(g), key)))
-
-    return ValMatrix(g, key, zerovalue)
-end
-
-
 
