@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.12.7
+# v0.12.10
 
 using Markdown
 using InteractiveUtils
@@ -65,14 +65,14 @@ end
 
 # ╔═╡ ec4e6c94-2082-11eb-3d82-d799a91863a7
 md"""
-To be able to do anything meaningful with that graph, we have to implement the interface for `LightGraphs.AbstractGraph` as well as the interface for `SimpleGraphs.AbstractValGraph`. Luckily, SimpleValueGraphs provides already some sensible defaults (that can be overriden for performance or other reasons) for a lot of LightGraphs functions so that we will actually have to implement less than is usually required by LightGraphs but nevertheless we need to implement the following functions:
+To be able to do anything meaningful with that graph, we have to implement the interface for `LightGraphs.AbstractGraph` as well as the interface for `SimpleGraphs.AbstractValGraph`. Luckily, SimpleValueGraphs provides already some sensible defaults (that can be overriden for performance or other reasons) for a lot of LightGraphs functions so that we will actually have to implement less than is usually required by LightGraphs. Nevertheless we need to implement the following functions:
 
 * `nv(::GraphView)`
 * `is_directed(::Type{<:GraphView})`
 * `has_edge(::GraphView, s, d)`
 
 And because our graphs has edge values, we also need to implement
-* `get_val(::GraphView, s, d, :)`
+* `get_edgeval(::GraphView, s, d, :)`
 
 """
 
@@ -113,14 +113,14 @@ end
 
 # ╔═╡ 10913788-2091-11eb-31a9-8dc219364439
 md"""
-#### get_val
-`get_val(g, u, v, :)` should return the edge values associated with the edge between `u` and `v`. It is important that this function returns a tuple or named tuple of the type `E_VALS` that we used when we defined the struct. In our case that would be `NamedTuple{(:weight,), Tuple{T}}`.
+#### get_edgeval
+`get_edgeval(g, u, v, key::Integer)` should return the edge value associated with the edge between `u` and `v` for a  specific key. We only have to implement this method for integer keys. As we only have a single value for each edge, we accept all values for the key - a more sophisticated approach would be to throw an error if the key is not correct.
 
 In our case we do not explicetly verify that the edge exist altought we could do so and throw a specialised error message. But this is not part of the interface and functions that deal with value graphs should not relay on that.
 """
 
 # ╔═╡ 5cf05bc8-2063-11eb-15af-f79fdb3bbbf5
-SimpleValueGraphs.get_val(g::GraphView, u, v, ::Colon) = (weight=g.matrix[u, v],)
+SimpleValueGraphs.get_edgeval(g::GraphView, u, v, key::Integer) = weight=g.matrix[u, v]
 
 # ╔═╡ 7757542e-2092-11eb-20b4-ff4234b49d32
 md"""
