@@ -104,7 +104,6 @@ include("valueedge.jl")
 include("valuegraph.jl")
 include("matrices.jl")
 
-#   TODO temporarily disabled until initializors are fixed
-#   include("integrations/SimpleGraphs.jl")
+include("integrations/SimpleGraphs.jl")
 
 end # module

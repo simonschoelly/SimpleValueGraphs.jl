@@ -3,15 +3,21 @@
 #  ------------------------------------------------------
 
 """
-    ValGraph{V, V_VALS, E_VALS}(undef, g::SimpleGraph)
-    ValGraph{V = eltype(g)}(undef, g::SimpleGraph; vertexval_types=(), edgeval_types=()))
+    ValGraph{V, V_VALS, E_VALS}(g::SimpleGraph; vertexval_initializer, edgeval_initializer)
+    ValGraph{V = eltype(g)}(g::SimpleGraph; vertexval_types=(), edgeval_types=(), vertexval_initializer, edgeval_initializer)
 
-Construct a `ValGraph` with the same structure as `g` with uninitialized edge values.
+Construct a `ValGraph` with the same structure as `g`.
 """
-function ValGraph{V, V_VALS, E_VALS}(::UndefInitializer, g::SimpleGraph) where {V, V_VALS, E_VALS}
+function ValGraph{V, V_VALS, E_VALS}(
+            g::SimpleGraph;
+            vertexval_initializer=nothing,
+            edgeval_initializer=nothing) where {V, V_VALS, E_VALS}
 
     n = nv(g)
     fadjlist = deepcopy_adjlist(V, g.fadjlist)
+
+    vertexvals = create_vertexvals(n, V_VALS, vertexval_initializer)
+    V_VALS_C = typeof(vertexvals)
 
     E_VALS_C = edgevals_container_type(Val(E_VALS)) # TODO ?
     edgevals = E_VALS_C( Adjlist{T}(undef, n) for T in E_VALS.types )
@@ -20,27 +26,42 @@ function ValGraph{V, V_VALS, E_VALS}(::UndefInitializer, g::SimpleGraph) where {
             edgevals[i][s] = Vector{T}(undef, length(fadjlist[s]))
         end
     end
-    return ValGraph{V, V_VALS, E_VALS, E_VALS_C}(ne(g), fadjlist, edgevals)
+
+    gv = ValGraph{V, V_VALS, E_VALS, V_VALS_C, E_VALS_C}(ne(g), fadjlist, vertexvals, edgevals)
+
+    if edgeval_initializer != undef && length(edgevals) > 0
+        # TODO there is a more efficient method for this
+        for e in edges(g)
+            s, d = Tuple(e)
+            set_edgeval!(gv, s, d, :, edgeval_initializer(s, d))
+        end
+    end
+
+    return gv
 end
 
-ValGraph{V}(::UndefInitializer, g::SimpleGraph; edgeval_types::AbstractTupleOfTypes=default_edgeval_types) where {V} =
-    ValGraph{V, construct_E_VAL(edgeval_types)}(undef, g)
+ValGraph{V}(g::SimpleGraph; vertexval_types=(), edgeval_types=(), kwargs...) where {V} =
+    ValGraph{V, construct_E_VAL(vertexval_types), construct_E_VAL(edgeval_types)}(g; kwargs...)
 
-ValGraph(::UndefInitializer, g::SimpleGraph; edgeval_types::AbstractTupleOfTypes=default_edgeval_types) =
-    ValGraph{eltype(g)}(undef, g;  edgeval_types=edgeval_types)
+ValGraph(g::SimpleGraph; kwargs...) = ValGraph{eltype(g)}(g; kwargs...)
 
 
 """
-    ValOutDiGraph{V, E_VALS}(undef, g::SimpleDiGraph)
-    ValOutDiGraph{V = eltype(g)}(undef, g::SimpleDiGraph; edgeval_types=$(default_edgeval_types))
+    ValOutDiGraph{V, V_VALS, E_VALS}(g::SimpleDiGraph; vertexval_initializer, edgeval_initializer)
+    ValOutDiGraph{V = eltype(g)}(g::SimpleDiGraph;vertexval_types=(), edgeval_types=(), vertexval_initializer, edgeval_initializer)
 
-Construct a `EdgeValOutDiGraph` with the same structure as `g` with uninitialized edge values.
+Construct a `ValOutDiGraph` with the same structure as `g`.
 """
-function EdgeValOutDiGraph{V, E_VALS}(::UndefInitializer, g::SimpleDiGraph) where {V, E_VALS}
+function ValOutDiGraph{V, V_VALS, E_VALS}(
+            g::SimpleDiGraph;
+            vertexval_initializer=nothing,
+            edgeval_initializer=nothing) where {V, V_VALS, E_VALS}
 
     n = nv(g)
     fadjlist = deepcopy_adjlist(V,g.fadjlist)
 
+    vertexvals = create_vertexvals(n, V_VALS, vertexval_initializer)
+    V_VALS_C = typeof(vertexvals)
     E_VALS_C = edgevals_container_type(Val(E_VALS)) # TODO ?
     edgevals = E_VALS_C( Adjlist{T}(undef, n) for T in E_VALS.types )
     for s in OneTo(n)
@@ -48,127 +69,69 @@ function EdgeValOutDiGraph{V, E_VALS}(::UndefInitializer, g::SimpleDiGraph) wher
             edgevals[i][s] = Vector{T}(undef, length(fadjlist[s]))
         end
     end
-    return ValOutDiGraph{V, E_VALS, E_VALS_C}(ne(g), fadjlist, edgevals)
+
+    gv = ValOutDiGraph{V, V_VALS, E_VALS, V_VALS_C, E_VALS_C}(ne(g), fadjlist, vertexvals, edgevals)
+
+    if edgeval_initializer != undef && length(edgevals) > 0
+        # TODO there is a more efficient method for this
+        for e in edges(g)
+            s, d = Tuple(e)
+            set_edgeval!(gv, s, d, :, edgeval_initializer(s, d))
+        end
+    end
+
+    return gv
 end
 
-ValOutDiGraph{V}(::UndefInitializer, g::SimpleDiGraph; edgeval_types::AbstractTupleOfTypes=default_edgeval_types) where {V} =
-    EdgeValOutDiGraph{V, construct_E_VAL(edgeval_types)}(undef, g)
+ValOutDiGraph{V}(g::SimpleDiGraph; vertexval_types=(), edgeval_types=(), kwargs...) where {V} =
+    ValOutDiGraph{V, construct_E_VAL(vertexval_types), construct_E_VAL(edgeval_types)}(g; kwargs...)
 
-EdgeValOutDiGraph(::UndefInitializer, g::SimpleDiGraph; edgeval_types::AbstractTupleOfTypes=default_edgeval_types) =
-    EdgeValOutDiGraph{eltype(g)}(undef, g; edgeval_types=edgeval_types)
-
+ValOutDiGraph(g::SimpleDiGraph; kwargs...) = ValOutDiGraph{eltype(g)}(g; kwargs...)
 
 
 """
-    EdgeValDiGraph{V, E_VALS}(undef, g::SimpleDiGraph)
-    EdgeValDiGraph{V = eltype(g)}(undef, g::SimpleDiGraph; edgeval_types=$(default_edgeval_types))
+    ValDiGraph{V, V_VALS, E_VALS}(g::SimpleDiGraph; vertexval_initializer, edgeval_initializer)
+    ValDiGraph{V = eltype(g)}(g::SimpleDiGraph;vertexval_types=(), edgeval_types=(), vertexval_initializer, edgeval_initializer)
 
-Construct a `EdgeValDiGraph` with the same structure as `g` with uninitialized edge values of types `edgeval_types`.
+Construct a `ValDiGraph` with the same structure as `g`.
 """
-function EdgeValDiGraph{V, E_VALS}(::UndefInitializer, g::SimpleDiGraph) where {V, E_VALS}
+function ValDiGraph{V, V_VALS, E_VALS}(
+            g::SimpleDiGraph;
+            vertexval_initializer=nothing,
+            edgeval_initializer=nothing) where {V, V_VALS, E_VALS}
 
     n = nv(g)
     fadjlist = deepcopy_adjlist(V, g.fadjlist)
     badjlist = deepcopy_adjlist(V, g.badjlist)
+
+    vertexvals = create_vertexvals(n, V_VALS, vertexval_initializer)
+    V_VALS_C = typeof(vertexvals)
 
     E_VALS_C = edgevals_container_type(Val(E_VALS)) # TODO ?
     edgevals = E_VALS_C( Adjlist{T}(undef, n) for T in E_VALS.types )
     redgevals = E_VALS_C( Adjlist{T}(undef, n) for T in E_VALS.types )
     for s in OneTo(n)
         for (i, T) in enumerate(E_VALS.types)
-            edgevals[i][s] = Vector{T}(undef, length(fadjlist[s])) 
-            redgevals[i][s] = Vector{T}(undef, length(badjlist[s])) 
+            edgevals[i][s] = Vector{T}(undef, length(fadjlist[s]))
+            redgevals[i][s] = Vector{T}(undef, length(badjlist[s]))
         end
     end
-    return EdgeValDiGraph{V, E_VALS, E_VALS_C}(ne(g), fadjlist, badjlist, edgevals, redgevals)
-end
 
-EdgeValDiGraph{V}(::UndefInitializer, g::SimpleDiGraph; edgeval_types::AbstractTupleOfTypes=default_edgeval_types) where {V} =
-    EdgeValDiGraph{V, construct_E_VAL(edgeval_types)}(undef, g)
+    gv = ValDiGraph{V, V_VALS, E_VALS, V_VALS_C, E_VALS_C}(ne(g), fadjlist, badjlist, vertexvals, edgevals, redgevals)
 
-EdgeValDiGraph(::UndefInitializer, g::SimpleDiGraph; edgeval_types::AbstractTupleOfTypes=default_edgeval_types) =
-    EdgeValDiGraph{eltype(g)}(undef, g; edgeval_types=edgeval_types)
-
-"""
-    EdgeValGraph{V, E_VALS}(edgeval_initializer, g::SimpleGraph)
-    EdgeValGraph{V = eltype(g)}(edgeval_initializer, g::SimpleGraph; edgeval_types=$(default_edgeval_types))
-
-Construct a `EdgeValGraph` with the same structure as `g`.
-
-`edgeval_initializer` is takes function that assigns to each edge (s, d) an edge value.
-"""
-function EdgeValGraph{V, E_VALS}(edgeval_initializer::Base.Callable, g::SimpleGraph) where {V, E_VALS}
-
-    gv = EdgeValGraph{V, E_VALS}(undef, g)
-
-    # TODO there is a more efficient method for this
-    for e in edges(g)
-        s, d = Tuple(e)
-        set_val!(gv, s, d, :, edgeval_initializer(s, d))
+    if edgeval_initializer != undef && length(edgevals) > 0
+        # TODO there is a more efficient method for this
+        for e in edges(g)
+            s, d = Tuple(e)
+            set_edgeval!(gv, s, d, :, edgeval_initializer(s, d))
+        end
     end
 
     return gv
 end
 
+ValDiGraph{V}(g::SimpleDiGraph; vertexval_types=(), edgeval_types=(), kwargs...) where {V} =
+    ValDiGraph{V, construct_E_VAL(vertexval_types), construct_E_VAL(edgeval_types)}(g; kwargs...)
 
+ValDiGraph(g::SimpleDiGraph; kwargs...) = ValDiGraph{eltype(g)}(g; kwargs...)
 
-"""
-    EdgeValOutDiGraph{V, E_VALS}(edgeval_initializer, g::SimpleGraph)
-    EdgeValOutDiGraph{V = eltype(g)}(edgeval_initializer, g::SimpleGraph; edgeval_types=$(default_edgeval_types))
-
-Construct a `EdgeValOutDiGraph` with the same structure as `g`.
-
-`edgeval_initializer` is takes function that assigns to each edge (s, d) an edge value.
-"""
-function EdgeValOutDiGraph{V, E_VALS}(edgeval_initializer::Base.Callable, g::SimpleDiGraph) where {V, E_VALS}
-
-    gv = EdgeValOutDiGraph{V, E_VALS}(undef, g)
-
-    # TODO there is a more efficient method for this
-    for e in edges(g)
-        s, d = Tuple(e)
-        set_val!(gv, s, d, :, edgeval_initializer(s, d))
-    end
-
-    return gv
-end
-
-"""
-    EdgeValDiGraph{V, E_VALS}(edgeval_initializer, g::SimpleGraph)
-    EdgeValDiGraph{V = eltype(g)}(edgeval_initializer, g::SimpleGraph; edgeval_types=$(default_edgeval_types))
-
-Construct a `EdgeValDiGraph` with the same structure as `g`.
-
-`edgeval_initializer` is takes function that assigns to each edge (s, d) an edge value.
-"""
-function EdgeValDiGraph{V, E_VALS}(edgeval_initializer::Base.Callable, g::SimpleDiGraph) where {V, E_VALS}
-
-    gv = EdgeValDiGraph{V, E_VALS}(undef, g)
-
-    # TODO there is a more efficient method for this
-    for e in edges(g)
-        s, d = Tuple(e)
-        set_val!(gv, s, d, :, edgeval_initializer(s, d))
-    end
-
-    return gv
-end
-
-
-EdgeValGraph{V}(edgeval_initializer::Base.Callable, g::SimpleGraph; edgeval_types::AbstractTupleOfTypes=default_edgeval_types) where {V} =
-    EdgeValGraph{V, construct_E_VAL(edgeval_types)}(edgeval_initializer, g)
-
-EdgeValGraph{}(edgeval_initializer::Base.Callable, g::SimpleGraph; edgeval_types::AbstractTupleOfTypes=default_edgeval_types) =
-    EdgeValGraph{eltype(g)}(edgeval_initializer, g; edgeval_types=edgeval_types)
-
-EdgeValOutDiGraph{V}(edgeval_initializer::Base.Callable, g::SimpleDiGraph; edgeval_types::AbstractTupleOfTypes=default_edgeval_types) where {V} =
-    EdgeValOutDiGraph{V, construct_E_VAL(edgeval_types)}(edgeval_initializer, g)
-
-EdgeValOutDiGraph{}(edgeval_initializer::Base.Callable, g::SimpleDiGraph; edgeval_types::AbstractTupleOfTypes=default_edgeval_types) =
-    EdgeValOutDiGraph{eltype(g)}(edgeval_initializer, g; edgeval_types=edgeval_types)
-
-EdgeValDiGraph{V}(edgeval_initializer::Base.Callable, g::SimpleDiGraph; edgeval_types::AbstractTupleOfTypes=default_edgeval_types) where {V} =
-    EdgeValDiGraph{V, construct_E_VAL(edgeval_types)}(edgeval_initializer, g)
-
-EdgeValDiGraph{}(edgeval_initializer::Base.Callable, g::SimpleDiGraph; edgeval_types::AbstractTupleOfTypes=default_edgeval_types) =
-    EdgeValDiGraph{eltype(g)}(edgeval_initializer, g; edgeval_types=edgeval_types)

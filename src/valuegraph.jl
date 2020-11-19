@@ -201,13 +201,13 @@ end
 
 
 for G in (:ValGraph, :ValOutDiGraph, :ValDiGraph)
-    @eval function $G(n; vertexval_types::AbstractTupleOfTypes=(), edgeval_types::AbstractTupleOfTypes=(), vertexval_initializer=nothing)
+    @eval function $G(n::Integer; vertexval_types::AbstractTupleOfTypes=(), edgeval_types::AbstractTupleOfTypes=(), vertexval_initializer=nothing)
         V_VALS = construct_E_VAL(vertexval_types)
         E_VALS = construct_E_VAL(edgeval_types)
         return $G{default_eltype, V_VALS, E_VALS}(n, vertexval_initializer)
     end
 
-    @eval function $G{V}(n; vertexval_types::AbstractTupleOfTypes=(), edgeval_types::AbstractTupleOfTypes=(), vertexval_initializer=nothing) where {V <: Integer}
+    @eval function $G{V}(n::Integer; vertexval_types::AbstractTupleOfTypes=(), edgeval_types::AbstractTupleOfTypes=(), vertexval_initializer=nothing) where {V <: Integer}
         V_VALS = construct_E_VAL(vertexval_types)
         E_VALS = construct_E_VAL(edgeval_types)
         return $G{V, E_VALS, V_VALS}(V(n), vertexval_initializer)
@@ -776,11 +776,12 @@ inedgevals(g::ValDiGraph, v::Integer, key::Integer) = g.redgevals[key][v]
 # ====================================================================
 
 
-@inline function Base.iterate(eit::ValEdgeIter{<:ValGraph}, state=(one(V), 1))
+@inline function Base.iterate(eit::ValEdgeIter{<:ValGraph}, state=(one(eltype(eit.graph)), 1))
 
     g = eit.graph
     fadjlist = g.fadjlist
     edgevals = g.edgevals
+    V = eltype(g)
     n = V(nv(g))
     u, i = state
 
@@ -807,12 +808,13 @@ end
 
 function Base.iterate(
             iter::ValEdgeIter{<:Union{ValOutDiGraph, ValDiGraph}},
-            state=(one(V), 1)
-    ) where {V, V_VALS, E_VALS}
+            state=(one(eltype(iter.graph)), 1)
+    )
 
     g = iter.graph
     fadjlist = g.fadjlist
     edgevals = g.edgevals
+    V = eltype(g)
     n = V(nv(g))
     u, i = state
 
