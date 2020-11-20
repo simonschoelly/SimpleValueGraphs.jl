@@ -191,8 +191,9 @@ function ValDiGraph{V, V_VALS, E_VALS}(n::Integer, vertexval_initializer=nothing
     fadjlist = Adjlist{V}(n)
     badjlist = Adjlist{V}(n)
     vertexvals = create_vertexvals(n, V_VALS, vertexval_initializer)
-    edgevals = create_edgevals(n, E_VAL)
-    redgevals = create_edgevals(n, E_VAL)
+    edgevals = create_edgevals(n, E_VALS)
+    redgevals = create_edgevals(n, E_VALS)
+    V_VALS_C = typeof(vertexvals)
     E_VALS_C = typeof(edgevals)
 
     return ValDiGraph{V, V_VALS, E_VALS, V_VALS_C, E_VALS_C}(

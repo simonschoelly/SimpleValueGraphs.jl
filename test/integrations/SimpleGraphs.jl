@@ -43,10 +43,10 @@ import SimpleValueGraphs: tuple_of_types, default_edgeval_types
 
     @testset "ValGraph{UInt64, Tuple{Int32, Float32}, Tuple{}}(gs; vertexvals_initializer=undef)" begin
 
-        g = ValGraph{UInt64, Tuple{Int32, Float32}, Tuple{}}(gs, vertexvals_initializer=undef)
+        g = ValGraph{UInt64, Tuple{Int32, Float32}, Tuple{}}(gs, vertexval_initializer=undef)
 
-        @test g isa ValGraph{Int16, Tuple{Int32, Float32}, Tuple{}}
-        @test g.vertexvals isa Tuple{Vector{Tuple{Int32, Float32}}}
+        @test g isa ValGraph{UInt64, Tuple{Int32, Float32}, Tuple{}}
+        @test g.vertexvals isa Tuple{Vector{Int32}, Vector{Float32}}
         @test length(g.vertexvals[1]) == 3
         @test length(g.vertexvals[2]) == 3
         @test g.edgevals == ()
@@ -54,12 +54,24 @@ import SimpleValueGraphs: tuple_of_types, default_edgeval_types
 
     @testset "ValOutDiGraph{Int64, NamedTuple{(a, b), Tuple{Int32, Float32}}, Tuple{}}(gs; vertexvals_initializer=undef)" begin
 
-        g = ValGraph{Int64, Tuple{Int32, Float32}, Tuple{}}(gs, vertexvals_initializer=undef)
+        g = ValOutDiGraph{Int64, Tuple{Int32, Float32}, Tuple{}}(gd, vertexval_initializer=undef)
 
-        @test g isa ValGraph{Int16, Tuple{Int32, Float32}, Tuple{}}
-        @test g.vertexvals isa Tuple{Vector{Tuple{Int32, Float32}}}
-        @test length(g.vertexvals[1]) == 3
-        @test length(g.vertexvals[2]) == 3
+        @test g isa ValOutDiGraph{Int64, Tuple{Int32, Float32}, Tuple{}}
+        @test g.vertexvals isa Tuple{Vector{Int32}, Vector{Float32}}
+        @test length(g.vertexvals[1]) == 4
+        @test length(g.vertexvals[2]) == 4
         @test g.edgevals == ()
+    end
+
+    @testset "ValDiGraph{Int64, NamedTuple{(a, b), Tuple{Int32, Float32}}, Tuple{}}(gs; vertexvals_initializer=undef)" begin
+
+        g = ValDiGraph{Int64, Tuple{Int32, Float32}, Tuple{}}(gd, vertexval_initializer=undef)
+
+        @test g isa ValDiGraph{Int64, Tuple{Int32, Float32}, Tuple{}}
+        @test g.vertexvals isa Tuple{Vector{Int32}, Vector{Float32}}
+        @test length(g.vertexvals[1]) == 4
+        @test length(g.vertexvals[2]) == 4
+        @test g.edgevals == ()
+        @test g.redgevals == ()
     end
 end # testset

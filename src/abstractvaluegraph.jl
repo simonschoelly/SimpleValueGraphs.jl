@@ -231,7 +231,7 @@ add_vertex(g::ZeroVertexValGraph) = add_vertex!(g, vertexvals_type(g)(()))
 
 # TODO documentation
 get_vertexval(g::AbstractValGraph, v, key::Symbol) =
-    get_vertexval(g, v, Base.fieldindex(key, vertexvals_type(g)))
+    get_vertexval(g, v, Base.fieldindex(vertexvals_type(g), key))
 
 get_vertexval(g::OneVertexValGraph, v) = get_vertexval(g, v, 1)
 
@@ -280,7 +280,7 @@ ERROR: type NamedTuple has no field b
 ```
 """
 get_edgeval(g::AbstractValGraph, s, d, key::Symbol) =
-    get_edgeval(g, s, d, Base.fieldindex(key, edgevals_type(g)))
+    get_edgeval(g, s, d, Base.fieldindex(edgevals_type(g), key))
 
 get_edgeval(g::OneEdgeValGraph, s, d) = get_edgeval(g, s, d, 1)
 
@@ -343,7 +343,7 @@ missing
 get_edgeval_or(g::AbstractValGraph, s, d, key, alternative) =
     has_edge(g, s, d) ? get_edgeval(g, s, d, key) : alternative
 
-get_edgeval_or(g::OneEdgeValGraph, s, d, alternative) = get_edgeval(g, s, d, 1, alternative)
+get_edgeval_or(g::OneEdgeValGraph, s, d, alternative) = get_edgeval_or(g, s, d, 1, alternative)
 
 
 #  -----------------------------------------------------
@@ -353,7 +353,7 @@ get_edgeval_or(g::OneEdgeValGraph, s, d, alternative) = get_edgeval(g, s, d, 1, 
 set_edgeval!(g::OneEdgeValGraph, s, d, value) = set_edgeval!(g, s, d, 1, value)
 
 set_edgeval!(g::AbstractValGraph, s, d, key::Symbol, value) =
-    set_edgeval!(g, s, d, Base.fieldindex(key, E_VALS), value)
+    set_edgeval!(g, s, d, Base.fieldindex(edgevals_type(g), key), value)
 
 """
     set_edgeval!(g::AbstractValGraph, s, d, :, values)
@@ -384,7 +384,7 @@ end
 set_vertexval!(g::OneVertexValGraph, v, value) = set_vertexval!(g, v, 1, value)
 
 set_vertexval!(g::AbstractValGraph, v, key::Symbol, value) =
-    set_vertexval!(g, v, Base.fieldindex(key, vertexvals_type(g)), value)
+    set_vertexval!(g, v, Base.fieldindex(vertexvals_type(g), key), value)
 
 """
     set_vertexval!(g::AbstractValGraph, v, :, values)
@@ -424,7 +424,7 @@ function outedgevals end
 outedgevals(g::OneEdgeValGraph, v) = outedgevals(g, v, 1)
 
 outedgevals(g::AbstractValGraph, v, key::Symbol) =
-    outedgevals(g, v, Base.fieldindex(key, edgevals_type(g)))
+    outedgevals(g, v, Base.fieldindex(edgevals_type(g), key))
 
 outedgevals(g::AbstractValGraph, u, key::Integer) =
     [get_edgeval(g, u, v, key) for v in outneighbors(g, u)]
@@ -440,7 +440,7 @@ function inedgevals end
 inedgevals(g::OneEdgeValGraph, v) = inedgevals(g, v, 1)
 
 inedgevals(g::AbstractValGraph, v, key::Symbol) =
-    inedgevals(g, v, Base.fieldindex(key, edgevals_type(g)))
+    inedgevals(g, v, Base.fieldindex(edgevals_type(g), key))
 
 inedgevals(g::AbstractValGraph, v, key::Integer) =
     [get_edgeval(g, u, v, key) for v in inneighbors(g, v)]
