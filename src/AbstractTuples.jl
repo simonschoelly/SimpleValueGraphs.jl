@@ -9,7 +9,7 @@ Module that provides additional functionally for `Tuple` and `NamedTuple`
 """
 module AbstractTuples
 
-export AbstractTuple, NamedNTuple, AbstractNTuple
+export AbstractTuple, NamedNTuple, AbstractNTuple, typetuple_to_type
 
 
 """
@@ -17,7 +17,8 @@ export AbstractTuple, NamedNTuple, AbstractNTuple
 
 A type `Union` of a `Tuple` and a `NamedTuple`.
 
-Useful for methods that take either a `Tuple` or a `NamedTuple` of some specific types as some parameter.
+Useful for methods that take either a `Tuple` or a `NamedTuple` of some specific
+types for parameters.
 
 Note that like `NamedTuple` but unlike `Tuple`, ÀbstractTuple is not covariant.
 I.e. it does not hold that `AbstractTuple{Tuple{Int}} <: AbstractTuple{Tuple{Integer}}`
@@ -92,6 +93,13 @@ false
 ```
 """
 const AbstractNTuple{N, T} = Union{NTuple{N, T}, NamedNTuple{N, T}}
+
+
+# TODO document, maybe restrict to types
+typetuple_to_type(tup::Tuple) = Tuple{ (T for T in tup)... }
+typetuple_to_type(tup::NamedTuple) =
+    NamedTuple{ Tuple(typeof(tup).names), Tuple{ (T for T in tup)... }}
+
 
 
 end # Module
