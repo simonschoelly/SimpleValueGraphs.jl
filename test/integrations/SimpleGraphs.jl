@@ -3,99 +3,63 @@ import SimpleValueGraphs: tuple_of_types, default_edgeval_types
 
 @testset "SimpleGraphs.jl" begin
 
-# EdgeValGraph(undef, gs, (Float64,))
-@testset "Constructor $G(undef, \$gs, \$edgeval_types)" for
-    G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
+    gs = SimpleGraph(Edge{Int16}.([(2, 2), (2, 3)]))
+    gd = SimpleDiGraph(Edge{UInt16}.([(2, 2), (2, 3), (3,4), (4, 3)]))
 
-    GS = is_directed(G) ? SimpleDiGraph : SimpleGraph
+    @testset "ValGraph{Int16, Tuple{}, Tuple{}}(gs)" begin
 
-    @testset "Params: edgeval_types = $edgeval_types, gs = $info" for
-                V in TEST_VERTEX_TYPES_SMALL,
-    edgeval_types in tuple_of_types.(TEST_EDGEVAL_TYPES_SMALL),
-       (gs, info) in make_testgraphs(GS{V})
-  
+        g = ValGraph{Int16, Tuple{}, Tuple{}}(gs)
 
-        g = G(undef, gs; edgeval_types=edgeval_types)
-
-        @testset "correct type" begin
-            E_VALS_should_be = (edgeval_types isa Tuple) ?
-                Tuple{edgeval_types...} :
-                NamedTuple{keys(edgeval_types),
-                           Tuple{edgeval_types...}}
-
-            @test g isa G{V, E_VALS_should_be}
-        end
-        testset_topological_equivalent(gs, g)
-        testset_isvalidgraph(g, undef_edgevalues=true)
+        @test g isa ValGraph{Int16, Tuple{}, Tuple{}}
+        @test g.ne == 2
+        @test g.fadjlist == [[], [2, 3], [2]]
+        @test g.vertexvals == ()
+        @test g.edgevals == ()
     end
-end
 
-# EdgeValGraph(undef, gs)
-@testset "Constructor $G(undef, \$gs)" for
-    G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
+    @testset "ValOutDiGraph{Int32, NamedTuple{(), Tuple{}}, Tuple{}}(gd)" begin
 
-    GS = is_directed(G) ? SimpleDiGraph : SimpleGraph
+        g = ValOutDiGraph{Int32, NamedTuple{(), Tuple{}}, Tuple{}}(gd)
 
-    @testset "Params: gs = $info" for
-                V in TEST_VERTEX_TYPES_SMALL,
-       (gs, info) in make_testgraphs(GS{V})
-  
-
-        g = G(undef, gs)
-
-        @testset "correct type" begin
-            E_VALS_should_be = (default_edgeval_types isa Tuple) ?
-                Tuple{default_edgeval_types...} :
-                NamedTuple{keys(default_edgeval_types),
-                           Tuple{default_edgeval_types...}}
-
-            @test g isa G{V, E_VALS_should_be}
-        end
-        testset_topological_equivalent(gs, g)
-        testset_isvalidgraph(g, undef_edgevalues=true)
+        @test g isa ValOutDiGraph{Int32, NamedTuple{(), Tuple{}}, Tuple{}}
+        @test g.ne == 4
+        @test g.fadjlist == [[], [2, 3], [4], [3]]
+        @test g.vertexvals == NamedTuple()
+        @test g.edgevals == ()
     end
-end
 
+    @testset "ValDiGraph{UInt16, Tuple{}, NamedTuple{(), Tuple{}}}(gd)" begin
 
+        g = ValDiGraph{UInt16, Tuple{}, NamedTuple{(), Tuple{}}}(gd)
 
-# EdgeValGraph((s, d) -> (f(s, d),), gs, (Float64,))
-@testset "Constructor $G(f, \$gs, \$edgeval_types)" for
-    G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph)
-
-    GS = is_directed(G) ? SimpleDiGraph : SimpleGraph
-
-
-    @testset "Params: edgeval_types = $(tuple_of_types(E_VALS)), gs = $info" for
-                V in TEST_VERTEX_TYPES_SMALL,
-           E_VALS in TEST_EDGEVAL_TYPES_SMALL,
-       (gs, info) in make_testgraphs(GS{V})
-  
-
-        n = nv(gs)
-        A = rand_sample(E_VALS, n, n)
-        edgeval_types = tuple_of_types(E_VALS)
-
-        g = G((s, d) -> A[s,d], gs; edgeval_types=edgeval_types)
-
-        @testset "correct type" begin
-            E_VALS_should_be = (edgeval_types isa Tuple) ?
-                Tuple{edgeval_types...} :
-                NamedTuple{keys(edgeval_types),
-                           Tuple{edgeval_types...}}
-
-            @test g isa G{V, E_VALS_should_be}
-        end
-
-        @testset "correct values" begin
-            @test all(edges(gs)) do e
-                s, d = src(e), dst(e)
-                A[s, d] == get_val(g, s, d, :)
-            end
-        end
-
-        testset_topological_equivalent(gs, g)
-        testset_isvalidgraph(g)
+        @test g isa ValDiGraph{UInt16, Tuple{}, NamedTuple{(), Tuple{}}}
+        @test g.ne == 4
+        @test g.fadjlist == [[], [2, 3], [4], [3]]
+        @test g.badjlist == [[], [2], [2, 4], [3]]
+        @test g.vertexvals == ()
+        @test g.edgevals == NamedTuple()
+        @test g.redgevals == NamedTuple()
     end
-end
 
+    @testset "ValGraph{UInt64, Tuple{Int32, Float32}, Tuple{}}(gs; vertexvals_initializer=undef)" begin
+
+        g = ValGraph{UInt64, Tuple{Int32, Float32}, Tuple{}}(gs, vertexvals_initializer=undef)
+
+        @test g isa ValGraph{Int16, Tuple{Int32, Float32}, Tuple{}}
+        @test g.vertexvals isa Tuple{Vector{Tuple{Int32, Float32}}}
+        @test length(g.vertexvals[1]) == 3
+        @test length(g.vertexvals[2]) == 3
+        @test g.edgevals == ()
+    end
+
+    @testset "ValOutDiGraph{Int64, NamedTuple{(a, b), Tuple{Int32, Float32}}, Tuple{}}(gs; vertexvals_initializer=undef)" begin
+
+        g = ValGraph{Int64, Tuple{Int32, Float32}, Tuple{}}(gs, vertexvals_initializer=undef)
+
+        @test g isa ValGraph{Int16, Tuple{Int32, Float32}, Tuple{}}
+        @test g.vertexvals isa Tuple{Vector{Tuple{Int32, Float32}}}
+        @test length(g.vertexvals[1]) == 3
+        @test length(g.vertexvals[2]) == 3
+        @test g.edgevals == ()
+    end
 end # testset
