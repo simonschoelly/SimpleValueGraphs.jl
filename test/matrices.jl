@@ -12,7 +12,9 @@ using LightGraphs: DefaultDistance
             E_VALS in TEST_EDGEVAL_TYPES_SMALL,
             gs     in make_testgraphs(is_directed(G) ? SimpleDiGraph{V} : SimpleGraph{V})
 
-            g = G{V, E_VALS}((s, d) -> rand_sample(E_VALS), gs.graph)
+            g = G{V, Tuple{}, E_VALS}(gs.graph;
+                edgeval_initializer=(s, d) -> rand_sample(E_VALS)
+            )
 
             @testset "g::$(typeof(g))" begin
 
@@ -62,7 +64,9 @@ using LightGraphs: DefaultDistance
             E_VALS in TEST_EDGEVAL_TYPES_SMALL,
             gs     in make_testgraphs(is_directed(G) ? SimpleDiGraph{V} : SimpleGraph{V})
 
-            g = G{V, E_VALS}((s, d) -> rand_sample(E_VALS), gs.graph)
+            g = G{V, Tuple{}, E_VALS}(gs.graph;
+                edgeval_initializer=(s, d) -> rand_sample(E_VALS)
+            )
 
             @testset "g::$(typeof(g))" begin
                 for key in allkeys_for_E_VALS(E_VALS)
@@ -77,7 +81,7 @@ using LightGraphs: DefaultDistance
 
                         @testset "getindex" begin
                             @test all(Iterators.product(vertices(g), vertices(g))) do (s, d)
-                                M[s, d] == (has_edge(g, s, d) ? get_val(g, s, d, key) : zv)
+                                M[s, d] == (has_edge(g, s, d) ? get_edgeval(g, s, d, key) : zv)
                             end
                         end
 
@@ -147,7 +151,9 @@ using LightGraphs: DefaultDistance
         E_VALS in (Tuple{}, NamedTuple{(), Tuple{}}),
         gs     in make_testgraphs(is_directed(G) ? SimpleDiGraph{V} : SimpleGraph{V})
 
-        g = G{V, Tuple{}, E_VALS}((s, d) -> rand_sample(E_VALS), gs.graph)
+        g = G{V, Tuple{}, E_VALS}(gs.graph;
+            edgeval_initializer=(s, d) -> rand_sample(E_VALS)
+        )
 
         @test weights(g) == DefaultDistance(nv(g))
     end

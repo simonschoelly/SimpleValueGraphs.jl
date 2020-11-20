@@ -22,7 +22,7 @@ register_test("interface/edgeval_accessors.jl")
 # register_test("interface/iterators.jl")
 # register_test("interface/modifiers.jl")
 # register_test("interface/valuegraph.jl")
-#register_test("matrices.jl")
+register_test("matrices.jl")
 
 
 @testset "ValueGraphs" begin
