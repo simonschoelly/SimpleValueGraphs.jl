@@ -18,14 +18,13 @@ abstract type AbstractValGraph{V<:Integer, V_VALS, E_VALS} <: AbstractGraph{V} e
 #  specialised types
 #  ------------------------------------------------------
 
-# TODO maybe we can parametrize these types
-OneEdgeValGraph = AbstractValGraph{V, V_VALS, E_VALS} where {V, V_VALS, E_VALS <: AbstractNTuple{1}}
+OneEdgeValGraph{V, V_VALS, E_VAL} = AbstractValGraph{V, V_VALS, <: AbstractNTuple{1, E_VAL}}
 
-ZeroEdgeValGraph = AbstractValGraph{V, V_VALS, E_VALS} where {V, V_VALS, E_VALS <: AbstractNTuple{0}}
+ZeroEdgeValGraph{V, V_VALS} = AbstractValGraph{V, V_VALS, <: AbstractNTuple{0}}
 
-OneVertexValGraph = AbstractValGraph{V, V_VALS} where {V, V_VALS <: AbstractNTuple{1}}
+OneVertexValGraph{V, V_VAL, E_VALS} = AbstractValGraph{V, <: AbstractNTuple{1, V_VAL}, E_VALS}
 
-ZeroVertexValGraph = AbstractValGraph{V, V_VALS} where {V, V_VALS <: AbstractNTuple{0}}
+ZeroVertexValGraph{V, E_VALS} = AbstractValGraph{V, <: AbstractNTuple{0}, E_VALS}
 
 # ======================================================
 # Type parameter information
