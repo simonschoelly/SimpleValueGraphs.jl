@@ -7,13 +7,19 @@
 
 
 """
-    ValGraph{V <: Integer, V_VALS, E_VALS, V_VALS_C, E_VALS_C}
+    ValGraph{V <: Integer, V_VALS, E_VALS, V_VALS_C, E_VALS_C} <: AbstractValGraph
 
-A type representing an undirected simple graph with edge values.
+A type representing an undirected simple graph with vertex and edge values.
 
-The element type `V` specifies the type of the vertex indices and `E_VAL`
-specifies the type of the edge values. User should usually not specify `E_VAL_C`
-by themself but rather let a constructor do that.
+# Parameters
+- `V`: The type of the vertex indices. Should be a concrete subtype of `Integer`.
+- `V_VALS`: The type of the vertex values, either a `Tuple` or `NamedTuple`.
+- `E_VALS`: The type of the edge values, either a `Tuple` or `NamedTuple`.
+- `V_VALS_C`: Internal storage parameter, is derived from `V_VALS`
+- `E_VALS_C`: Internal storage parameter, is derived from `E_VALS`
+
+The internal parameters `V_VALS_C` and `E_VALS_C` are automatically calculated
+by the constructors so that they should usually not be manually specified.
 """
 mutable struct ValGraph{  V <: Integer,
                             V_VALS <: AbstractTuple,
@@ -29,13 +35,22 @@ mutable struct ValGraph{  V <: Integer,
 end
 
 """
-    ValOutDiGraph{V <: Integer, V_VALS, E_VALS, V_VALS_C, E_VALS_C}
+    ValOutDiGraph{V <: Integer, V_VALS, E_VALS, V_VALS_C, E_VALS_C} <: AbstractValGraph
 
-A type representing a directed simple graph with edge values.
+A type representing a directed simple graph with vertex and edge values.
 
-The element type `V` specifies the type of the vertex indices and `E_VAL`
-specifies the type of the edge values. User should usually not specify `E_VAL_C`
-by themself but rather let a constructor do that.
+# Parameters
+- `V`: The type of the vertex indices. Should be a concrete subtype of `Integer`.
+- `V_VALS`: The type of the vertex values, either a `Tuple` or `NamedTuple`.
+- `E_VALS`: The type of the edge values, either a `Tuple` or `NamedTuple`.
+- `V_VALS_C`: Internal storage parameter, is derived from `V_VALS`
+- `E_VALS_C`: Internal storage parameter, is derived from `E_VALS`
+
+
+The internal parameters `V_VALS_C` and `E_VALS_C` are automatically calculated
+by the constructors so that they should usually not be manually specified.
+
+Uses less memory than `ValDiGraph` by only storing outgoing edges.
 """
 mutable struct ValOutDiGraph{ V <: Integer,
                                 V_VALS <: AbstractTuple,
@@ -52,13 +67,23 @@ end
 
 
 """
-    ValDiGraph{V <: Integer, V_VALS, E_VALS, V_VALS_C, E_VALS_C}
+    ValDiGraph{V <: Integer, V_VALS, E_VALS, V_VALS_C, E_VALS_C} <: AbstractValGraph
 
-A type representing a directed simple graph with edge values.
+A type representing a directed simple graph with vertex and edge values.
 
-The element type `V` specifies the type of the vertex indices and `E_VAL`
-specifies the type of the edge values. User should usually not specify `E_VAL_C`
-but rather let a constructor do that.
+# Parameters
+- `V`: The type of the vertex indices. Should be a concrete subtype of `Integer`.
+- `V_VALS`: The type of the vertex values, either a `Tuple` or `NamedTuple`.
+- `E_VALS`: The type of the edge values, either a `Tuple` or `NamedTuple`.
+- `V_VALS_C`: Internal storage parameter, is derived from `V_VALS`
+- `E_VALS_C`: Internal storage parameter, is derived from `E_VALS`
+
+
+The internal parameters `V_VALS_C` and `E_VALS_C` are automatically calculated
+by the constructors so that they should usually not be manually specified.
+
+Uses more memory than `ValOutDiGraph` by not only storing outgoing edges, but also
+back edges.
 """
 mutable struct ValDiGraph{    V <: Integer,
                                 V_VALS <: AbstractTuple,
@@ -84,8 +109,7 @@ end
 #  ------------------------------------------------------
 
 """
-The default eltype to use in a graph constructor when no eltype
-is specified.
+The default eltype to use in a graph constructor when no eltype is specified.
 """
 const default_eltype = Int32
 
@@ -732,6 +756,32 @@ function set_edgeval!(g::ValDiGraph, s::Integer, d::Integer, ::Colon, values)
     return true
 end
 
+#  ------------------------------------------------------
+#  get_vertexval
+#  ------------------------------------------------------
+
+# TODO maybe implement also for Colon
+
+function get_vertexval(g::ValGraph, v::Integer, key::Integer)
+
+    # TODO verify key, vertex
+
+    return g.vertexvals[key][v]
+end
+
+function get_vertexval(g::ValOutDiGraph, v::Integer, key::Integer)
+
+    # TODO verify key, vertex
+
+    return g.vertexvals[key][v]
+end
+
+function get_vertexval(g::ValDiGraph, v::Integer, key::Integer)
+
+    # TODO verify key, vertex
+
+    return g.vertexvals[key][v]
+end
 
 #  ------------------------------------------------------
 #  is_directed
@@ -771,6 +821,7 @@ outedgevals(g::ValOutDiGraph, v::Integer, key::Integer) = g.edgevals[key][v]
 
 inedgevals(g::ValGraph, v::Integer, key::Integer) = outedgevals(g, v, key)
 inedgevals(g::ValDiGraph, v::Integer, key::Integer) = g.redgevals[key][v]
+
 
 # ====================================================================
 # Iterators

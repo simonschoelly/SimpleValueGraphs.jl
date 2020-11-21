@@ -53,7 +53,7 @@ end
                 V in TEST_VERTEX_TYPES_SMALL,
     edgeval_types in tuple_of_types.(TEST_EDGEVAL_TYPES_SMALL),
                 n in (V in (UInt8, Int8) ? V[0, 5, typemax(V)] : V[0, 5])
-                    
+
         g = G(n; edgeval_types=edgeval_types)
 
         E_VALS_should_be = (edgeval_types isa Tuple) ?
@@ -109,7 +109,7 @@ end
                 V in TEST_VERTEX_TYPES_SMALL,
     edgeval_types in tuple_of_types.(TEST_EDGEVAL_TYPES_SMALL),
        (gs, info) in make_testgraphs(GS{V})
-  
+
 
         g = G(undef, gs; edgeval_types=edgeval_types)
 
@@ -135,7 +135,7 @@ end
     @testset "Params: gs = $info" for
                 V in TEST_VERTEX_TYPES_SMALL,
        (gs, info) in make_testgraphs(GS{V})
-  
+
 
         g = G(undef, gs)
 
