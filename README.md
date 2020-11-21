@@ -9,3 +9,39 @@ It is similar to [MetaGraphs.jl](https://github.com/JuliaGraphs/MetaGraphs.jl) a
 It solves the following problem:
 - The topology of `MetaGraphs` can be changed fast, but changing and querying edge values is slow.
 - Changing the topology of `SimpleWeightedGraphs` is slow, but changing and querying edge values is fast.
+
+## Example
+
+```julia
+using SimpleValueGraphs
+
+using LightGraphs: smallgraph
+using Plots
+using GraphRecipes: graphplot
+using Colors: RGB, Color
+
+# Load a LightGraphs.SimpleGraph
+gs = smallgraph(:house)
+
+# Convert to a ValGraph with vertex and edge values
+gv = ValGraph(gs;
+    # Two names vertex values:
+    # - color: A random color
+    # - label: The vertex identifier as a string
+    vertexval_types=(color=Color, label=String),
+    vertexval_initializer=v -> (rand(RGB), string(v)),
+    # One unnamed edge value:
+    # A string s -- d from source to destination of each edge
+    edgeval_types=(String, ),
+    edgeval_initializer=(s, d) -> ("$s -- $d",)
+)
+
+# Plot this graph using the vertex and edge values
+graphplot(gv;
+    nodecolor = [get_vertexval(gv, v, :color) for v in vertices(gv)],
+    names = [get_vertexval(gv, v, :label) for v in vertices(gv)],
+    edgelabel=weights(gv; zerovalue="")
+)
+```
+![example output](https://github.com/simonschoelly/SimpleValueGraphs.jl/blob/master/docs/assets/readme-example-output.png)
+
