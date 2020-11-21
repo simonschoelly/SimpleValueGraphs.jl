@@ -409,7 +409,64 @@ end
 #  add_vertex!
 #  ------------------------------------------------------
 
-# TODO
+function LG.add_vertex!(g::ValGraph{V, V_VALS, E_VALS}, values::V_VALS) where {V, V_VALS, E_VALS}
+
+    if V != BigInt && nv(g) == typemax(V)
+        # maybe consider capping at nv(g) - 1
+        return false # cannot add more vertices
+    end
+
+    push!(g.fadjlist, V[])
+    for i in 1:length(g.edgevals)
+        push!(g.edgevals[i], E_VALS.types[i][])
+    end
+
+    for i in 1:length(g.vertexvals)
+        push!(g.vertexvals[i], values[i])
+    end
+
+    return true
+end
+
+function LG.add_vertex!(g::ValOutDiGraph{V, V_VALS, E_VALS}, values::V_VALS) where {V, V_VALS, E_VALS}
+
+    if V != BigInt && nv(g) == typemax(V)
+        # maybe consider capping at nv(g) - 1
+        return false # cannot add more vertices
+    end
+
+    push!(g.fadjlist, V[])
+    for i in 1:length(g.edgevals)
+        push!(g.edgevals[i], E_VALS.types[i][])
+    end
+
+    for i in 1:length(g.vertexvals)
+        push!(g.vertexvals[i], values[i])
+    end
+
+    return true
+end
+
+function LG.add_vertex!(g::ValDiGraph{V, V_VALS, E_VALS}, values::V_VALS) where {V, V_VALS, E_VALS}
+
+    if V != BigInt && nv(g) == typemax(V)
+        # maybe consider capping at nv(g) - 1
+        return false # cannot add more vertices
+    end
+
+    push!(g.fadjlist, V[])
+    push!(g.badjlist, V[])
+    for i in 1:length(g.edgevals)
+        push!(g.edgevals[i], E_VALS.types[i][])
+        push!(g.redgevals[i], E_VALS.types[i][])
+    end
+
+    for i in 1:length(g.vertexvals)
+        push!(g.vertexvals[i], values[i])
+    end
+
+    return true
+end
 
 #  ------------------------------------------------------
 #  has_edge

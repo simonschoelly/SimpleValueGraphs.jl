@@ -13,7 +13,7 @@ const LG = LightGraphs
 
 import LightGraphs:
     nv, ne, is_directed,
-    eltype, vertices, has_vertex,
+    eltype, vertices, add_vertex!, has_vertex,
     edgetype, edges, src, dst, reverse,
     weights,
     add_edge!, rem_edge!, has_edge,
@@ -61,7 +61,6 @@ export
 
     eltype,
     vertices,
-    has_vertex,
 
     edgetype,
     edges,
@@ -74,6 +73,9 @@ export
     add_edge!,
     rem_edge!,
     has_edge,
+
+    add_vertex!,
+    has_vertex,
 
     inneighbors,
     outneighbors,

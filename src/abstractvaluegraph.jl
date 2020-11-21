@@ -200,7 +200,7 @@ If the edge already exists, return `false` but still change the edge values.
 """
 function add_edge! end
 
-add_edge!(g::ZeroEdgeValGraph, s, d) = add_edge!(g, s, d, edgevals_type(g)(()))
+LG.add_edge!(g::ZeroEdgeValGraph, s, d) = add_edge!(g, s, d, edgevals_type(g)(()))
 
 
 #  -----------------------------------------------------
@@ -212,14 +212,13 @@ add_edge!(g::ZeroEdgeValGraph, s, d) = add_edge!(g, s, d, edgevals_type(g)(()))
 
 Add an vertex to a graph `g` and set the vertex values.
 
-If `g` does not have and vertex values, `values` can be omitted.
+If `g` does not have vertex values, `values` can be omitted.
 
 Return `true` if the vertex was added successfully, otherwise return `false`.
-If the vertex already exists, return `false` but still change the vertex values.
 """
 function add_vertex! end
 
-add_vertex(g::ZeroVertexValGraph) = add_vertex!(g, vertexvals_type(g)(()))
+LG.add_vertex!(g::ZeroVertexValGraph) = add_vertex!(g, vertexvals_type(g)(()))
 
 
 # ======================================================
