@@ -813,6 +813,7 @@ function set_edgeval!(g::ValDiGraph, s::Integer, d::Integer, ::Colon, values)
     return true
 end
 
+
 #  ------------------------------------------------------
 #  get_vertexval
 #  ------------------------------------------------------
@@ -839,6 +840,29 @@ function get_vertexval(g::ValDiGraph, v::Integer, key::Integer)
 
     return g.vertexvals[key][v]
 end
+#
+#  ------------------------------------------------------
+#  set_vertexval!
+#  ------------------------------------------------------
+
+function set_vertexval!(g::ValGraph, v::Integer, key::Integer, value)
+
+    has_vertex(g, v) || return false
+    g.vertexvals[key][v] = value
+end
+
+function set_vertexval!(g::ValOutDiGraph, v::Integer, key::Integer, value)
+
+    has_vertex(g, v) || return false
+    g.vertexvals[key][v] = value
+end
+
+function set_vertexval!(g::ValDiGraph, v::Integer, key::Integer, value)
+
+    has_vertex(g, v) || return false
+    g.vertexvals[key][v] = value
+end
+
 
 #  ------------------------------------------------------
 #  is_directed

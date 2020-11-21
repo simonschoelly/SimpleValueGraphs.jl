@@ -401,8 +401,8 @@ set_vertexval!(g::AbstractValGraph, v, key::Symbol, value) =
 """
     set_vertexval!(g::AbstractValGraph, v, :, values)
 
-Set the values of the vertex `v` to `values`. Return `true` if such an vertex exists and
-`false` otherwise.
+Set the values of the vertex `v` to `values`. Return `true` if such an vertex exists
+and `false` otherwise.
 """
 function set_vertexval!(g::AbstractValGraph, v, ::Colon, values)
 
@@ -412,7 +412,7 @@ function set_vertexval!(g::AbstractValGraph, v, ::Colon, values)
 
     # TODO currently we cannot convert from tuples to named tuples or vice versa
     values = convert(V_VALS, values)
-    for (i, value) in values
+    for (i, value) in enumerate(values)
         set_vertexval!(g, v, i, value)
     end
 
