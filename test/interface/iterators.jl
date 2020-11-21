@@ -1,20 +1,23 @@
 import SimpleValueGraphs: tuple_of_types, OneEdgeValGraph
 
 @testset "edge iterator $G" for
-    G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph),
+    G in (ValGraph, ValOutDiGraph, ValDiGraph),
     V in TEST_VERTEX_TYPES_SMALL,
     E_VALS in TEST_EDGEVAL_TYPES_SMALL,
     (gs, info) in make_testgraphs(is_directed(G) ? SimpleDiGraph{V} : SimpleGraph{V})
 
     @testset "Params: $G{$V, $E_VALS}, gs = $info" begin
 
-        g = G((s,d) -> rand_sample(E_VALS), gs, edgeval_types=tuple_of_types(E_VALS))
+        g = G(gs;
+              edgeval_types=tuple_of_types(E_VALS),
+              edgeval_initializer=(s,d) -> rand_sample(E_VALS)
+        )
 
         iter = edges(g)
 
         E_should_be = (is_directed(g) ? ValDiEdge : ValEdge){V, E_VALS}
 
-        
+
         @testset "eltype" begin
             @test eltype(iter) <: E_should_be
         end
@@ -25,10 +28,10 @@ import SimpleValueGraphs: tuple_of_types, OneEdgeValGraph
 
         @testset "correct edges" begin
             @test all(iter) do e
-                s, d, vs = src(e), dst(e), get_val(e, :)
+                s, d, vs = src(e), dst(e), get_edgeval(e, :)
                 e isa E_should_be &&
                 has_edge(g, s, d) &&
-                get_val(g, s, d, :) == vs
+                get_edgeval(g, s, d, :) == vs
             end
         end
 
@@ -48,14 +51,17 @@ import SimpleValueGraphs: tuple_of_types, OneEdgeValGraph
 end
 
 @testset "inneighbors $G" for
-    G in (EdgeValGraph, EdgeValDiGraph),
+    G in (ValGraph, ValDiGraph),
     V in TEST_VERTEX_TYPES_SMALL,
     E_VALS in TEST_EDGEVAL_TYPES_SMALL,
     (gs, info) in make_testgraphs(is_directed(G) ? SimpleDiGraph{V} : SimpleGraph{V})
 
     @testset "Params: $G{$V, $E_VALS}, gs = $info" begin
 
-        g = G((s,d) -> rand_sample(E_VALS), gs, edgeval_types=tuple_of_types(E_VALS))
+        g = G(gs;
+            edgeval_types=tuple_of_types(E_VALS),
+            edgeval_initializer=(s,d) -> rand_sample(E_VALS)
+        )
 
         @testset "inneighbors are unique" begin
             @test all(vertices(g)) do u
@@ -73,14 +79,17 @@ end
 end
 
 @testset "outneighbors $G" for
-    G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph),
+    G in (ValGraph, ValOutDiGraph, ValDiGraph),
     V in TEST_VERTEX_TYPES_SMALL,
     E_VALS in TEST_EDGEVAL_TYPES_SMALL,
     (gs, info) in make_testgraphs(is_directed(G) ? SimpleDiGraph{V} : SimpleGraph{V})
 
     @testset "Params: $G{$V, $E_VALS}, gs = $info" begin
 
-        g = G((s,d) -> rand_sample(E_VALS), gs, edgeval_types=tuple_of_types(E_VALS))
+        g = G(gs;
+            edgeval_types=tuple_of_types(E_VALS),
+            edgeval_initializer=(s,d) -> rand_sample(E_VALS)
+        )
 
         @testset "outneighbors are unique" begin
             @test all(vertices(g)) do u
@@ -98,19 +107,22 @@ end
 end
 
 @testset "outedgevals $G" for
-    G in (EdgeValGraph, EdgeValOutDiGraph, EdgeValDiGraph),
+    G in (ValGraph, ValOutDiGraph, ValDiGraph),
     V in TEST_VERTEX_TYPES_SMALL,
     E_VALS in TEST_EDGEVAL_TYPES_SMALL,
     (gs, info) in make_testgraphs(is_directed(G) ? SimpleDiGraph{V} : SimpleGraph{V})
 
     @testset "Params: $G{$V, $E_VALS}, gs = $info" begin
 
-        g = G((s,d) -> rand_sample(E_VALS), gs, edgeval_types=tuple_of_types(E_VALS))
+        g = G(gs;
+            edgeval_types=tuple_of_types(E_VALS),
+            edgeval_initializer=(s,d) -> rand_sample(E_VALS)
+        )
 
         @testset "outedgevals are correct for key $key" for key in allkeys_for_E_VALS(E_VALS)
 
             @test all(vertices(g)) do u
-                outedgevals(g, u, key) == [get_val(g, u, v, key) for v in outneighbors(g, u)]
+                outedgevals(g, u, key) == [get_edgeval(g, u, v, key) for v in outneighbors(g, u)]
             end
         end
 
@@ -125,19 +137,22 @@ end
 end
 
 @testset "inedgevals $G" for
-    G in (EdgeValGraph, EdgeValDiGraph),
+    G in (ValGraph, ValDiGraph),
     V in TEST_VERTEX_TYPES_SMALL,
     E_VALS in TEST_EDGEVAL_TYPES_SMALL,
     (gs, info) in make_testgraphs(is_directed(G) ? SimpleDiGraph{V} : SimpleGraph{V})
 
     @testset "Params: $G{$V, $E_VALS}, gs = $info" begin
 
-        g = G((s,d) -> rand_sample(E_VALS), gs, edgeval_types=tuple_of_types(E_VALS))
+        g = G(gs;
+            edgeval_types=tuple_of_types(E_VALS),
+            edgeval_initializer=(s,d) -> rand_sample(E_VALS)
+        )
 
         @testset "inedgevals are correct for key $key" for key in allkeys_for_E_VALS(E_VALS)
 
             @test all(vertices(g)) do u
-                inedgevals(g, u, key) == [get_val(g, v, u, key) for v in inneighbors(g, u)]
+                inedgevals(g, u, key) == [get_edgeval(g, v, u, key) for v in inneighbors(g, u)]
             end
         end
 
@@ -152,14 +167,17 @@ end
 end
 
 @testset "edges $G" for
-    G in (EdgeValGraph, EdgeValDiGraph),
+    G in (ValGraph, ValDiGraph),
     V in TEST_VERTEX_TYPES_SMALL,
     E_VALS in TEST_EDGEVAL_TYPES_SMALL,
     (gs, info) in make_testgraphs(is_directed(G) ? SimpleDiGraph{V} : SimpleGraph{V})
 
     @testset "Params: $G{$V, $E_VALS}, gs = $info" begin
 
-        g = G((s,d) -> rand_sample(E_VALS), gs, edgeval_types=tuple_of_types(E_VALS))
+        g = G(gs;
+            edgeval_types=tuple_of_types(E_VALS),
+            edgeval_initializer=(s,d) -> rand_sample(E_VALS)
+        )
 
         @testset "edges are lexicographical sorted, unique" begin
             lexicographical_sorted = true
@@ -185,7 +203,7 @@ end
 
         @testset "correct values" begin
             @test all(edges(g)) do e
-                get_val(e, :) == get_val(g, src(e), dst(e), :)
+                get_edgeval(e, :) == get_edgeval(g, src(e), dst(e), :)
             end
         end
 
