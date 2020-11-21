@@ -24,7 +24,7 @@ end
         @test e.src == e_rev.src == src_should
         @test e.dst == e_rev.dst == dst_should
         @test e.src <= e.dst
-        @test e.vals == values
+        @test e.values == values
         @test e isa ValEdge{V, E_VALS}
     end
 
@@ -34,7 +34,7 @@ end
 
         @test e.src == u
         @test e.dst == v
-        @test e.vals == values
+        @test e.values == values
         @test e isa ValDiEdge{V, E_VALS}
     end
 end

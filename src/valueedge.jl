@@ -1,17 +1,58 @@
 
+# ======================================================
+# Type definitions
+# ======================================================
 
-abstract type AbstractValEdge{V <: Integer, E_VALS} <: AbstractEdge{V} end
+abstract type AbstractValEdge{V <: Integer, E_VALS <: AbstractTuple} <: AbstractEdge{V} end
+
 
 """
     ValEdge{V, E_VALS} <: AbstractValEdge{V}
 
 A data structure representing an undirected edge with multiple values.
+"""
+struct ValEdge{V<:Integer, E_VALS <: AbstractTuple} <: AbstractValEdge{V, E_VALS}
+    src::V
+    dst::V
+    values::E_VALS
 
-----
 
-    ValEdge(s, d, vals)
+    function ValEdge{V, E_VALS}(src, dst, values) where {V, E_VALS}
 
-Create a `ValEdge` with source `s`, destination `d` and values `vals`.
+        src, dst = minmax(src, dst) # TODO maybe use a branchless operator
+        return new{V, E_VALS}(src, dst, values)
+    end
+end
+
+
+"""
+    ValDiEdge{V, E_VALS} <: AbstractValEdge{V}
+
+A data structure representing a directed edge with multiple values.
+"""
+struct ValDiEdge{V<:Integer, E_VALS <: AbstractTuple} <: AbstractValEdge{V, E_VALS}
+    src::V
+    dst::V
+    values::E_VALS
+
+
+    function ValDiEdge{V, E_VALS}(src, dst, values) where {V, E_VALS}
+
+        return new{V, E_VALS}(src, dst, values)
+    end
+end
+
+
+# =========================================================
+# Constructors
+# =========================================================
+
+"""
+    ValEdge(s, d[, values])
+    ValEdge{V}(s, d[, values])
+    ValEdge{V, E_VALS}(s, d, values)
+
+Create a `ValEdge` with source `s`, destination `d` and values `values`.
 
 # Examples
 ```jldoctest
@@ -25,34 +66,21 @@ julia> e = ValEdge(1,2, (first = 1, second = "2"))
 ValEdge 1 -- 2 with values (first = 1, second = "2")
 ```
 """
-struct ValEdge{V<:Integer, E_VALS} <: AbstractValEdge{V, E_VALS}
-    src::V
-    dst::V
-    vals::E_VALS
+function ValEdge(src::Integer, dst::Integer, values::E_VALS=()) where {E_VALS}
 
-    function ValEdge(src::V, dst::V, vals::E_VALS) where {V, E_VALS}
-        src, dst = minmax(src, dst) # TODO maybe use a branchless operator
-        return new{V, E_VALS}(src, dst, vals)
-    end
-
-    function ValEdge{V, E_VALS}(src, dst, vals) where {V, E_VALS}
-        src, dst = minmax(src, dst) # TODO maybe use a branchless operator
-        return new{V, E_VALS}(src, dst, vals)
-    end
+    src, dst = promote(src, dst)
+    return ValEdge{typeof(src), E_VALS}(src, dst, values)
 end
 
+ValEdge{V}(s, d, values=()) where {V} = ValEdge{V, typeof(values)}(s, d, values)
 
 
 """
-    ValDiEdge{V, E_VALS} <: AbstractValEdge{V}
+    ValDiEdge(s, d[, values])
+    ValDiEdge{V}(s, d[, values])
+    ValDiEdge{V, E_VALS}(s, d, values)
 
-A data structure representing a directed edge with multiple values.
-
-----
-
-    ValDiEdge(s, d, vals)
-
-Create a `ValEdge` with source `s`, destination `d` and values `vals`.
+Create a `ValDiEdge` with source `s`, destination `d` and values `values`.
 
 # Examples
 ```jldoctest
@@ -66,26 +94,34 @@ julia> e = ValDiEdge(1,2, (first = 1, second = "2"))
 ValDiEdge 1 -> 2 with values (first = 1, second = "2")
 ```
 """
-struct ValDiEdge{V<:Integer, E_VALS} <: AbstractValEdge{V, E_VALS}
-    src::V
-    dst::V
-    vals::E_VALS
+function ValDiEdge(src::Integer, dst::Integer, values::E_VALS=()) where {E_VALS}
 
-    function ValDiEdge(src::V, dst::V, vals::E_VALS) where {V, E_VALS}
-        return new{V, E_VALS}(src, dst, vals)
-    end
-
-    function ValDiEdge{V, E_VALS}(src, dst, vals) where {V, E_VALS}
-        return new{V, E_VALS}(src, dst, vals)
-    end
+    src, dst = promote(src, dst)
+    return ValDiEdge{typeof(src), E_VALS}(src, dst, values)
 end
+
+ValDiEdge{V}(s, d, values=()) where {V} = ValDiEdge{V, typeof(values)}(s, d, values)
+
+# =========================================================
+# Interface
+# =========================================================
+
+#  ------------------------------------------------------
+#  src & dst
+#  ------------------------------------------------------
 
 LG.src(e::AbstractValEdge) = e.src
 LG.dst(e::AbstractValEdge) = e.dst
 
+
+#  ------------------------------------------------------
+#  get_edgeval
+#  ------------------------------------------------------
+
 """
     get_edgeval(e::AbstractValEdge, :)
-Return the values attached to the edg;e `e`.
+
+Return the values attached to the edge `e`.
 
 # Examples
 
@@ -99,7 +135,7 @@ julia> get_edgeval(e, :)
 (weight = 2.5,)
 ```
 """
-get_edgeval(e::AbstractValEdge, ::Colon) = e.vals
+get_edgeval(e::AbstractValEdge, ::Colon) = e.values
 
 """
     get_edgeval(e::AbstractValEdge, key)
@@ -118,16 +154,29 @@ julia> get_edgeval(e, :a) # use symbolic key
 
 ```
 """
-get_edgeval(e::AbstractValEdge, key) = e.vals[key]
+get_edgeval(e::AbstractValEdge, key) = e.values[key]
 
+
+#  ------------------------------------------------------
+#  reverse
+#  ------------------------------------------------------
 
 LG.reverse(e::ValEdge) = e
 LG.reverse(e::ValDiEdge) = ValDiEdge(dst(e), src(e), get_edgeval(e, :))
 
 
+#  ------------------------------------------------------
+#  is_directed
+#  ------------------------------------------------------
+
 LG.is_directed(::Type{<:ValEdge}) = false
 LG.is_directed(::Type{<:ValDiEdge}) = true
 LG.is_directed(e::AbstractValEdge) = is_directed(typeof(e))
+
+
+# ======================================================
+# show
+# ======================================================
 
 function Base.show(io::IO, e::AbstractValEdge)
     isdir = is_directed(e)
