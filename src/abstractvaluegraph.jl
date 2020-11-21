@@ -142,43 +142,21 @@ end
 hasvertexkey_or_throw(g::AbstractValGraph, key) = hasvertexkey_or_throw(typeof(g), key)
 
 
-#  ------------------------------------------------------
+# ======================================================
 #  show
-#  ------------------------------------------------------
+# ======================================================
 
-#= TODO this (show) needs an implementation
-has_named_edgevals(g::AbstractEdgeValGraph{ <: Any, <: NamedTuple}) = true
-has_named_edgevals(g::AbstractEdgeValGraph{ <: Any, <: Tuple}) = false
-
-# TODO this looks kind of ugly
-function Base.show(io::IO, g::AbstractEdgeValGraph{V, E_VALS}) where {V, E_VALS}
-    nvg = Int(nv(g))
-    neg = ne(g)
-    dir = is_directed(g) ? "directed" : "undirected"
-    name = string(nameof(typeof(g)))
-
-    types = tuple_of_types(E_VALS)
-
-    edgevalues_string = if g isa ZeroEdgeValGraph
-        "with no edge values"
-    elseif g isa OneEdgeValGraph
-        if has_named_edgevals(g)
-            "with named edge values of type $types"
-        else
-            "with edge values of type $types"
-        end
-    else
-        if has_named_edgevals(g)
-            "with multiple named edge values of types $types"
-        else
-            "with multiple edge values of types $types"
-        end
-
-    end
-
-    println(io, "{$nvg, $neg} $dir $name{$V} graph $edgevalues_string.")
+function Base.show(io::IO, ::MIME"text/plain", g::AbstractValGraph)
+    print(io, "{$(nv(g)), $(ne(g))}")
+    print(io, " ", is_directed(g) ? "directed" : "undirected")
+    print(io, " $(typeof(g).name) with")
+    println(io)
+    print(io, "              eltype: $(eltype(g))")
+    println(io)
+    print(io, "  vertex value types: $(tuple_of_types(vertexvals_type(g)))")
+    println(io)
+    print(io, "    edge value types: $(tuple_of_types(edgevals_type(g)))")
 end
-=#
 
 
 # ======================================================
