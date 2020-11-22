@@ -210,7 +210,7 @@ LG.add_edge!(g::ZeroEdgeValGraph, s, d) = add_edge!(g, s, d, edgevals_type(g)(()
 #  -----------------------------------------------------
 
 """
-    add_vertex!(g::AbstractValGraph, s, d, [values])
+    add_vertex!(g::AbstractValGraph[, values])
 
 Add an vertex to a graph `g` and set the vertex values.
 

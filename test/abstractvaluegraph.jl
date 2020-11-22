@@ -1,4 +1,5 @@
 using SimpleValueGraphs: hasedgekey_or_throw, AbstractValGraph, ValEdgeIter
+
 @testset "abstractvaluegraph" begin
 
 struct DummyValGraph{V, V_VALS, E_VALS, G <: AbstractValGraph{V, V_VALS, E_VALS}} <: AbstractValGraph{V, V_VALS, E_VALS}
@@ -7,12 +8,22 @@ struct DummyValGraph{V, V_VALS, E_VALS, G <: AbstractValGraph{V, V_VALS, E_VALS}
 end
 
 SimpleValueGraphs.nv(g::DummyValGraph) = nv(g.wrapped)
+
 SimpleValueGraphs.is_directed(::Type{<:DummyValGraph{V, V_VALS, E_VALS, G}}) where {V, V_VALS, E_VALS, G} = is_directed(G)
+
 SimpleValueGraphs.has_edge(g::DummyValGraph, s, d) = has_edge(g.wrapped, s, d)
+
 SimpleValueGraphs.get_edgeval(g::DummyValGraph, s, d, key::Integer) =
     get_edgeval(g.wrapped, s, d, key)
+
 SimpleValueGraphs.get_vertexval(g::DummyValGraph, v, key::Integer) =
     get_vertexval(g.wrapped, v, key)
+
+SimpleValueGraphs.get_vertexval(g::DummyValGraph, v, key::Integer) =
+    get_vertexval(g.wrapped, v, key)
+
+SimpleValueGraphs.get_edgeval(g::DummyValGraph, s, d, key::Integer) =
+    get_edgeval(g.wrapped, s, d, key)
 
 @testset "eltype" begin
 
@@ -223,6 +234,95 @@ end
     @test inneighbors(g2, 3) == []
     @test inneighbors(g2, 4) == [5]
     @test inneighbors(g2, 5) == [4]
+end
+
+@testset "get_vertexval" begin
+
+    g0 = DummyValGraph(ValDiGraph(2));
+
+    g1 = DummyValGraph(ValGraph(2;
+        vertexval_types=(Int64, ),
+        vertexval_initializer=v -> (v, )
+    ))
+
+    g2 = DummyValGraph(ValOutDiGraph(2;
+        vertexval_types=(a=Int64, b=String),
+        vertexval_initializer=v -> (a=v, b="$v")
+    ))
+
+    @test get_vertexval(g0, 1, :) == ()
+    @test get_vertexval(g0, 2, :) == ()
+    @test get_vertexval(g1, 1, :) == (1,)
+    @test get_vertexval(g1, 2, :) == (2,)
+    @test get_vertexval(g2, 1, :) == (a=1, b="1")
+    @test get_vertexval(g2, 2, :) == (a=2, b="2")
+
+    @test get_vertexval(g1, 1, 1) == 1
+    @test get_vertexval(g1, 2, 1) == 2
+    @test get_vertexval(g2, 1, 1) == 1
+    @test get_vertexval(g2, 2, 1) == 2
+    @test get_vertexval(g2, 1, 2) == "1"
+    @test get_vertexval(g2, 2, 2) == "2"
+
+    @test get_vertexval(g2, 1, :a) == 1
+    @test get_vertexval(g2, 2, :a) == 2
+    @test get_vertexval(g2, 1, :b) == "1"
+    @test get_vertexval(g2, 2, :b) == "2"
+
+    @test get_vertexval(g1, 1) == 1
+    @test get_vertexval(g1, 2) == 2
+end
+
+@testset "get_edgeval" begin
+
+    g_simple = SimpleGraph(Edge.([(1, 1), (2, 3)]))
+    g_simple_di = SimpleDiGraph(Edge.([(1, 1), (1, 2), (3, 4), (4, 3)]))
+
+    g0 = DummyValGraph(ValGraph(g_simple))
+    g1 = DummyValGraph(
+        ValGraph(g_simple;
+                 edgeval_types=(a=Int64, b=String),
+                 edgeval_initializer=(s, d) ->(a=s, b="$d")
+    ))
+    g2 = DummyValGraph(
+        ValDiGraph(g_simple_di;
+                 edgeval_types=(Int64,),
+                 edgeval_initializer=(s, d) ->(s,)
+    ))
+
+    @test get_edgeval(g0, 1, 1, :) == ()
+    @test get_edgeval(g0, 2, 3, :) == ()
+    @test get_edgeval(g0, 3, 2, :) == ()
+    @test get_edgeval(g1, 1, 1, :) == (a=1, b="1")
+    @test get_edgeval(g1, 2, 3, :) == (a=2, b="3")
+    @test get_edgeval(g1, 3, 2, :) == (a=2, b="3")
+    @test get_edgeval(g2, 1, 1, :) == (1,)
+    @test get_edgeval(g2, 1, 2, :) == (1,)
+    @test get_edgeval(g2, 3, 4, :) == (3,)
+    @test get_edgeval(g2, 4, 3, :) == (4,)
+
+    @test get_edgeval(g1, 1, 1, 1) == 1
+    @test get_edgeval(g1, 2, 3, 1) == 2
+    @test get_edgeval(g1, 3, 2, 1) == 2
+    @test get_edgeval(g1, 1, 1, 2) == "1"
+    @test get_edgeval(g1, 2, 3, 2) == "3"
+    @test get_edgeval(g1, 3, 2, 2) == "3"
+    @test get_edgeval(g2, 1, 1, 1) == 1
+    @test get_edgeval(g2, 1, 2, 1) == 1
+    @test get_edgeval(g2, 3, 4, 1) == 3
+    @test get_edgeval(g2, 4, 3, 1) == 4
+
+    @test get_edgeval(g1, 1, 1, :a) == 1
+    @test get_edgeval(g1, 2, 3, :a) == 2
+    @test get_edgeval(g1, 3, 2, :a) == 2
+    @test get_edgeval(g1, 1, 1, :b) == "1"
+    @test get_edgeval(g1, 2, 3, :b) == "3"
+    @test get_edgeval(g1, 3, 2, :b) == "3"
+
+    @test get_edgeval(g2, 1, 1) == 1
+    @test get_edgeval(g2, 1, 2) == 1
+    @test get_edgeval(g2, 3, 4) == 3
+    @test get_edgeval(g2, 4, 3) == 4
 end
 
 
