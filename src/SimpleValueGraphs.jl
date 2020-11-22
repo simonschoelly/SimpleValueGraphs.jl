@@ -42,6 +42,9 @@ export
     vertexvals_type,
     edgevals_type,
 
+    hasvertexkey,
+    hasedgekey,
+
     get_vertexval,
     set_vertexval!,
 

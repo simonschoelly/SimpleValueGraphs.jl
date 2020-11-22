@@ -1,41 +1,132 @@
-using SimpleValueGraphs: hasedgekey, hasedgekey_or_throw
-
+using SimpleValueGraphs: hasedgekey_or_throw, AbstractValGraph
 @testset "abstractvaluegraph" begin
+
+struct DummyValGraph{V, V_VALS, E_VALS, G <: AbstractValGraph{V, V_VALS, E_VALS}} <: AbstractValGraph{V, V_VALS, E_VALS}
+
+    wrapped::G
+end
+
+SimpleValueGraphs.nv(g::DummyValGraph) = nv(g.wrapped)
+SimpleValueGraphs.is_directed(::Type{<:DummyValGraph{V, V_VALS, E_VALS, G}}) where {V, V_VALS, E_VALS, G} = is_directed(G)
+SimpleValueGraphs.has_edge(g::DummyValGraph, s, d) = has_edge(g.wrapped, s, d)
+SimpleValueGraphs.get_edgeval(g::DummyValGraph, s, d, key::Integer) =
+    get_edgeval(g.wrapped, s, d, key)
+SimpleValueGraphs.get_vertexval(g::DummyValGraph, v, key::Integer) =
+    get_vertexval(g.wrapped, v, key)
+
+@testset "eltype" begin
+
+    @test eltype(DummyValGraph{Int8}) == Int8
+    @test eltype(DummyValGraph(ValGraph{UInt16}(3))) == UInt16
+end
+
+@testset "vertexvals_type" begin
+
+    @test vertexvals_type(DummyValGraph{Int64, Tuple{Integer, Union{Nothing, String}}}) ==
+                Tuple{Integer, Union{Nothing, String}}
+
+    g = DummyValGraph(ValDiGraph(
+        0;
+        vertexval_types=(a=Char, b=Vector{Bool}),
+        vertexval_initializer=undef
+    ))
+
+    expected_type = NamedTuple{(:a, :b), Tuple{Char, Vector{Bool}}}
+    @assert g isa AbstractValGraph{V, expected_type, E_VALS} where {V, E_VALS}
+    @test vertexvals_type(g) == expected_type
+end
+
+@testset "vertexvals_type" begin
+
+    @test edgevals_type(DummyValGraph{Int, Tuple{}, Tuple{Integer, Union{Nothing, String}}}) ==
+                Tuple{Integer, Union{Nothing, String}}
+
+    g = DummyValGraph(ValOutDiGraph(
+        0;
+        edgeval_types=(String,)
+    ))
+    expected_type = Tuple{String}
+    @assert g isa AbstractValGraph{V, V_VALS, expected_type} where {V, V_VALS}
+    @test edgevals_type(g) == expected_type
+end
 
 @testset "hasedgekey" begin
 
-    @test hasedgekey(ValGraph{Int, Tuple{Int, Int}}, 1)
-    @test hasedgekey(ValGraph{Int, Tuple{Int, Int}}, 2)
-    @test !hasedgekey(ValGraph{Int, Tuple{Int, Int}}, 3)
+    g1 = DummyValGraph(ValGraph(0; edgeval_types=(a=Int, b=String)))
+    g2 = DummyValGraph(ValDiGraph(0; edgeval_types=(Int, )))
 
-    @test hasedgekey(ValDiGraph{Int8, NamedTuple{(:a, :b), Tuple{Int, Int}}}, 1)
-    @test hasedgekey(ValDiGraph{Int8, NamedTuple{(:a, :b), Tuple{Int, Int}}}, 2)
-    @test !hasedgekey(ValDiGraph{Int8, NamedTuple{(:a, :b), Tuple{Int, Int}}}, 0)
-    @test hasedgekey(ValDiGraph{Int8, NamedTuple{(:a, :b), Tuple{Int, Int}}}, :a)
-    @test hasedgekey(ValDiGraph{Int8, NamedTuple{(:a, :b), Tuple{Int, Int}}}, :b)
-    @test !hasedgekey(ValDiGraph{Int8, NamedTuple{(:a, :b), Tuple{Int, Int}}}, :c)
+    @test hasedgekey(g1, :a)
+    @test hasedgekey(typeof(g1), :a)
+    @test hasedgekey(g1, :b)
+    @test hasedgekey(typeof(g1), :b)
+    @test !hasedgekey(g1, :c)
+    @test !hasedgekey(typeof(g1), :c)
+    @test hasedgekey(g1, 1)
+    @test hasedgekey(typeof(g1), 1)
+    @test hasedgekey(g1, 2)
+    @test hasedgekey(typeof(g1), 2)
+    @test !hasedgekey(g1, 0)
+    @test !hasedgekey(typeof(g1), 0)
+    @test !hasedgekey(g1, 3)
+    @test !hasedgekey(typeof(g1), 3)
 
-    g = ValOutDiGraph((s, d) -> (rand(Int), rand(Int)), cycle_digraph(5), edgeval_types=(Int, Int))
-    @test hasedgekey(g, 1)
-    @test hasedgekey(g, 2)
-    @test !hasedgekey(g, 3)
-
+    @test hasedgekey(g2, 1)
+    @test hasedgekey(typeof(g2), 1)
+    @test !hasedgekey(g2, 0)
+    @test !hasedgekey(typeof(g2), 2)
 end
 
-# TODO do we need to test this?
-@testset "hasedgekey_or_throw" begin
+@testset "hasvertexkey" begin
 
-    @test hasedgekey_or_throw(ValGraph{Int, Tuple{Int, Int}}, 1) === nothing
-    @test hasedgekey_or_throw(ValGraph{Int, Tuple{Int, Int}}, 2) === nothing
-    @test_throws ErrorException hasedgekey_or_throw(ValGraph{Int, Tuple{Int, Int}}, 3)
+    g1 = DummyValGraph(ValGraph(0; vertexval_types=(xy=Bool, ), vertexval_initializer=undef))
+    g2 = DummyValGraph(ValDiGraph(0; vertexval_types=(Int, Int), vertexval_initializer=undef))
 
-    g = ValDiGraph((s, d) -> (a=rand(Int), b=rand(Int)), cycle_digraph(5), edgeval_types=(a=Int, b=Int))
-    @test hasedgekey_or_throw(g, 1) === nothing
-    @test hasedgekey_or_throw(g, 2) === nothing
-    @test_throws ErrorException hasedgekey_or_throw(g, -1)
-    @test hasedgekey_or_throw(g, :a) === nothing
-    @test hasedgekey_or_throw(g, :b) === nothing
-    @test_throws ErrorException hasedgekey_or_throw(g, :c)
+    @test hasvertexkey(g1, :xy)
+    @test hasvertexkey(typeof(g1), :xy)
+    @test !hasvertexkey(g1, :uv)
+    @test !hasvertexkey(typeof(g1), :uv)
+    @test hasvertexkey(g1, 1)
+    @test hasvertexkey(typeof(g1), 1)
+    @test !hasvertexkey(g1, 0)
+    @test !hasvertexkey(typeof(g1), 0)
+    @test !hasvertexkey(g1, 2)
+    @test !hasvertexkey(typeof(g1), 2)
+
+
+    @test hasvertexkey(g2, Int8(1))
+    @test hasvertexkey(typeof(g2), Int8(1))
+    @test hasvertexkey(g2, UInt8(2))
+    @test hasvertexkey(typeof(g2), UInt8(2))
+    @test !hasvertexkey(g2, 0)
+    @test !hasvertexkey(typeof(g2), UInt8(0))
+    @test !hasvertexkey(g2, 3)
+    @test !hasvertexkey(typeof(g2), 3)
+end
+
+# TODO should we also test the non-exported hasvertexkey_or_throw, hasedgekey_or_throw?
+
+# TODO test show
+
+@testset "vertices" begin
+
+    g1 = DummyValGraph(ValGraph{UInt8}(2))
+    g2 = DummyValGraph(ValOutDiGraph{Int16}(3))
+
+    @test allunique(vertices(g1))
+    @test issetequal(vertices(g1), 1:2)
+    @test allunique(vertices(g2))
+    @test issetequal(vertices(g2), 1:3)
+end
+
+@testset "has_vertex" begin
+
+    g = DummyValGraph(ValGraph{UInt8}(2))
+
+    @test has_vertex(g, UInt8(1))
+    @test has_vertex(g, 2)
+    @test !has_vertex(g, 0)
+    @test !has_vertex(g, 3)
+    @test !has_vertex(g, -1)
 end
 
 

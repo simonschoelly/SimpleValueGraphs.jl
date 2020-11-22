@@ -48,12 +48,13 @@ LG.eltype(g::AbstractValGraph) = eltype(typeof(g))
 # TODO might also implement this for SimpleGraph
 """
     vertexvals_type(g::AbstractValGraph)
+    vertexvals_type(::Type{<:AbstractValGraph})
 
 Return the types of the vertex values of a graph `g`.
 """
 vertexvals_type(g::AbstractValGraph) = vertexvals_type(typeof(g))
 
-vertexvals_type(::Type{<:AbstractValGraph{V, V_VALS, E_VALS}}) where {V, V_VALS, E_VALS} = V_VALS
+vertexvals_type(::Type{<:AbstractValGraph{V, V_VALS}}) where {V, V_VALS} = V_VALS
 
 
 #  ------------------------------------------------------
@@ -63,6 +64,7 @@ vertexvals_type(::Type{<:AbstractValGraph{V, V_VALS, E_VALS}}) where {V, V_VALS,
 # TODO might also implement this for SimpleGraph
 """
     edgevals_type(g::AbstractValGraph)
+    edgevals_type(::Type{<:AbstractValGraph})
 
 Return the types of the edge values of a graph `g`.
 """
@@ -128,7 +130,7 @@ function hasvertexkey(
             G::Type{<:AbstractValGraph{V, V_VALS}},
             key::Integer) where {V, V_VALS <: AbstractTuple}
 
-    return key in OneTo(length(E_VALS.types))
+    return key in OneTo(length(V_VALS.types))
 end
 
 hasvertexkey(g::AbstractValGraph, key) = hasvertexkey(typeof(g), key)

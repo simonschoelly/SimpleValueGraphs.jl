@@ -14,7 +14,7 @@ function register_test(path::String)
 end
 
 register_test("AbstractTuples.jl")
-# register_test("abstractvaluegraph.jl")
+register_test("abstractvaluegraph.jl")
 register_test("integrations/SimpleGraphs.jl")
 # register_test("interface/constructors.jl")
 register_test("interface/edges.jl")
