@@ -25,6 +25,9 @@ import Base: show, iterate, length,
     getindex, size
 
 import LinearAlgebra
+import LinearAlgebra:
+    ishermitian, issymmetric,
+    adjoint, transpose
 
 
 export
@@ -35,8 +38,6 @@ export
     AbstractValEdge,
     ValEdge,
     ValDiEdge,
-
-    default_edgeval,
 
     vertexvals_type,
     edgevals_type,
