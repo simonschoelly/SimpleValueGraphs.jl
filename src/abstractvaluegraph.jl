@@ -503,9 +503,13 @@ function Base.iterate(iter::ValEdgeIter, state)
     graph = iter.graph
 
     while i <= length(verts)
-        while j <= length(verts) nothing
-            u = verts[i]
+        u = verts[i]
+        while j <= length(verts)
             v = verts[j]
+            if !is_directed(graph) && u > v
+                j += 1
+                continue
+            end
             if has_edge(graph, u, v)
                 new_state = (vertices=verts, i=i, j=j+1)
                 edge = eltype(iter)(u, v, get_edgeval(graph, u, v, :))

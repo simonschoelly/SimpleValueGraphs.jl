@@ -1,4 +1,4 @@
-using SimpleValueGraphs: hasedgekey_or_throw, AbstractValGraph
+using SimpleValueGraphs: hasedgekey_or_throw, AbstractValGraph, ValEdgeIter
 @testset "abstractvaluegraph" begin
 
 struct DummyValGraph{V, V_VALS, E_VALS, G <: AbstractValGraph{V, V_VALS, E_VALS}} <: AbstractValGraph{V, V_VALS, E_VALS}
@@ -127,6 +127,102 @@ end
     @test !has_vertex(g, 0)
     @test !has_vertex(g, 3)
     @test !has_vertex(g, -1)
+end
+
+@testset "edges" begin
+
+    g_simple = SimpleGraph(Edge.([(1, 1), (1, 2), (4, 5)]))
+    g_simple_di = SimpleDiGraph(Edge.([(1, 1), (1, 2), (4, 5), (5, 4)]))
+
+    g1 = DummyValGraph(ValGraph{UInt16}(g_simple;
+        edgeval_types=(a=Int64, b=Float64),
+        edgeval_initializer=(s, d) -> (a=s, b=d)
+    ))
+    g2 = DummyValGraph(ValDiGraph{Int16}(g_simple_di;
+        edgeval_types=(Int64, Float64),
+        edgeval_initializer=(s, d) -> (s, d)
+    ))
+
+    @test edges(g1) isa ValEdgeIter{typeof(g1)}
+    @test edges(g2) isa ValEdgeIter{typeof(g2)}
+
+    @test eltype(edges(g1)) == ValEdge{UInt16, NamedTuple{(:a, :b), Tuple{Int64, Float64}}}
+    @test eltype(edges(g2)) == ValDiEdge{Int16, Tuple{Int64, Float64}}
+
+    @test collect(edges(g1)) == [
+        ValEdge{UInt16, NamedTuple{(:a, :b), Tuple{Int64, Float64}}}(1, 1, (a=1, b=1.0)),
+        ValEdge{UInt16, NamedTuple{(:a, :b), Tuple{Int64, Float64}}}(1, 2, (a=1, b=2.0)),
+        ValEdge{UInt16, NamedTuple{(:a, :b), Tuple{Int64, Float64}}}(4, 5, (a=4, b=5.0))
+    ]
+    @test collect(edges(g2)) == [
+        ValDiEdge{Int16, Tuple{Int64, Float64}}(1, 1, (1, 1.0)),
+        ValDiEdge{Int16, Tuple{Int64, Float64}}(1, 2, (1, 2.0)),
+        ValDiEdge{Int16, Tuple{Int64, Float64}}(4, 5, (4, 5.0)),
+        ValDiEdge{Int16, Tuple{Int64, Float64}}(5, 4, (5, 4.0)),
+    ]
+end
+
+@testset "edgetype" begin
+
+    g1 = DummyValGraph(ValGraph{Int8}(0; edgeval_types=(Int16, Int32)))
+    g2 = DummyValGraph(ValDiGraph{UInt8}(0; edgeval_types=(a=UInt16, b=UInt32)))
+
+    @test edgetype(g1) == ValEdge{Int8, Tuple{Int16, Int32}}
+    @test edgetype(g2) == ValDiEdge{UInt8, NamedTuple{(:a, :b), Tuple{UInt16, UInt32}}}
+end
+
+@testset "ne" begin
+
+    g_simple = SimpleGraph(Edge.([(1, 1), (1, 2), (4, 5)]))
+    g_simple_di = SimpleDiGraph(Edge.([(1, 1), (1, 2), (4, 5), (5, 4)]))
+
+    g1 = DummyValGraph(ValGraph(g_simple))
+    g2 = DummyValGraph(ValDiGraph(g_simple_di))
+
+    @test ne(g1) == 3
+    @test ne(g2) == 4
+end
+
+@testset "outneightbors" begin
+
+    g_simple = SimpleGraph(Edge.([(1, 1), (1, 2), (4, 5)]))
+    g_simple_di = SimpleDiGraph(Edge.([(1, 1), (1, 2), (4, 5), (5, 4)]))
+
+    g1 = DummyValGraph(ValGraph(g_simple))
+    g2 = DummyValGraph(ValDiGraph(g_simple_di))
+
+    @test outneighbors(g1, 1) == [1, 2]
+    @test outneighbors(g1, 2) == [1]
+    @test outneighbors(g1, 3) == []
+    @test outneighbors(g1, 4) == [5]
+    @test outneighbors(g1, 5) == [4]
+
+    @test outneighbors(g2, 1) == [1, 2]
+    @test outneighbors(g2, 2) == []
+    @test outneighbors(g2, 3) == []
+    @test outneighbors(g2, 4) == [5]
+    @test outneighbors(g2, 5) == [4]
+end
+
+@testset "inneightbors" begin
+
+    g_simple = SimpleGraph(Edge.([(1, 1), (1, 2), (4, 5)]))
+    g_simple_di = SimpleDiGraph(Edge.([(1, 1), (1, 2), (4, 5), (5, 4)]))
+
+    g1 = DummyValGraph(ValGraph(g_simple))
+    g2 = DummyValGraph(ValDiGraph(g_simple_di))
+
+    @test inneighbors(g1, 1) == [1, 2]
+    @test inneighbors(g1, 2) == [1]
+    @test inneighbors(g1, 3) == []
+    @test inneighbors(g1, 4) == [5]
+    @test inneighbors(g1, 5) == [4]
+
+    @test inneighbors(g2, 1) == [1]
+    @test inneighbors(g2, 2) == [1]
+    @test inneighbors(g2, 3) == []
+    @test inneighbors(g2, 4) == [5]
+    @test inneighbors(g2, 5) == [4]
 end
 
 

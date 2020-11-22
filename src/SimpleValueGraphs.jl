@@ -22,7 +22,7 @@ import LightGraphs:
     adjacency_matrix
 
 import Base: show, iterate, length,
-    getindex, size
+    getindex, size, ==
 
 import LinearAlgebra
 import LinearAlgebra:
@@ -93,6 +93,7 @@ export
     getindex,
     show,
     zero,
+    ==,
 
     # overridden methods from LinearAlgebra
     ishermitian,

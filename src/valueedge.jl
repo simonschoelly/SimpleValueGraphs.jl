@@ -173,6 +173,16 @@ LG.is_directed(::Type{<:ValEdge}) = false
 LG.is_directed(::Type{<:ValDiEdge}) = true
 LG.is_directed(e::AbstractValEdge) = is_directed(typeof(e))
 
+#  ------------------------------------------------------
+#  ==
+#  ------------------------------------------------------
+
+==(lhs::ValEdge, rhs::ValEdge) =
+    lhs.src == rhs.src && lhs.dst == lhs.dst && lhs.values == rhs.values
+
+==(lhs::ValDiEdge, rhs::ValDiEdge) =
+    lhs.src == rhs.src && lhs.dst == lhs.dst && lhs.values == rhs.values
+
 
 # ======================================================
 # show

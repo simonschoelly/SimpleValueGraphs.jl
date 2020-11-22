@@ -235,7 +235,7 @@ for G in (:ValGraph, :ValOutDiGraph, :ValDiGraph)
     @eval function $G{V}(n::Integer; vertexval_types::AbstractTupleOfTypes=(), edgeval_types::AbstractTupleOfTypes=(), vertexval_initializer=nothing) where {V <: Integer}
         V_VALS = construct_E_VAL(vertexval_types)
         E_VALS = construct_E_VAL(edgeval_types)
-        return $G{V, E_VALS, V_VALS}(V(n), vertexval_initializer)
+        return $G{V, V_VALS, E_VALS}(V(n), vertexval_initializer)
     end
 end
 
