@@ -58,7 +58,7 @@ end
 Create an `AdjacencyMatrix` view from a graph `g`.
 
 ### See also
-[`AdjacencyMatrix`](@ref), [`ValMatrix`](@ref), [`weigths`](@ref)
+[`AdjacencyMatrix`](@ref), [`ValMatrix`](@ref), [`weights`](@ref)
 
 ### Examples
 
@@ -111,7 +111,7 @@ the edge values specified by `key`. Entries that are not in the graph
 are represented by `zero_value` in the matrix.
 
 ### See also
-[`AdjacencyMatrix`](@ref), [`adjacency_matrix`](@ref), [`weigths`](@ref)
+[`AdjacencyMatrix`](@ref), [`adjacency_matrix`](@ref), [`weights`](@ref)
 
 ### Examples
 ```jldoctest
@@ -133,7 +133,7 @@ julia> ValMatrix(gv, 1, 0.0)
 """
 function ValMatrix(g::AbstractValGraph, key::Union{Integer, Symbol}, zero_value)
 
-    T = E_VAL_for_key(edgevals_type(g), key)
+    T = edgevals_type(g, key)
     Z = typeof(zero_value)
     Tv = Union{T, Z}
 
@@ -175,11 +175,11 @@ without any edge values.
 """
 function weights end
 
-LG.weights(g::AbstractValGraph{V, V_VALS, <: AbstractNTuple{0}}) where {V, V_VALS} = LG.DefaultDistance(nv(g))
+LG.weights(g::ZeroEdgeValGraph) = LG.DefaultDistance(nv(g))
 
-LG.weights(g::AbstractValGraph{V, V_VALS, <: AbstractNTuple{1}}; kwargs...) where {V, V_VALS} = LG.weights(g, 1; kwargs...)
+LG.weights(g::OneEdgeValGraph; kwargs...) = LG.weights(g, 1; kwargs...)
 
-function LG.weights(g::AbstractValGraph, key; zerovalue=zero(E_VAL_for_key(edgevals_type(g), key)))
+function LG.weights(g::AbstractValGraph, key; zerovalue=zero(edgevals_type(g, key)))
 
     return ValMatrix(g, key, zerovalue)
 end

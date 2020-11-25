@@ -1,6 +1,6 @@
 using LinearAlgebra: ishermitian, issymmetric
 using SparseArrays: AbstractSparseMatrix
-using SimpleValueGraphs: E_VAL_for_key, OneEdgeValGraph
+using SimpleValueGraphs: OneEdgeValGraph
 using LightGraphs: DefaultDistance
 
 @testset "matrices" begin
@@ -71,7 +71,7 @@ using LightGraphs: DefaultDistance
             @testset "g::$(typeof(g))" begin
                 for key in allkeys_for_E_VALS(E_VALS)
 
-                    @testset "key = $key, zerovalue=$zv" for zv in (nothing, rand_sample(E_VAL_for_key(E_VALS, key)))
+                    @testset "key = $key, zerovalue=$zv" for zv in (nothing, rand_sample(fieldtype(E_VALS, key)))
 
                         M = ValMatrix(g, key, zv)
 
@@ -85,7 +85,7 @@ using LightGraphs: DefaultDistance
                             end
                         end
 
-                        if E_VAL_for_key(E_VALS, key) <: Real && zv isa Real && g isa ValGraph
+                        if fieldtype(E_VALS, key) <: Real && zv isa Real && g isa ValGraph
                             @testset "ishermitian" begin
                                 @test ishermitian(M) == true
                             end
@@ -97,7 +97,7 @@ using LightGraphs: DefaultDistance
                             end
                         end
 
-                        if E_VAL_for_key(E_VALS, key) <: Real && zv isa Real && g isa ValGraph
+                        if fieldtype(E_VALS, key) <: Real && zv isa Real && g isa ValGraph
                             @testset "isadjoint" begin
                                 @test adjoint(M) === M
                             end
@@ -117,10 +117,10 @@ using LightGraphs: DefaultDistance
                                 @test M == Mw
                             end
 
-                            if E_VAL_for_key(E_VALS, key) isa Number
+                            if fieldtype(E_VALS, key) isa Number
                                 @testset "weights(g, $key)" begin
                                     Mw = weights(g, key)
-                                    @test M isa ValMatrix{E_VAL_for_key(E_VALS, key), typeof(g), key}
+                                    @test M isa ValMatrix{fieldtype(E_VALS, key), typeof(g), key}
                                 end
                             end
 
@@ -130,10 +130,10 @@ using LightGraphs: DefaultDistance
                                     @test M == Mw
                                 end
 
-                                if E_VAL_for_key(E_VALS, key) isa Number
+                                if fieldtype(E_VALS, key) isa Number
                                     @testset "weights(g)" begin
                                         Mw = weights(g)
-                                        @test M isa ValMatrix{E_VAL_for_key(E_VALS, key), typeof(g), key}
+                                        @test M isa ValMatrix{fieldtype(E_VALS, key), typeof(g), key}
                                     end
                                 end
                             end

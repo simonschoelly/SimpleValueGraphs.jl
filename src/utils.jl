@@ -9,16 +9,6 @@ const AbstractTupleOfTypes = Union{TupleOfTypes, NamedTupleOfTypes}
 # TODO we might want to replace this with a proper wrapper around Adjlist
 const Adjlist{T} = Vector{Vector{T}}
 
-# TODO better name, do we still need these?
-#  Seems to be only used in src/matrices.jl
-function E_VAL_for_key(E_VALS::Type{<:Tuple}, key)
-    return E_VALS.types[key]
-end
-
-# TODO  Seems to be only used in src/matrices.jl
-function E_VAL_for_key(E_VALS::Type{<:NamedTuple}, key)
-    return NamedTuple{Tuple(E_VALS.names)}(E_VALS.types)[key]
-end
 
 
 # ==========

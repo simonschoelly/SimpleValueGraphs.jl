@@ -72,6 +72,25 @@ edgevals_type(g::AbstractValGraph) = edgevals_type(typeof(g))
 
 edgevals_type(::Type{<:AbstractValGraph{V, V_VALS, E_VALS}}) where {V, V_VALS, E_VALS} = E_VALS
 
+# TODO test
+"""
+    edgevals_type(g::AbstractValGraph, key)
+    edgevals_type(::Type{<:AbstractValGraph}, key)
+
+Return the type of the edge values for a specific `key` of a graph `g`.
+"""
+edgevals_type(g::AbstractValGraph, key) = edgevals_type(typeof(g), key)
+
+function edgevals_type(G::Type{<:AbstractValGraph}, key::Integer)
+
+    return fieldtype(edgevals_type(G), Int(key))
+end
+
+function edgevals_type(G::Type{<:AbstractValGraph{V, V_VALS, <: NamedTuple}}, key::Symbol) where {V, V_VALS}
+
+    return fieldtype(edgevals_type(G), key)
+end
+
 
 #  ------------------------------------------------------
 #  hasedgekey & hasedgekey_or_throw
