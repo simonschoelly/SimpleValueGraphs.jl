@@ -155,9 +155,9 @@ function Base.show(io::IO, ::MIME"text/plain", g::AbstractValGraph)
     println(io)
     print(io, "              eltype: $(eltype(g))")
     println(io)
-    print(io, "  vertex value types: $(tuple_of_types(vertexvals_type(g)))")
+    print(io, "  vertex value types: $(typetuple(vertexvals_type(g)))")
     println(io)
-    print(io, "    edge value types: $(tuple_of_types(edgevals_type(g)))")
+    print(io, "    edge value types: $(typetuple(edgevals_type(g)))")
 end
 
 

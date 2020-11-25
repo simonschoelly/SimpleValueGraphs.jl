@@ -1,4 +1,4 @@
-import SimpleValueGraphs: tuple_of_types, OneEdgeValGraph
+import SimpleValueGraphs: typetuple, OneEdgeValGraph
 
 @testset "edge iterator $G" for
     G in (ValGraph, ValOutDiGraph, ValDiGraph),
@@ -9,7 +9,7 @@ import SimpleValueGraphs: tuple_of_types, OneEdgeValGraph
     @testset "Params: $G{$V, $E_VALS}, gs = $info" begin
 
         g = G(gs;
-              edgeval_types=tuple_of_types(E_VALS),
+              edgeval_types=typetuple(E_VALS),
               edgeval_initializer=(s,d) -> rand_sample(E_VALS)
         )
 
@@ -59,7 +59,7 @@ end
     @testset "Params: $G{$V, $E_VALS}, gs = $info" begin
 
         g = G(gs;
-            edgeval_types=tuple_of_types(E_VALS),
+            edgeval_types=typetuple(E_VALS),
             edgeval_initializer=(s,d) -> rand_sample(E_VALS)
         )
 
@@ -87,7 +87,7 @@ end
     @testset "Params: $G{$V, $E_VALS}, gs = $info" begin
 
         g = G(gs;
-            edgeval_types=tuple_of_types(E_VALS),
+            edgeval_types=typetuple(E_VALS),
             edgeval_initializer=(s,d) -> rand_sample(E_VALS)
         )
 
@@ -115,7 +115,7 @@ end
     @testset "Params: $G{$V, $E_VALS}, gs = $info" begin
 
         g = G(gs;
-            edgeval_types=tuple_of_types(E_VALS),
+            edgeval_types=typetuple(E_VALS),
             edgeval_initializer=(s,d) -> rand_sample(E_VALS)
         )
 
@@ -145,7 +145,7 @@ end
     @testset "Params: $G{$V, $E_VALS}, gs = $info" begin
 
         g = G(gs;
-            edgeval_types=tuple_of_types(E_VALS),
+            edgeval_types=typetuple(E_VALS),
             edgeval_initializer=(s,d) -> rand_sample(E_VALS)
         )
 
@@ -175,7 +175,7 @@ end
     @testset "Params: $G{$V, $E_VALS}, gs = $info" begin
 
         g = G(gs;
-            edgeval_types=tuple_of_types(E_VALS),
+            edgeval_types=typetuple(E_VALS),
             edgeval_initializer=(s,d) -> rand_sample(E_VALS)
         )
 

@@ -1,5 +1,5 @@
 
-import SimpleValueGraphs: tuple_of_types, default_edgeval_types
+import SimpleValueGraphs: typetuple, default_edgeval_types
 
 @testset "SimpleGraphs.jl" begin
 

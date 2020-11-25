@@ -9,7 +9,7 @@ Module that provides additional functionally for `Tuple` and `NamedTuple`
 """
 module AbstractTuples
 
-export AbstractTuple, NamedNTuple, AbstractNTuple, typetuple_to_type
+export AbstractTuple, NamedNTuple, AbstractNTuple, typetuple_to_type, typetuple
 
 
 """
@@ -95,11 +95,58 @@ false
 const AbstractNTuple{N, T} = Union{NTuple{N, T}, NamedNTuple{N, T}}
 
 
-# TODO document, maybe restrict to types
+# TODO maybe restrict to types
+"""
+    typetuple_to_type(t::Tuple)
+    typetuple_to_type(t::NamedTuple)
+
+Convert a Tuple or Named tuple containing types to a Tuple or NamedTuple with
+these types.
+
+### Examples
+
+```jldoctest
+julia> typetuple_to_type((Int64, String))
+Tuple{Int64,String}
+
+julia> typetuple_to_type((a = String, b = Float64))
+NamedTuple{(:a, :b),Tuple{String,Float64}}
+```
+"""
+function typetuple_to_type end
+
 typetuple_to_type(tup::Tuple) = Tuple{ (T for T in tup)... }
 typetuple_to_type(tup::NamedTuple) =
     NamedTuple{ Tuple(typeof(tup).names), Tuple{ (T for T in tup)... }}
 
+"""
+    typetuple(::Type{<:Tuple})
+    typetuple(::Type{<:NamedTuple})
+
+Convert a Tuple or NamedTuple type to a Tuple or NamedTuple
+containing the types of the tuple.
+
+### Examples
+
+```jldoctest
+julia> typetuple(Tuple{Int64, String})
+(Int64, String)
+
+julia> typetuple(typeof(a = "first", b = 2.0))
+(a = String, b = Float64)
+```
+"""
+function typetuple end
+
+function typetuple(TT::Type{<:Tuple})
+
+    return Tuple(TT.types)
+end
+
+function typetuple(TT::Type{<:NamedTuple})
+
+    return NamedTuple{Tuple(TT.names)}(TT.types)
+end
 
 
 end # Module
