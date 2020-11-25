@@ -1,6 +1,6 @@
 using SimpleValueGraphs.AbstractTuples
 
-import SimpleValueGraphs: tuple_of_types, default_edgeval_types, default_eltype
+import SimpleValueGraphs: default_eltype
 
 
 function testset_toplogical_equivalent(g::SimpleGraph, gv::ValGraph)

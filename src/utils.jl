@@ -1,9 +1,6 @@
 
 using SimpleValueGraphs.AbstractTuples
 
-const TupleOfTypes = Tuple{Vararg{Type}}
-const NamedTupleOfTypes = NamedTuple{S, <:Tuple{Vararg{Type}}} where {S}
-const AbstractTupleOfTypes = Union{TupleOfTypes, NamedTupleOfTypes}
 
 
 # TODO we might want to replace this with a proper wrapper around Adjlist

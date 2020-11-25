@@ -113,13 +113,6 @@ The default eltype to use in a graph constructor when no eltype is specified.
 """
 const default_eltype = Int32
 
-# TODO these helpers maybe belong somewhere else and need a better name
-construct_E_VAL(edgeval_types::Tuple) = Tuple{ (T for T in edgeval_types)... }
-construct_E_VAL(edgeval_types::NamedTuple) =
-    NamedTuple{ Tuple(typeof(edgeval_types).names), Tuple{ (T for T in edgeval_types)... }}
-
-const default_edgeval_types = (weight=Float64,)
-
 function create_edgevals(n, E_VAL::Type{<:Tuple})
     return Tuple( Adjlist{T}(n) for T in E_VAL.types )
 end
@@ -226,15 +219,18 @@ end
 
 
 for G in (:ValGraph, :ValOutDiGraph, :ValDiGraph)
-    @eval function $G(n::Integer; vertexval_types::AbstractTupleOfTypes=(), edgeval_types::AbstractTupleOfTypes=(), vertexval_initializer=nothing)
-        V_VALS = construct_E_VAL(vertexval_types)
-        E_VALS = construct_E_VAL(edgeval_types)
+
+    @eval function $G(n::Integer; vertexval_types::AbstractTypeTuple=(), edgeval_types::AbstractTypeTuple=(), vertexval_initializer=nothing)
+
+        V_VALS = typetuple_to_type(vertexval_types)
+        E_VALS = typetuple_to_type(edgeval_types)
         return $G{default_eltype, V_VALS, E_VALS}(n, vertexval_initializer)
     end
 
-    @eval function $G{V}(n::Integer; vertexval_types::AbstractTupleOfTypes=(), edgeval_types::AbstractTupleOfTypes=(), vertexval_initializer=nothing) where {V <: Integer}
-        V_VALS = construct_E_VAL(vertexval_types)
-        E_VALS = construct_E_VAL(edgeval_types)
+    @eval function $G{V}(n::Integer; vertexval_types::AbstractTypeTuple=(), edgeval_types::AbstractTypeTuple=(), vertexval_initializer=nothing) where {V <: Integer}
+
+        V_VALS = typetuple_to_type(vertexval_types)
+        E_VALS = typetuple_to_type(edgeval_types)
         return $G{V, V_VALS, E_VALS}(V(n), vertexval_initializer)
     end
 end

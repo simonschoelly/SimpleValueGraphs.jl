@@ -9,8 +9,15 @@ Module that provides additional functionally for `Tuple` and `NamedTuple`
 """
 module AbstractTuples
 
-export AbstractTuple, NamedNTuple, AbstractNTuple, typetuple_to_type, typetuple
+export
+    AbstractTuple,
+    NamedNTuple, AbstractNTuple,
+    TypeTuple, NamedTypeTuple, AbstractTypeTuple,
+    typetuple_to_type, typetuple
 
+# ======================================================
+# Abstract tuple types
+# ======================================================
 
 """
     AbstractTuple{<: Tuple}
@@ -95,7 +102,14 @@ false
 const AbstractNTuple{N, T} = Union{NTuple{N, T}, NamedNTuple{N, T}}
 
 
-# TODO maybe restrict to types
+# ======================================================
+# Type tuples
+# ======================================================
+
+const TypeTuple = Tuple{Vararg{Type}}
+const NamedTypeTuple = NamedTuple{S, <:Tuple{Vararg{Type}}} where {S}
+const AbstractTypeTuple = Union{TypeTuple, NamedTypeTuple}
+
 """
     typetuple_to_type(t::Tuple)
     typetuple_to_type(t::NamedTuple)
@@ -115,8 +129,8 @@ NamedTuple{(:a, :b),Tuple{String,Float64}}
 """
 function typetuple_to_type end
 
-typetuple_to_type(tup::Tuple) = Tuple{ (T for T in tup)... }
-typetuple_to_type(tup::NamedTuple) =
+typetuple_to_type(tup::TypeTuple) = Tuple{ (T for T in tup)... }
+typetuple_to_type(tup::NamedTypeTuple) =
     NamedTuple{ Tuple(typeof(tup).names), Tuple{ (T for T in tup)... }}
 
 """
