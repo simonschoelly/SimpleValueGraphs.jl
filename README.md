@@ -1,6 +1,7 @@
 # SimpleValueGraphs.jl
 ![](https://img.shields.io/badge/lifecycle-experimental-orange.svg)
 [![Build Status](https://travis-ci.com/simonschoelly/SimpleValueGraphs.jl.svg?branch=master)](https://travis-ci.com/simonschoelly/SimpleValueGraphs.jl)
+![CI](https://github.com/simonschoelly/SimpleValueGraphs.jl/workflows/CI/badge.svg?branch=master)
 [![codecov](https://codecov.io/gh/simonschoelly/SimpleValueGraphs.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/simonschoelly/SimpleValueGraphs.jl)
 [![](https://img.shields.io/badge/chat-Zulip%23graphs-yellow)](https://julialang.zulipchat.com/#narrow/stream/228745-graphs)
 
