@@ -154,18 +154,18 @@ end
         edgeval_initializer=(s, d) -> (s, d)
     ))
 
-    @test edges(g1) isa ValEdgeIter{typeof(g1)}
-    @test edges(g2) isa ValEdgeIter{typeof(g2)}
+    @test edges(g1, :) isa ValEdgeIter{typeof(g1)}
+    @test edges(g2, :) isa ValEdgeIter{typeof(g2)}
 
-    @test eltype(edges(g1)) == ValEdge{UInt16, NamedTuple{(:a, :b), Tuple{Int64, Float64}}}
-    @test eltype(edges(g2)) == ValDiEdge{Int16, Tuple{Int64, Float64}}
+    @test eltype(edges(g1, :)) == ValEdge{UInt16, NamedTuple{(:a, :b), Tuple{Int64, Float64}}}
+    @test eltype(edges(g2, :)) == ValDiEdge{Int16, Tuple{Int64, Float64}}
 
-    @test collect(edges(g1)) == [
+    @test collect(edges(g1, :)) == [
         ValEdge{UInt16, NamedTuple{(:a, :b), Tuple{Int64, Float64}}}(1, 1, (a=1, b=1.0)),
         ValEdge{UInt16, NamedTuple{(:a, :b), Tuple{Int64, Float64}}}(1, 2, (a=1, b=2.0)),
         ValEdge{UInt16, NamedTuple{(:a, :b), Tuple{Int64, Float64}}}(4, 5, (a=4, b=5.0))
     ]
-    @test collect(edges(g2)) == [
+    @test collect(edges(g2, :)) == [
         ValDiEdge{Int16, Tuple{Int64, Float64}}(1, 1, (1, 1.0)),
         ValDiEdge{Int16, Tuple{Int64, Float64}}(1, 2, (1, 2.0)),
         ValDiEdge{Int16, Tuple{Int64, Float64}}(4, 5, (4, 5.0)),
@@ -178,8 +178,8 @@ end
     g1 = DummyValGraph(ValGraph{Int8}(0; edgeval_types=(Int16, Int32)))
     g2 = DummyValGraph(ValDiGraph{UInt8}(0; edgeval_types=(a=UInt16, b=UInt32)))
 
-    @test edgetype(g1) == ValEdge{Int8, Tuple{Int16, Int32}}
-    @test edgetype(g2) == ValDiEdge{UInt8, NamedTuple{(:a, :b), Tuple{UInt16, UInt32}}}
+    @test edgetype(g1) == ValEdge{Int8, Tuple{}}
+    @test edgetype(g2) == ValDiEdge{UInt8, Tuple{}}
 end
 
 @testset "ne" begin

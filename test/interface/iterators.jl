@@ -13,7 +13,7 @@ import SimpleValueGraphs: typetuple, OneEdgeValGraph
               edgeval_initializer=(s,d) -> rand_sample(E_VALS)
         )
 
-        iter = edges(g)
+        iter = edges(g, :)
 
         E_should_be = (is_directed(g) ? ValDiEdge : ValEdge){V, E_VALS}
 
@@ -183,7 +183,7 @@ end
             lexicographical_sorted = true
             s = 0
             d = 0
-            for e in edges(g)
+            for e in edges(g, :)
                 s_new = src(e)
                 d_new = dst(e)
 
@@ -196,19 +196,19 @@ end
         end
 
         @testset "correct src, dst" begin
-            @test all(edges(g)) do e
+            @test all(edges(g, :)) do e
                 has_edge(g, src(e), dst(e))
             end
         end
 
         @testset "correct values" begin
-            @test all(edges(g)) do e
+            @test all(edges(g, :)) do e
                 get_edgeval(e, :) == get_edgeval(g, src(e), dst(e), :)
             end
         end
 
         @testset "correct length" begin
-            @test length(edges(g)) == ne(g)
+            @test length(edges(g, :)) == ne(g)
         end
     end
 end

@@ -188,7 +188,13 @@ LG.vertices(g::AbstractValGraph) = OneTo{eltype(g)}(nv(g))
 
 LG.has_vertex(g::AbstractValGraph, v) = v ∈ vertices(g)
 
-LG.edges(g::AbstractValGraph) = ValEdgeIter(g)
+"""
+    edges(g::AbstractValGraph[, key])
+
+Return the edges of `g`. By default add no edge values
+but when `key=:` then add edge values.
+"""
+LG.edges(g::AbstractValGraph, key=nothing) = ValEdgeIter(g, key)
 
 LG.edgetype(g::AbstractValGraph) = eltype(edges(g))
 
@@ -492,16 +498,32 @@ inedgevals(g::AbstractValGraph, v, key::Integer) =
 # Edge Iterator
 # ======================================================
 
-struct ValEdgeIter{G<:AbstractValGraph} <: AbstractEdgeIter
+# TODO support also Int as key
+struct ValEdgeIter{G<:AbstractValGraph, key} <: AbstractEdgeIter
     graph::G
+
+    function ValEdgeIter{G}(g::G, key::Union{Colon, Nothing}) where {G}
+
+        return new{G, key}(g)
+    end
 end
+
+ValEdgeIter(g, key) = ValEdgeIter{typeof(g)}(g, key)
 
 Base.length(iter::ValEdgeIter) = count(_ -> true, iter)
 
-function Base.eltype(::Type{<:ValEdgeIter{G}}) where
-        {V, V_VALS, E_VALS, G <: AbstractValGraph{V, V_VALS, E_VALS}}
+function Base.eltype(::Type{<:ValEdgeIter{G, key}}) where
+        {V, V_VALS, E_VALS, G <: AbstractValGraph{V, V_VALS, E_VALS}, key}
 
-    return (is_directed(G) ? ValDiEdge : ValEdge){V, E_VALS}
+    E = is_directed(G) ? ValDiEdge : ValEdge
+
+    if key == nothing
+        # TODO it might better to return an empty named tuple type in case
+        # E_VALS is a named tuple, but then we need to adjust the iterators
+        return E{V, Tuple{}}
+    end
+
+    return E{V, E_VALS}
 end
 Base.eltype(iter::ValEdgeIter) = eltype(typeof(iter))
 
@@ -514,7 +536,7 @@ function Base.iterate(iter::ValEdgeIter)
     iterate(iter, (vertices=verts, i=1, j=1))
 end
 
-function Base.iterate(iter::ValEdgeIter, state)
+function Base.iterate(iter::ValEdgeIter{G, key}, state) where {G, key}
 
     verts = state.vertices
     i = state.i
@@ -531,7 +553,11 @@ function Base.iterate(iter::ValEdgeIter, state)
             end
             if has_edge(graph, u, v)
                 new_state = (vertices=verts, i=i, j=j+1)
-                edge = eltype(iter)(u, v, get_edgeval(graph, u, v, :))
+                edge = if key == nothing
+                        eltype(iter)(u, v, ())
+                    else
+                        eltype(iter)(u, v, get_edgeval(graph, u, v, :))
+                    end
                 return (edge, new_state)
             end
             j += 1
