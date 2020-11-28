@@ -464,6 +464,13 @@ function LG.add_vertex!(g::ValDiGraph{V, V_VALS, E_VALS}, values::V_VALS) where 
     return true
 end
 
+
+#  ------------------------------------------------------
+#  rem_vertex!
+#  ------------------------------------------------------
+
+# TODO
+
 #  ------------------------------------------------------
 #  has_edge
 #  ------------------------------------------------------
@@ -845,18 +852,24 @@ function set_vertexval!(g::ValGraph, v::Integer, key::Integer, value)
 
     has_vertex(g, v) || return false
     g.vertexvals[key][v] = value
+
+    return true
 end
 
 function set_vertexval!(g::ValOutDiGraph, v::Integer, key::Integer, value)
 
     has_vertex(g, v) || return false
     g.vertexvals[key][v] = value
+
+    return true
 end
 
 function set_vertexval!(g::ValDiGraph, v::Integer, key::Integer, value)
 
     has_vertex(g, v) || return false
     g.vertexvals[key][v] = value
+
+    return true
 end
 
 
