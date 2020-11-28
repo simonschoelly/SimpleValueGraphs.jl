@@ -295,7 +295,7 @@ Throw an exception if the graph does not contain such an edge or if the key is n
 For graphs that only have one value per edge, `key` can be omitted.
 
 ### See also
-[`get_edgeval_or`](@ref), [`set_val!`](@ref)
+[`get_edgeval_or`](@ref), [`set_edgeval!`](@ref)
 
 ### Examples
 ```jldoctest
@@ -331,10 +331,11 @@ Return all values associated with the edge `s -> d` in `g`.
 Throw an exception if the graph does not contain such an edge.
 
 ### See also
-[`get_edgeval_or`](@ref), [`set_val!`](@ref)
+[`get_edgeval_or`](@ref), [`set_edgeval!`](@ref)
 
 ### Examples
 ```jldoctest
+julia> using LightGraphs: path_digraph
 julia> gv = ValDiGraph((s, d) -> (rand(), 10), path_digraph(3), (a=Float64, b=Int))
 {3, 2} directed ValDiGraph{Int64} graph with multiple named edge values of types (a = Float64, b = Int64).
 

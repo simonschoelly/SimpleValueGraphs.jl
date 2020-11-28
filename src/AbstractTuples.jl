@@ -35,7 +35,7 @@ I.e. it does not hold that `AbstractTuple{Tuple{Int}} <: AbstractTuple{Tuple{Int
 
 ### Examples
 
-```jldoctest
+```julia
 julia> (1, "xyz") isa AbstractTuple{Tuple{Int, String}}
 true
 
@@ -62,7 +62,7 @@ also `NamedNTuple` not covariant.
 
 ### Examples
 
-```jldoctest
+```julia
 julia> (a = 1, b = 2) isa NTuple{2, Int}
 true
 
@@ -85,7 +85,7 @@ A Union of an `NTuple` and a `NamedNTuple`.
 
 ### Examples
 
-```jldoctest
+```julia
 julia> (1, 2, 3) isa AbstractNTuple{3, Int}
 true
 
@@ -119,7 +119,7 @@ these types.
 
 ### Examples
 
-```jldoctest
+```julia
 julia> typetuple_to_type((Int64, String))
 Tuple{Int64,String}
 
@@ -142,7 +142,7 @@ containing the types of the tuple.
 
 ### Examples
 
-```jldoctest
+```julia
 julia> typetuple(Tuple{Int64, String})
 (Int64, String)
 

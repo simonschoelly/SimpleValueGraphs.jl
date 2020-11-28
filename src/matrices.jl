@@ -63,9 +63,9 @@ Create an `AdjacencyMatrix` view from a graph `g`.
 ### Examples
 
 ```jldoctest
+julia> using LightGraphs> star_graph
 julia> gv = ValGraph((s, d) -> (1.0, ), star_graph(4), (Float64, ))
 {4, 3} undirected ValGraph{Int64} graph with edge values of type (Float64,).
-
 
 julia> adjacency_matrix(gv)
 4×4 AdjacencyMatrix{ValGraph{Int64,Tuple{Float64},Tuple{Array{Array{Float64,1},1}}}}:
