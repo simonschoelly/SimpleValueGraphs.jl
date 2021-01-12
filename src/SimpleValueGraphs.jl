@@ -1,6 +1,6 @@
 module SimpleValueGraphs
 
-using LightGraphs: AbstractGraph, AbstractEdgeIter, AbstractEdge
+using LightGraphs: AbstractGraph, AbstractEdgeIter, AbstractEdge, num_self_loops
 
 using LightGraphs.SimpleGraphs: AbstractSimpleGraph, AbstractSimpleEdge,
     SimpleGraph, SimpleDiGraph, SimpleEdge, IsDirected
@@ -28,6 +28,9 @@ import LinearAlgebra
 import LinearAlgebra:
     ishermitian, issymmetric,
     adjoint, transpose
+
+import SparseArrays:
+    SparseMatrixCSC
 
 
 export
@@ -99,7 +102,10 @@ export
     ishermitian,
     adjoint,
     transpose,
-    issymmetric
+    issymmetric,
+
+    # overriden methods from SparseArrays
+    SparseMatrixCSC
 
 # ==== Includes ===========================
 

@@ -83,6 +83,58 @@ LinearAlgebra.issymmetric(::AdjacencyMatrix{<:ValGraph}) = true
 LinearAlgebra.adjoint(matrix::AdjacencyMatrix{<:ValGraph}) = matrix
 LinearAlgebra.transpose(matrix::AdjacencyMatrix{<:ValGraph}) = matrix
 
+
+##  ------------------------------------------------------
+##  SparseMatrixCSC
+##  ------------------------------------------------------
+
+function SparseMatrixCSC(matrix::AdjacencyMatrix{<: Union{ValGraph, ValDiGraph}})
+
+    g = matrix.graph
+    n = Int(nv(g))
+    nnz = is_directed(g) ? ne(g) : (2 * ne(g) - num_self_loops(g))
+
+    colptr = Vector{Int}(undef, n + 1)
+    rowval = Vector{Int}(undef, nnz)
+    nzval = fill(true, nnz)
+
+    nnz_idx = 1
+    @inbounds colptr[1] = 1
+    for v in vertices(g)
+        for u in inneighbors(g, v)
+            @inbounds rowval[nnz_idx] = u
+            nnz_idx += 1
+        end
+        @inbounds colptr[v + 1] = nnz_idx
+    end
+
+    return SparseMatrixCSC(n, n, colptr, rowval, nzval)
+end
+
+# TODO Create directly without transpose
+function SparseMatrixCSC(matrix::AdjacencyMatrix{<: ValOutDiGraph})
+
+    g = matrix.graph
+    n = Int(nv(g))
+    nnz = is_directed(g) ? ne(g) : (2 * ne(g) - num_self_loops(g))
+
+    colptr = Vector{Int}(undef, n + 1)
+    rowval = Vector{Int}(undef, nnz)
+    nzval = fill(true, nnz)
+
+    nnz_idx = 1
+    @inbounds colptr[1] = 1
+    for u in vertices(g)
+        for v in outneighbors(g, u)
+            @inbounds rowval[nnz_idx] = v
+            nnz_idx += 1
+        end
+        @inbounds colptr[u + 1] = nnz_idx
+    end
+
+    return SparseMatrixCSC(transpose(SparseMatrixCSC(n, n, colptr, rowval, nzval)))
+end
+
 #  ======================================================
 #  ValMatrix
 #  ======================================================
@@ -158,7 +210,65 @@ LinearAlgebra.issymmetric(::ValMatrix{ <: Any, <: ValGraph}) = true
 LinearAlgebra.adjoint(matrix::ValMatrix{ <: Real, <: ValGraph}) = matrix
 LinearAlgebra.transpose(matrix::ValMatrix{ <: Any, <: ValGraph}) = matrix
 
-### weights
+
+##  ------------------------------------------------------
+##  SparseMatrixCSC
+##  ------------------------------------------------------
+
+function SparseMatrixCSC(matrix::ValMatrix{Tv, <: Union{ValGraph, ValDiGraph}, key}) where {Tv, key}
+
+    g = matrix.graph
+    n = Int(nv(g))
+    nnz = is_directed(g) ? ne(g) : (2 * ne(g) - num_self_loops(g))
+
+    colptr = Vector{Int}(undef, n + 1)
+    rowval = Vector{Int}(undef, nnz)
+    nzval = Vector{Tv}(undef, nnz)
+
+    nnz_idx = 1
+    @inbounds colptr[1] = 1
+    for v in vertices(g)
+        for (u, val) in zip(inneighbors(g, v), inedgevals(g, v))
+            @inbounds rowval[nnz_idx] = u
+            @inbounds nzval[nnz_idx] = val
+            nnz_idx += 1
+        end
+        @inbounds colptr[v + 1] = nnz_idx
+    end
+
+    return SparseMatrixCSC(n, n, colptr, rowval, nzval)
+end
+
+# TODO instead of using transpose, a better way should be found that
+# does not allocate a temporary SparseMatrixCSC
+function SparseMatrixCSC(matrix::ValMatrix{Tv, <: ValOutDiGraph, key}) where {Tv, key}
+
+    g = matrix.graph
+    n = Int(nv(g))
+    nnz = ne(g)
+
+    colptr = Vector{Int}(undef, n + 1)
+    rowval = Vector{Int}(undef, nnz)
+    nzval = Vector{Tv}(undef, nnz)
+
+    nnz_idx = 1
+    @inbounds colptr[1] = 1
+    for u in vertices(g)
+        for (v, val) in zip(outneighbors(g, u), outedgevals(g, u))
+            @inbounds rowval[nnz_idx] = v
+            @inbounds nzval[nnz_idx] = val
+            nnz_idx += 1
+        end
+        @inbounds colptr[u + 1] = nnz_idx
+    end
+
+    return SparseMatrixCSC(transpose(SparseMatrixCSC(n, n, colptr, rowval, nzval)))
+end
+
+
+##  ------------------------------------------------------
+##  weights
+##  ------------------------------------------------------
 
 """
     weights(g::AbstractValGraph[, key]; zerovalue)
