@@ -27,7 +27,7 @@ A type `Union` of a `Tuple` and a `NamedTuple`.
 Useful for methods that take either a `Tuple` or a `NamedTuple` of some specific
 types for parameters.
 
-Note that like `NamedTuple` but unlike `Tuple`, ÀbstractTuple is not covariant.
+Note that like `NamedTuple` but unlike `Tuple`, AbstractTuple is not covariant.
 I.e. it does not hold that `AbstractTuple{Tuple{Int}} <: AbstractTuple{Tuple{Integer}}`
 
 ### See also
