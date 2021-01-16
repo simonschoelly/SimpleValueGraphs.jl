@@ -62,7 +62,7 @@ jobs:
             using Documenter: DocMeta, doctest
             using SimpleValueGraphs
             DocMeta.setdocmeta!(SimpleValueGraphs, :DocTestSetup, :(using SimpleValueGraphs); recursive=true)
-            doctest(SimpleValueGraphs)' # change MYPACKAGE to the name of your package
+            doctest(SimpleValueGraphs, doctest = false)' # change MYPACKAGE to the name of your package
       - run: julia --project=docs docs/make.jl
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
