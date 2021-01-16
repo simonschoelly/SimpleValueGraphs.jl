@@ -24,3 +24,7 @@ makedocs(
     ),
     doctest = false
 )
+
+deploydocs(;
+    repo="github.com/simonschoelly/SimpleValueGraphs.jl",
+)
