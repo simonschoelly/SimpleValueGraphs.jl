@@ -63,12 +63,14 @@ Create an `AdjacencyMatrix` view from a graph `g`.
 ### Examples
 
 ```jldoctest
-julia> using LightGraphs> star_graph
-julia> gv = ValGraph((s, d) -> (1.0, ), star_graph(4), (Float64, ))
-{4, 3} undirected ValGraph{Int64} graph with edge values of type (Float64,).
+julia> gv = ValGraph(star_graph(4), edgeval_types=(Float64,), edgeval_initializer=(s, d) -> (1.0, ))
+{4, 3} undirected ValGraph with
+              eltype: Int64
+  vertex value types: ()
+    edge value types: (Float64,)
 
 julia> adjacency_matrix(gv)
-4×4 AdjacencyMatrix{ValGraph{Int64,Tuple{Float64},Tuple{Array{Array{Float64,1},1}}}}:
+4×4 AdjacencyMatrix{ValGraph{Int64,Tuple{},Tuple{Float64},Tuple{},Tuple{Array{Array{Float64,1},1}}}}:
  0  1  1  1
  1  0  0  0
  1  0  0  0
@@ -167,20 +169,24 @@ are represented by `zero_value` in the matrix.
 
 ### Examples
 ```jldoctest
-julia> gv = ValDiGraph((s, d) -> (rand(), "\$s-\$d"), path_digraph(3), (a=Float64, b=String))
-{3, 2} directed ValDiGraph{Int64} graph with multiple named edge values of types (a = Float64, b = String).
+julia> gv = ValDiGraph(path_digraph(3),  edgeval_types=(a=Float64, b=String), edgeval_initializer=(s, d) -> (rand(MersenneTwister(0)), "\$s-\$d"))
+{3, 2} directed ValDiGraph with
+              eltype: Int64
+  vertex value types: ()
+    edge value types: (a = Float64, b = String)
+
 
 julia> ValMatrix(gv, 1, 0.0)
-3×3 ValMatrix{Float64,ValDiGraph{Int64,NamedTuple{(:a, :b),Tuple{Float64,String}},NamedTuple{(:a, :b),Tuple{Array{Array{Float64,1},1},Array{Array{String,1},1}}}},1}:
- 0.0  0.706577  0.0
- 0.0  0.0       0.680497
+3×3 ValMatrix{Float64,ValDiGraph{Int64,Tuple{},NamedTuple{(:a, :b),Tuple{Float64,String}},Tuple{},NamedTuple{(:a, :b),Tuple{Array{Array{Float64,1},1},Array{Array{String,1},1}}}},1}:
+ 0.0  0.823648  0.0
+ 0.0  0.0       0.823648
  0.0  0.0       0.0
 
- julia> ValMatrix(gv, :b, nothing) |> Matrix
- 3×3 Array{Union{Nothing, String},2}:
-  nothing  "1-2"    nothing
-  nothing  nothing  "2-3"
-  nothing  nothing  nothing
+julia> ValMatrix(gv, :b, nothing)
+3×3 ValMatrix{Union{Nothing, String},ValDiGraph{Int64,Tuple{},NamedTuple{(:a, :b),Tuple{Float64,String}},Tuple{},NamedTuple{(:a, :b),Tuple{Array{Array{Float64,1},1},Array{Array{String,1},1}}}},:b}:
+ nothing  "1-2"    nothing
+ nothing  nothing  "2-3"
+ nothing  nothing  nothing
 ```
 """
 function ValMatrix(g::AbstractValGraph, key::Union{Integer, Symbol}, zero_value)

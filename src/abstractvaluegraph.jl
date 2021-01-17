@@ -299,17 +299,20 @@ For graphs that only have one value per edge, `key` can be omitted.
 
 ### Examples
 ```jldoctest
-julia> gv = ValDiGraph((s, d) -> (rand(),), path_digraph(3), (a=Float64,))
-{3, 2} directed ValDiGraph{Int64} graph with named edge values of type (a = Float64,).
+julia> gv = ValDiGraph(path_digraph(3), edgeval_types=(a=Float64,), edgeval_initializer=(s, d) -> (rand(MersenneTwister(0)),))
+{3, 2} directed ValDiGraph with
+              eltype: Int64
+  vertex value types: ()
+    edge value types: (a = Float64,)
 
 julia> get_edgeval(gv, 1, 2, :a)
-0.6238826396606063
+0.8236475079774124
 
 julia> get_edgeval(gv, 1, 2, 1)
-0.6238826396606063
+0.8236475079774124
 
 julia> get_edgeval(gv, 1, 2)
-0.6238826396606063
+0.8236475079774124
 
 julia> get_edgeval(gv, 1, 3)
 ERROR: No such edge
@@ -335,12 +338,14 @@ Throw an exception if the graph does not contain such an edge.
 
 ### Examples
 ```jldoctest
-julia> using LightGraphs: path_digraph
-julia> gv = ValDiGraph((s, d) -> (rand(), 10), path_digraph(3), (a=Float64, b=Int))
-{3, 2} directed ValDiGraph{Int64} graph with multiple named edge values of types (a = Float64, b = Int64).
+julia> gv = ValDiGraph(path_digraph(3), edgeval_types=(a=Float64, b=Int), edgeval_initializer=(s, d) -> (rand(MersenneTwister(0)), 10))
+{3, 2} directed ValDiGraph with
+              eltype: Int64
+  vertex value types: ()
+    edge value types: (a = Float64, b = Int64)
 
 julia> get_edgeval(gv, 1, 2, :)
-(a = 0.38605078026294826, b = 10)
+(a = 0.8236475079774124, b = 10)
 
 julia> get_edgeval(gv, 1, 3, :)
 ERROR: Values not found
@@ -370,11 +375,14 @@ If there is no such edge return `alternative`.
 
 ### Examples
 ```jldoctest
-julia> gv = ValDiGraph((s, d) -> (rand(), 10), path_digraph(3), (a=Float64, b=Int))
-{3, 2} directed ValDiGraph{Int64} graph with multiple named edge values of types (a = Float64, b = Int64).
+julia> gv = ValDiGraph(path_digraph(3), edgeval_types=(a=Float64, b=Int), edgeval_initializer=(s, d) -> (rand(MersenneTwister(0)), 10))
+{3, 2} directed ValDiGraph with
+              eltype: Int64
+  vertex value types: ()
+    edge value types: (a = Float64, b = Int64)
 
 julia> get_edgeval_or(gv, 1, 2, :, missing)
-(a = 0.34307617867033446, b = 10)
+(a = 0.8236475079774124, b = 10)
 
 julia> get_edgeval_or(gv, 1, 3, :, missing)
 missing
