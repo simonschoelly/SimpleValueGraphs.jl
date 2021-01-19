@@ -180,11 +180,13 @@ LG.is_directed(e::AbstractValEdge) = is_directed(typeof(e))
 #  ------------------------------------------------------
 
 ==(lhs::ValEdge, rhs::ValEdge) =
-    lhs.src == rhs.src && lhs.dst == lhs.dst && lhs.values == rhs.values
+    lhs.src == rhs.src && lhs.dst == rhs.dst && lhs.values == rhs.values
 
 ==(lhs::ValDiEdge, rhs::ValDiEdge) =
-    lhs.src == rhs.src && lhs.dst == lhs.dst && lhs.values == rhs.values
+    lhs.src == rhs.src && lhs.dst == rhs.dst && lhs.values == rhs.values
 
+hash(e::ValEdge, h::UInt) = hash(e.src, hash(e.dst, hash(e.values, h)))
+hash(e::ValDiEdge, h::UInt) = hash(e.src, hash(e.dst, hash(e.values, h)))
 
 # ======================================================
 # show
