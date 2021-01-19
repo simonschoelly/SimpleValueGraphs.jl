@@ -1,5 +1,6 @@
 # SimpleValueGraphs.jl
 
+[![version](https://juliahub.com/docs/SimpleValueGraphs/version.svg)](https://juliahub.com/ui/Packages/SimpleValueGraphs/aub6U)
 ![](https://img.shields.io/badge/lifecycle-maturing-blue.svg)
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://simonschoelly.github.io/SimpleValueGraphs.jl/stable)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://simonschoelly.github.io/SimpleValueGraphs.jl/dev)
