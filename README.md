@@ -1,5 +1,6 @@
 # SimpleValueGraphs.jl
-![](https://img.shields.io/badge/lifecycle-experimental-orange.svg)
+
+![](https://img.shields.io/badge/lifecycle-maturing-blue.svg)
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://simonschoelly.github.io/SimpleValueGraphs.jl/stable)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://simonschoelly.github.io/SimpleValueGraphs.jl/dev)
 [![Build Status](https://travis-ci.com/simonschoelly/SimpleValueGraphs.jl.svg?branch=master)](https://travis-ci.com/simonschoelly/SimpleValueGraphs.jl)
