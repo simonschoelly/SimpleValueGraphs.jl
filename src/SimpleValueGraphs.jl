@@ -144,7 +144,7 @@ function swissmetro_graph()
     g = ValGraph{Int8}(
         6;
         vertexval_types=(name = String, population = Int32),
-        vertexval_initializer=v -> cities[v],
+        vertexval_init=v -> cities[v],
         edgeval_types=(distance=Float64,)
     )
 

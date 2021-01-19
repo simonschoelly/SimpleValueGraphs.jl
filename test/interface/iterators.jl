@@ -10,7 +10,7 @@ import SimpleValueGraphs: typetuple, OneEdgeValGraph
 
         g = G(gs;
               edgeval_types=typetuple(E_VALS),
-              edgeval_initializer=(s,d) -> rand_sample(E_VALS)
+              edgeval_init=(s,d) -> rand_sample(E_VALS)
         )
 
         iter = edges(g, :)
@@ -60,7 +60,7 @@ end
 
         g = G(gs;
             edgeval_types=typetuple(E_VALS),
-            edgeval_initializer=(s,d) -> rand_sample(E_VALS)
+            edgeval_init=(s,d) -> rand_sample(E_VALS)
         )
 
         @testset "inneighbors are unique" begin
@@ -88,7 +88,7 @@ end
 
         g = G(gs;
             edgeval_types=typetuple(E_VALS),
-            edgeval_initializer=(s,d) -> rand_sample(E_VALS)
+            edgeval_init=(s,d) -> rand_sample(E_VALS)
         )
 
         @testset "outneighbors are unique" begin
@@ -116,7 +116,7 @@ end
 
         g = G(gs;
             edgeval_types=typetuple(E_VALS),
-            edgeval_initializer=(s,d) -> rand_sample(E_VALS)
+            edgeval_init=(s,d) -> rand_sample(E_VALS)
         )
 
         @testset "outedgevals are correct for key $key" for key in allkeys_for_E_VALS(E_VALS)
@@ -146,7 +146,7 @@ end
 
         g = G(gs;
             edgeval_types=typetuple(E_VALS),
-            edgeval_initializer=(s,d) -> rand_sample(E_VALS)
+            edgeval_init=(s,d) -> rand_sample(E_VALS)
         )
 
         @testset "inedgevals are correct for key $key" for key in allkeys_for_E_VALS(E_VALS)
@@ -176,7 +176,7 @@ end
 
         g = G(gs;
             edgeval_types=typetuple(E_VALS),
-            edgeval_initializer=(s,d) -> rand_sample(E_VALS)
+            edgeval_init=(s,d) -> rand_sample(E_VALS)
         )
 
         @testset "edges are lexicographical sorted, unique" begin

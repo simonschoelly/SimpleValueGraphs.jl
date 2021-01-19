@@ -11,7 +11,7 @@ import SimpleValueGraphs: typetuple
             E_VALS in TEST_EDGEVAL_TYPES_SMALL
 
             gs = is_directed(G) ? cycle_digraph(V(5)) : cycle_graph(V(4))
-            g = G(gs, edgeval_types=typetuple(E_VALS), edgeval_initializer=(s, d) -> rand_sample(E_VALS))
+            g = G(gs, edgeval_types=typetuple(E_VALS), edgeval_init=(s, d) -> rand_sample(E_VALS))
             @assert g isa G{V, Tuple{}, E_VALS}
 
             @testset "Correct values set" begin
@@ -51,7 +51,7 @@ import SimpleValueGraphs: typetuple
             key in allkeys_for_E_VALS(E_VALS)
 
             gs = is_directed(G) ? cycle_digraph(V(5)) : cycle_graph(V(4))
-            g = G(gs, edgeval_types=typetuple(E_VALS), edgeval_initializer=(s, d) -> rand_sample(E_VALS))
+            g = G(gs, edgeval_types=typetuple(E_VALS), edgeval_init=(s, d) -> rand_sample(E_VALS))
             @assert g isa G{V, Tuple{}, E_VALS}
 
             @testset "Correct values set" begin
@@ -90,7 +90,7 @@ import SimpleValueGraphs: typetuple
             E_VALS in TEST_EDGEVAL_TYPES_SINGE_VALUE_SMALL
 
             gs = is_directed(G) ? cycle_digraph(V(5)) : cycle_graph(V(4))
-            g = G(gs, edgeval_types=typetuple(E_VALS), edgeval_initializer=(s, d) -> rand_sample(E_VALS))
+            g = G(gs, edgeval_types=typetuple(E_VALS), edgeval_init=(s, d) -> rand_sample(E_VALS))
             @assert g isa G{V, Tuple{}, E_VALS}
 
             @testset "Correct values set" begin
@@ -132,7 +132,7 @@ end
             E_VALS in TEST_EDGEVAL_TYPES_SMALL
 
             gs = is_directed(G) ? cycle_digraph(V(5)) : cycle_graph(V(4))
-            g = G(gs, edgeval_types=typetuple(E_VALS), edgeval_initializer=(s, d) -> rand_sample(E_VALS))
+            g = G(gs, edgeval_types=typetuple(E_VALS), edgeval_init=(s, d) -> rand_sample(E_VALS))
             @assert g isa G{V, Tuple{}, E_VALS}
 
             @testset "Getting correct values" begin
@@ -159,7 +159,7 @@ end
             default in (nothing, 0)
 
             gs = is_directed(G) ? cycle_digraph(V(5)) : cycle_graph(V(4))
-            g = G(gs, edgeval_types=typetuple(E_VALS), edgeval_initializer=(s, d) -> rand_sample(E_VALS))
+            g = G(gs, edgeval_types=typetuple(E_VALS), edgeval_init=(s, d) -> rand_sample(E_VALS))
             @assert g isa G{V, Tuple{}, E_VALS}
 
             @testset "Getting correct values" begin
@@ -179,7 +179,7 @@ end
     # covering a special case
     @testset "get_edgeval_or for ValGraph with colon key - deg(s) > deg(d)" begin
 
-        g = ValGraph(star_graph(3), edgeval_types=(Int, ), edgeval_initializer=(s, d) -> (rand(Int),))
+        g = ValGraph(star_graph(3), edgeval_types=(Int, ), edgeval_init=(s, d) -> (rand(Int),))
 
         @test get_edgeval_or(g, 1, 2, :, nothing) == get_edgeval_or(g, 2, 1, :, nothing)
     end
@@ -201,7 +201,7 @@ end
             key in allkeys_for_E_VALS(E_VALS)
 
             gs = is_directed(G) ? cycle_digraph(V(5)) : cycle_graph(V(4))
-            g = G(gs, edgeval_types=typetuple(E_VALS), edgeval_initializer=(s, d) -> rand_sample(E_VALS))
+            g = G(gs, edgeval_types=typetuple(E_VALS), edgeval_init=(s, d) -> rand_sample(E_VALS))
             @assert g isa G{V, Tuple{}, E_VALS}
 
             @testset "Getting correct value" begin
@@ -227,7 +227,7 @@ end
             E_VALS in TEST_EDGEVAL_TYPES_SINGE_VALUE_SMALL
 
             gs = is_directed(G) ? cycle_digraph(V(5)) : cycle_graph(V(4))
-            g = G(gs, edgeval_types=typetuple(E_VALS), edgeval_initializer=(s, d) -> rand_sample(E_VALS))
+            g = G(gs, edgeval_types=typetuple(E_VALS), edgeval_init=(s, d) -> rand_sample(E_VALS))
             @assert g isa G{V, Tuple{}, E_VALS}
 
             @testset "Getting correct value" begin
@@ -263,7 +263,7 @@ end
             default in (nothing, 0)
 
             gs = is_directed(G) ? cycle_digraph(V(5)) : cycle_graph(V(4))
-            g = G(gs, edgeval_types=typetuple(E_VALS), edgeval_initializer=(s, d) -> rand_sample(E_VALS))
+            g = G(gs, edgeval_types=typetuple(E_VALS), edgeval_init=(s, d) -> rand_sample(E_VALS))
             @assert g isa G{V, Tuple{}, E_VALS}
 
             @testset "Getting correct value" begin
@@ -290,7 +290,7 @@ end
             default in (nothing, 0)
 
             gs = is_directed(G) ? cycle_digraph(V(5)) : cycle_graph(V(4))
-            g = G(gs, edgeval_types=typetuple(E_VALS), edgeval_initializer=(s, d) -> rand_sample(E_VALS))
+            g = G(gs, edgeval_types=typetuple(E_VALS), edgeval_init=(s, d) -> rand_sample(E_VALS))
             @assert g isa G{V, Tuple{}, E_VALS}
 
             @testset "Getting correct value" begin

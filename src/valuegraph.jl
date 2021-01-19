@@ -154,18 +154,18 @@ end
 #  ------------------------------------------------------
 
 """
-    ValGraph{V = $default_eltype}(n; vertexval_types=(), edgeval_types=(), vertexval_initializer=nothing)
-    ValGraph{V, V_VALS, E_VALS}(n, vertexval_initializer=nothing)
+    ValGraph{V = $default_eltype}(n; vertexval_types=(), edgeval_types=(), vertexval_init=nothing)
+    ValGraph{V, V_VALS, E_VALS}(n, vertexval_init=nothing)
 
 Construct a `ValGraph` with `n` vertices and 0 edges with of types
 `edgeval_types`.
 
 If omitted, the element type `V` is $(default_eltype).
 """
-function ValGraph{V, V_VALS, E_VALS}(n::Integer, vertexval_initializer=nothing) where {V <: Integer, V_VALS <: AbstractTuple, E_VALS <: AbstractTuple}
+function ValGraph{V, V_VALS, E_VALS}(n::Integer, vertexval_init=nothing) where {V <: Integer, V_VALS <: AbstractTuple, E_VALS <: AbstractTuple}
 
     fadjlist = Adjlist{V}(n)
-    vertexvals = create_vertexvals(n, V_VALS, vertexval_initializer)
+    vertexvals = create_vertexvals(n, V_VALS, vertexval_init)
     edgevals = create_edgevals(n, E_VALS)
     V_VALS_C = typeof(vertexvals)
     E_VALS_C = typeof(edgevals)
@@ -174,18 +174,18 @@ function ValGraph{V, V_VALS, E_VALS}(n::Integer, vertexval_initializer=nothing) 
 end
 
 """
-    ValOutDiGraph{V = $default_eltype}(n; vertexval_types=(), edgeval_types=(), vertexval_initializer=nothing)
-    ValOutDiGraph{V, V_VALS, E_VALS}(n, vertexval_initializer=nothing)
+    ValOutDiGraph{V = $default_eltype}(n; vertexval_types=(), edgeval_types=(), vertexval_init=nothing)
+    ValOutDiGraph{V, V_VALS, E_VALS}(n, vertexval_init=nothing)
 
 Construct a `ValOutDiGraph` with `n` vertices and 0 edges of types
 `edgeval_types`.
 If omitted, the element type `V` is $(default_eltype).
 
 """
-function ValOutDiGraph{V, V_VALS, E_VALS}(n::Integer, vertexval_initializer=nothing) where {V<:Integer, V_VALS, E_VALS}
+function ValOutDiGraph{V, V_VALS, E_VALS}(n::Integer, vertexval_init=nothing) where {V<:Integer, V_VALS, E_VALS}
 
     fadjlist = Adjlist{V}(n)
-    vertexvals = create_vertexvals(n, V_VALS, vertexval_initializer)
+    vertexvals = create_vertexvals(n, V_VALS, vertexval_init)
     edgevals = create_edgevals(n, E_VALS)
     V_VALS_C = typeof(vertexvals)
     E_VALS_C = typeof(edgevals)
@@ -195,19 +195,19 @@ end
 
 
 """
-    ValDiGraph{V = $default_eltype}(n; vertexval_types=(), edgeval_types=(), vertexval_initializer=nothing)
-    ValDiGraph{V, E_VALS}(n, vertexval_initializer=nothing)
+    ValDiGraph{V = $default_eltype}(n; vertexval_types=(), edgeval_types=(), vertexval_init=nothing)
+    ValDiGraph{V, E_VALS}(n, vertexval_init=nothing)
 
 Construct a `ValDiGraph` with `n` vertices and 0 edges with value-types
 `edgeval_types`.
 
 If omitted, the element type `V` is $(default_eltype).
 """
-function ValDiGraph{V, V_VALS, E_VALS}(n::Integer, vertexval_initializer=nothing) where {V<:Integer, V_VALS, E_VALS}
+function ValDiGraph{V, V_VALS, E_VALS}(n::Integer, vertexval_init=nothing) where {V<:Integer, V_VALS, E_VALS}
 
     fadjlist = Adjlist{V}(n)
     badjlist = Adjlist{V}(n)
-    vertexvals = create_vertexvals(n, V_VALS, vertexval_initializer)
+    vertexvals = create_vertexvals(n, V_VALS, vertexval_init)
     edgevals = create_edgevals(n, E_VALS)
     redgevals = create_edgevals(n, E_VALS)
     V_VALS_C = typeof(vertexvals)
@@ -220,18 +220,18 @@ end
 
 for G in (:ValGraph, :ValOutDiGraph, :ValDiGraph)
 
-    @eval function $G(n::Integer; vertexval_types::AbstractTypeTuple=(), edgeval_types::AbstractTypeTuple=(), vertexval_initializer=nothing)
+    @eval function $G(n::Integer; vertexval_types::AbstractTypeTuple=(), edgeval_types::AbstractTypeTuple=(), vertexval_init=nothing)
 
         V_VALS = typetuple_to_type(vertexval_types)
         E_VALS = typetuple_to_type(edgeval_types)
-        return $G{default_eltype, V_VALS, E_VALS}(n, vertexval_initializer)
+        return $G{default_eltype, V_VALS, E_VALS}(n, vertexval_init)
     end
 
-    @eval function $G{V}(n::Integer; vertexval_types::AbstractTypeTuple=(), edgeval_types::AbstractTypeTuple=(), vertexval_initializer=nothing) where {V <: Integer}
+    @eval function $G{V}(n::Integer; vertexval_types::AbstractTypeTuple=(), edgeval_types::AbstractTypeTuple=(), vertexval_init=nothing) where {V <: Integer}
 
         V_VALS = typetuple_to_type(vertexval_types)
         E_VALS = typetuple_to_type(edgeval_types)
-        return $G{V, V_VALS, E_VALS}(V(n), vertexval_initializer)
+        return $G{V, V_VALS, E_VALS}(V(n), vertexval_init)
     end
 end
 

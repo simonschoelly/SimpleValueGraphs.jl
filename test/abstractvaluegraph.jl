@@ -39,7 +39,7 @@ end
     g = DummyValGraph(ValDiGraph(
         0;
         vertexval_types=(a=Char, b=Vector{Bool}),
-        vertexval_initializer=undef
+        vertexval_init=undef
     ))
 
     expected_type = NamedTuple{(:a, :b), Tuple{Char, Vector{Bool}}}
@@ -89,8 +89,8 @@ end
 
 @testset "hasvertexkey" begin
 
-    g1 = DummyValGraph(ValGraph(0; vertexval_types=(xy=Bool, ), vertexval_initializer=undef))
-    g2 = DummyValGraph(ValDiGraph(0; vertexval_types=(Int, Int), vertexval_initializer=undef))
+    g1 = DummyValGraph(ValGraph(0; vertexval_types=(xy=Bool, ), vertexval_init=undef))
+    g2 = DummyValGraph(ValDiGraph(0; vertexval_types=(Int, Int), vertexval_init=undef))
 
     @test hasvertexkey(g1, :xy)
     @test hasvertexkey(typeof(g1), :xy)
@@ -147,11 +147,11 @@ end
 
     g1 = DummyValGraph(ValGraph{UInt16}(g_simple;
         edgeval_types=(a=Int64, b=Float64),
-        edgeval_initializer=(s, d) -> (a=s, b=d)
+        edgeval_init=(s, d) -> (a=s, b=d)
     ))
     g2 = DummyValGraph(ValDiGraph{Int16}(g_simple_di;
         edgeval_types=(Int64, Float64),
-        edgeval_initializer=(s, d) -> (s, d)
+        edgeval_init=(s, d) -> (s, d)
     ))
 
     @test edges(g1, :) isa ValEdgeIter{typeof(g1)}
@@ -242,12 +242,12 @@ end
 
     g1 = DummyValGraph(ValGraph(2;
         vertexval_types=(Int64, ),
-        vertexval_initializer=v -> (v, )
+        vertexval_init=v -> (v, )
     ))
 
     g2 = DummyValGraph(ValOutDiGraph(2;
         vertexval_types=(a=Int64, b=String),
-        vertexval_initializer=v -> (a=v, b="$v")
+        vertexval_init=v -> (a=v, b="$v")
     ))
 
     @test get_vertexval(g0, 1, :) == ()
@@ -282,12 +282,12 @@ end
     g1 = DummyValGraph(
         ValGraph(g_simple;
                  edgeval_types=(a=Int64, b=String),
-                 edgeval_initializer=(s, d) ->(a=s, b="$d")
+                 edgeval_init=(s, d) ->(a=s, b="$d")
     ))
     g2 = DummyValGraph(
         ValDiGraph(g_simple_di;
                  edgeval_types=(Int64,),
-                 edgeval_initializer=(s, d) ->(s,)
+                 edgeval_init=(s, d) ->(s,)
     ))
 
     @test get_edgeval(g0, 1, 1, :) == ()

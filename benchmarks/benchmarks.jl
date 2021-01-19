@@ -14,7 +14,7 @@ function load_graph_with_rand_weights(name::Symbol)
         rng = MersenneTwister(0)
         G = is_directed(g) ? ValDiGraph : ValGraph
         return G(g; edgeval_types=(weight=Float64, ),
-                 edgeval_initializer=(s, d) -> (weight=rand(rng, 1:255),))
+                 edgeval_init=(s, d) -> (weight=rand(rng, 1:255),))
     end
 
     error("no graph called :$name found.")
@@ -63,7 +63,7 @@ end
 function graph_with_weights(::Type{ValGraph{T}}, name) where {T}
 
     g, w = graph_with_weights(SimpleGraph{T}, SparseMatrixCSC, name)
-    return ValGraph(g, edgeval_types=(Float64,), edgeval_initializer=(s, d) -> (w[s,d],))
+    return ValGraph(g, edgeval_types=(Float64,), edgeval_init=(s, d) -> (w[s,d],))
 end
 
 

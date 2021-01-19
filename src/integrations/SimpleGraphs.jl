@@ -4,15 +4,15 @@
 """
     ValGraph{V, V_VALS, E_VALS}(
         g::SimpleGraph;
-        vertexval_initializer,
-        edgeval_initializer
+        vertexval_init,
+        edgeval_init
     )
     ValGraph{V = eltype(g)}(
         g::SimpleGraph;
         vertexval_types=(),
         edgeval_types=(),
-        vertexval_initializer,
-        edgeval_initializer
+        vertexval_init,
+        edgeval_init
     )
 
 Construct a `ValGraph` with the same structure as `g`.
@@ -21,10 +21,10 @@ Construct a `ValGraph` with the same structure as `g`.
 - `g`: A `LightGraphs.SimpleGraph`
 
 # Keywords
-- `vertexval_initializer`: How the vertex values of this graph should be initialized.
+- `vertexval_init`: How the vertex values of this graph should be initialized.
     Can be either a function `v -> (values...)` or `undef`. Can be omitted if this
     graph has no vertex values.
-- `edgeval_initializer`: How the edge values of this graph should be initialized.
+- `edgeval_init`: How the edge values of this graph should be initialized.
     Can be either a function `(s,d) -> (values...)` or `undef`. Can be omitted if this
     graph has no edge values.
 - `vertexval_types`: A `Tuple` or `NamedTuple` of types.
@@ -33,19 +33,19 @@ Construct a `ValGraph` with the same structure as `g`.
 # Parameters
 - `V` the eltype of this graphs vertices. `eltype(g) if omitted.
 - `V_VALS` The type (either a `Tuple` or a `NamedTuple` type) of vertex values. Can
-    alternatively be specified with the `vertexval_initializer` keyword argument.
+    alternatively be specified with the `vertexval_init` keyword argument.
 - `E_VALS` The type (either a `Tuple` or a `NamedTuple` type) of edge values. Can
-    alternatively be specified with the `edgeval_initializer` keyword argument.
+    alternatively be specified with the `edgeval_init` keyword argument.
 """
 function ValGraph{V, V_VALS, E_VALS}(
             g::SimpleGraph;
-            vertexval_initializer=nothing,
-            edgeval_initializer=nothing) where {V, V_VALS, E_VALS}
+            vertexval_init=nothing,
+            edgeval_init=nothing) where {V, V_VALS, E_VALS}
 
     n = nv(g)
     fadjlist = deepcopy_adjlist(V, g.fadjlist)
 
-    vertexvals = create_vertexvals(n, V_VALS, vertexval_initializer)
+    vertexvals = create_vertexvals(n, V_VALS, vertexval_init)
     V_VALS_C = typeof(vertexvals)
 
     E_VALS_C = edgevals_container_type(Val(E_VALS)) # TODO ?
@@ -63,11 +63,11 @@ function ValGraph{V, V_VALS, E_VALS}(
         edgevals
     )
 
-    if edgeval_initializer != undef && length(edgevals) > 0
+    if edgeval_init != undef && length(edgevals) > 0
         # TODO there is a more efficient method for this
         for e in edges(g)
             s, d = Tuple(e)
-            set_edgeval!(gv, s, d, :, edgeval_initializer(s, d))
+            set_edgeval!(gv, s, d, :, edgeval_init(s, d))
         end
     end
 
@@ -88,15 +88,15 @@ ValGraph(g::SimpleGraph; kwargs...) = ValGraph{eltype(g)}(g; kwargs...)
 """
     ValOutDiGraph{V, V_VALS, E_VALS}(
         g::SimpleDiGraph;
-        vertexval_initializer,
-        edgeval_initializer
+        vertexval_init,
+        edgeval_init
     )
     ValOutDiGraph{V = eltype(g)}(
         g::SimpleDiGraph;
         vertexval_types=(),
         edgeval_types=(),
-        vertexval_initializer,
-        edgeval_initializer
+        vertexval_init,
+        edgeval_init
     )
 
 Construct a `ValOutDiGraph` with the same structure as `g`.
@@ -105,10 +105,10 @@ Construct a `ValOutDiGraph` with the same structure as `g`.
 - `g`: A `LightGraphs.SimpleDiGraph`
 
 # Keywords
-- `vertexval_initializer`: How the vertex values of this graph should be initialized.
+- `vertexval_init`: How the vertex values of this graph should be initialized.
     Can be either a function `v -> (values...)` or `undef`. Can be omitted if this
     graph has no vertex values.
-- `edgeval_initializer`: How the edge values of this graph should be initialized.
+- `edgeval_init`: How the edge values of this graph should be initialized.
     Can be either a function `(s,d) -> (values...)` or `undef`. Can be omitted if this
     graph has no edge values.
 - `vertexval_types`: A `Tuple` or `NamedTuple` of types.
@@ -117,19 +117,19 @@ Construct a `ValOutDiGraph` with the same structure as `g`.
 # Parameters
 - `V` the eltype of this graphs vertices. `eltype(g) if omitted.
 - `V_VALS` The type (either a `Tuple` or a `NamedTuple` type) of vertex values. Can
-    alternatively be specified with the `vertexval_initializer` keyword argument.
+    alternatively be specified with the `vertexval_init` keyword argument.
 - `E_VALS` The type (either a `Tuple` or a `NamedTuple` type) of edge values. Can
-    alternatively be specified with the `edgeval_initializer` keyword argument.
+    alternatively be specified with the `edgeval_init` keyword argument.
 """
 function ValOutDiGraph{V, V_VALS, E_VALS}(
             g::SimpleDiGraph;
-            vertexval_initializer=nothing,
-            edgeval_initializer=nothing) where {V, V_VALS, E_VALS}
+            vertexval_init=nothing,
+            edgeval_init=nothing) where {V, V_VALS, E_VALS}
 
     n = nv(g)
     fadjlist = deepcopy_adjlist(V,g.fadjlist)
 
-    vertexvals = create_vertexvals(n, V_VALS, vertexval_initializer)
+    vertexvals = create_vertexvals(n, V_VALS, vertexval_init)
     V_VALS_C = typeof(vertexvals)
     E_VALS_C = edgevals_container_type(Val(E_VALS)) # TODO ?
     edgevals = E_VALS_C( Adjlist{T}(undef, n) for T in E_VALS.types )
@@ -141,11 +141,11 @@ function ValOutDiGraph{V, V_VALS, E_VALS}(
 
     gv = ValOutDiGraph{V, V_VALS, E_VALS, V_VALS_C, E_VALS_C}(ne(g), fadjlist, vertexvals, edgevals)
 
-    if edgeval_initializer != undef && length(edgevals) > 0
+    if edgeval_init != undef && length(edgevals) > 0
         # TODO there is a more efficient method for this
         for e in edges(g)
             s, d = Tuple(e)
-            set_edgeval!(gv, s, d, :, edgeval_initializer(s, d))
+            set_edgeval!(gv, s, d, :, edgeval_init(s, d))
         end
     end
 
@@ -166,15 +166,15 @@ ValOutDiGraph(g::SimpleDiGraph; kwargs...) = ValOutDiGraph{eltype(g)}(g; kwargs.
 """
     ValDiGraph{V, V_VALS, E_VALS}(
         g::SimpleDiGraph;
-        vertexval_initializer,
-        edgeval_initializer
+        vertexval_init,
+        edgeval_init
     )
     ValDiGraph{V = eltype(g)}(
         g::SimpleDiGraph;
         vertexval_types=(),
         edgeval_types=(),
-        vertexval_initializer,
-        edgeval_initializer
+        vertexval_init,
+        edgeval_init
     )
 
 Construct a `ValDiGraph` with the same structure as `g`.
@@ -183,10 +183,10 @@ Construct a `ValDiGraph` with the same structure as `g`.
 - `g`: A `LightGraphs.SimpleDiGraph`
 
 # Keywords
-- `vertexval_initializer`: How the vertex values of this graph should be initialized.
+- `vertexval_init`: How the vertex values of this graph should be initialized.
     Can be either a function `v -> (values...)` or `undef`. Can be omitted if this
     graph has no vertex values.
-- `edgeval_initializer`: How the edge values of this graph should be initialized.
+- `edgeval_init`: How the edge values of this graph should be initialized.
     Can be either a function `(s,d) -> (values...)` or `undef`. Can be omitted if this
     graph has no edge values.
 - `vertexval_types`: A `Tuple` or `NamedTuple` of types.
@@ -195,21 +195,21 @@ Construct a `ValDiGraph` with the same structure as `g`.
 # Parameters
 - `V` the eltype of this graphs vertices. `eltype(g) if omitted.
 - `V_VALS` The type (either a `Tuple` or a `NamedTuple` type) of vertex values. Can
-    alternatively be specified with the `vertexval_initializer` keyword argument.
+    alternatively be specified with the `vertexval_init` keyword argument.
 - `E_VALS` The type (either a `Tuple` or a `NamedTuple` type) of edge values. Can
-    alternatively be specified with the `edgeval_initializer` keyword argument.
+    alternatively be specified with the `edgeval_init` keyword argument.
 
 """
 function ValDiGraph{V, V_VALS, E_VALS}(
             g::SimpleDiGraph;
-            vertexval_initializer=nothing,
-            edgeval_initializer=nothing) where {V, V_VALS, E_VALS}
+            vertexval_init=nothing,
+            edgeval_init=nothing) where {V, V_VALS, E_VALS}
 
     n = nv(g)
     fadjlist = deepcopy_adjlist(V, g.fadjlist)
     badjlist = deepcopy_adjlist(V, g.badjlist)
 
-    vertexvals = create_vertexvals(n, V_VALS, vertexval_initializer)
+    vertexvals = create_vertexvals(n, V_VALS, vertexval_init)
     V_VALS_C = typeof(vertexvals)
 
     E_VALS_C = edgevals_container_type(Val(E_VALS)) # TODO ?
@@ -224,11 +224,11 @@ function ValDiGraph{V, V_VALS, E_VALS}(
 
     gv = ValDiGraph{V, V_VALS, E_VALS, V_VALS_C, E_VALS_C}(ne(g), fadjlist, badjlist, vertexvals, edgevals, redgevals)
 
-    if edgeval_initializer != undef && length(edgevals) > 0
+    if edgeval_init != undef && length(edgevals) > 0
         # TODO there is a more efficient method for this
         for e in edges(g)
             s, d = Tuple(e)
-            set_edgeval!(gv, s, d, :, edgeval_initializer(s, d))
+            set_edgeval!(gv, s, d, :, edgeval_init(s, d))
         end
     end
 

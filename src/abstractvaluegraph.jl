@@ -299,7 +299,7 @@ For graphs that only have one value per edge, `key` can be omitted.
 
 ### Examples
 ```jldoctest
-julia> gv = ValDiGraph(path_digraph(3), edgeval_types=(a=Float64,), edgeval_initializer=(s, d) -> (rand(MersenneTwister(0)),))
+julia> gv = ValDiGraph(path_digraph(3), edgeval_types=(a=Float64,), edgeval_init=(s, d) -> (rand(MersenneTwister(0)),))
 {3, 2} directed ValDiGraph with
               eltype: Int64
   vertex value types: ()
@@ -338,7 +338,7 @@ Throw an exception if the graph does not contain such an edge.
 
 ### Examples
 ```jldoctest
-julia> gv = ValDiGraph(path_digraph(3), edgeval_types=(a=Float64, b=Int), edgeval_initializer=(s, d) -> (rand(MersenneTwister(0)), 10))
+julia> gv = ValDiGraph(path_digraph(3), edgeval_types=(a=Float64, b=Int), edgeval_init=(s, d) -> (rand(MersenneTwister(0)), 10))
 {3, 2} directed ValDiGraph with
               eltype: Int64
   vertex value types: ()
@@ -375,7 +375,7 @@ If there is no such edge return `alternative`.
 
 ### Examples
 ```jldoctest
-julia> gv = ValDiGraph(path_digraph(3), edgeval_types=(a=Float64, b=Int), edgeval_initializer=(s, d) -> (rand(MersenneTwister(0)), 10))
+julia> gv = ValDiGraph(path_digraph(3), edgeval_types=(a=Float64, b=Int), edgeval_init=(s, d) -> (rand(MersenneTwister(0)), 10))
 {3, 2} directed ValDiGraph with
               eltype: Int64
   vertex value types: ()

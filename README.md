@@ -32,11 +32,11 @@ gv = ValGraph(gs;
     # - color: A random color
     # - label: The vertex identifier as a string
     vertexval_types=(color=Color, label=String),
-    vertexval_initializer=v -> (rand(RGB), string(v)),
+    vertexval_init=v -> (rand(RGB), string(v)),
     # One unnamed edge value:
     # A string s -- d from source to destination of each edge
     edgeval_types=(String, ),
-    edgeval_initializer=(s, d) -> ("$s -- $d",)
+    edgeval_init=(s, d) -> ("$s -- $d",)
 )
 
 # Plot this graph using the vertex and edge values

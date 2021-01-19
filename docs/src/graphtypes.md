@@ -161,14 +161,14 @@ julia> g2 = ValDiGraph{Int8}(4; edgeval_types=(a=String, b=Bool))
 Similar to edge vales, vertex values can be specified with the `verteval_types` keyword argument.
 But the problem here is, that we already create some vertices in the constructor,
 so we also must specify how to initialize the values for these vertices.
-We do that by using the `vertexval_initializer` keyword argument, which is either `undef `in
+We do that by using the `vertexval_init` keyword argument, which is either `undef `in
 case we do not actually want to initialize these values (similar to `undef` for arrays)
 or a function `v -> values` that take a vertex index and returns a tuple or named tuple
 of vertex values
 
 ```julia
 # Single unnamed vertex value, use undef for initialization
-julia> g1 = ValGraph(4; vertexval_types=(Int64,), vertexval_initializer=undef)
+julia> g1 = ValGraph(4; vertexval_types=(Int64,), vertexval_init=undef)
 {4, 0} undirected ValGraph with
               eltype: Int32
   vertex value types: (Int64,)
@@ -177,7 +177,7 @@ julia> g1 = ValGraph(4; vertexval_types=(Int64,), vertexval_initializer=undef)
 # Two named vertex values, use a function for initialization
 julia> g2 = ValDiGraph{Int8}(4;
                 vertexval_types=(a=String, b=Bool),
-                vertexval_initializer= v -> (a="$v", b=false)
+                vertexval_init= v -> (a="$v", b=false)
             )
 {4, 0} directed ValDiGraph with
               eltype: Int8
@@ -189,7 +189,7 @@ julia> g2 = ValDiGraph{Int8}(4;
 
 One can also initialize a graph from a LightGraphs `SimpleGraph` or `SimpleDiGraph`. If
 edge values are specified (with the `edgeval_types` keyword) we also need an initializer for
-edge values. We do that by using the `edgeval_initializer` keyword argument which can be
+edge values. We do that by using the `edgeval_init` keyword argument which can be
 either `undef` or a function `(s, d) -> values` that takes a source and target vertex and
 and return a tuple or named tuple of edge values.  The constructor takes care that it calls
 this function only with `s <= d`  for undirected graphs, so that we do not have to worry
@@ -206,7 +206,7 @@ julia> g_simple = smallgraph(:house)
 
 julia> g1 = ValGraph(g_simple;
                 edgeval_types=(Int64, ),
-                edgeval_initializer=(s, d) -> (s + d, )
+                edgeval_init=(s, d) -> (s + d, )
             )
 {5, 6} undirected ValGraph with
               eltype: Int64
@@ -218,7 +218,7 @@ julia> g_simple_directed = PathDiGraph(3)
 
 julia> g2 = ValOutDiGraph{Int8}(g_simple_directed;
                 vertexval_types=(String, ),
-                vertexval_initializer=undef
+                vertexval_init=undef
             )
 {3, 2} directed ValOutDiGraph with
               eltype: Int8

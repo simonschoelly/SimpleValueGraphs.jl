@@ -63,7 +63,7 @@ Create an `AdjacencyMatrix` view from a graph `g`.
 ### Examples
 
 ```jldoctest
-julia> gv = ValGraph(star_graph(4), edgeval_types=(Float64,), edgeval_initializer=(s, d) -> (1.0, ))
+julia> gv = ValGraph(star_graph(4), edgeval_types=(Float64,), edgeval_init=(s, d) -> (1.0, ))
 {4, 3} undirected ValGraph with
               eltype: Int64
   vertex value types: ()
@@ -169,7 +169,7 @@ are represented by `zero_value` in the matrix.
 
 ### Examples
 ```jldoctest
-julia> gv = ValDiGraph(path_digraph(3),  edgeval_types=(a=Float64, b=String), edgeval_initializer=(s, d) -> (rand(MersenneTwister(0)), "\$s-\$d"))
+julia> gv = ValDiGraph(path_digraph(3),  edgeval_types=(a=Float64, b=String), edgeval_init=(s, d) -> (rand(MersenneTwister(0)), "\$s-\$d"))
 {3, 2} directed ValDiGraph with
               eltype: Int64
   vertex value types: ()

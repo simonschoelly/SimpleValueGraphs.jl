@@ -9,7 +9,7 @@ To add a vertex, use the `add_vertex` method. If the graph has vertex values, th
 also be passed to this function.
 
 ```julia
-julia> g2 = ValGraph(0, vertexval_types=(a=Int, ), vertexval_initializer=undef);
+julia> g2 = ValGraph(0, vertexval_types=(a=Int, ), vertexval_init=undef);
 
 julia> add_vertex!(g2, (a=50,))
 true
@@ -19,7 +19,7 @@ julia> g1 = ValGraph(4);
 julia> add_vertex!(g1)
 true
 
-julia> g2 = ValGraph(0, vertexval_types=(a=Int, ), vertexval_initializer=undef);
+julia> g2 = ValGraph(0, vertexval_types=(a=Int, ), vertexval_init=undef);
 
 julia> add_vertex!(g2, (a=50,))
 true
@@ -28,7 +28,7 @@ true
 Vertex values can be set using the `set_vertexval!` function.
 
 ```julia
-julia> g = ValGraph(5, vertexval_types=(a=Int, String), vertexval_initializer=undef);
+julia> g = ValGraph(5, vertexval_types=(a=Int, String), vertexval_init=undef);
 
 julia> set_vertexval!(g, 1, :a, 50)
 true

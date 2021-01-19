@@ -41,9 +41,9 @@ import SimpleValueGraphs: typetuple
         @test g.redgevals == NamedTuple()
     end
 
-    @testset "ValGraph{UInt64, Tuple{Int32, Float32}, Tuple{}}(gs; vertexvals_initializer=undef)" begin
+    @testset "ValGraph{UInt64, Tuple{Int32, Float32}, Tuple{}}(gs; vertexvals_init=undef)" begin
 
-        g = ValGraph{UInt64, Tuple{Int32, Float32}, Tuple{}}(gs, vertexval_initializer=undef)
+        g = ValGraph{UInt64, Tuple{Int32, Float32}, Tuple{}}(gs, vertexval_init=undef)
 
         @test g isa ValGraph{UInt64, Tuple{Int32, Float32}, Tuple{}}
         @test g.vertexvals isa Tuple{Vector{Int32}, Vector{Float32}}
@@ -52,9 +52,9 @@ import SimpleValueGraphs: typetuple
         @test g.edgevals == ()
     end
 
-    @testset "ValOutDiGraph{Int64, NamedTuple{(a, b), Tuple{Int32, Float32}}, Tuple{}}(gs; vertexvals_initializer=undef)" begin
+    @testset "ValOutDiGraph{Int64, NamedTuple{(a, b), Tuple{Int32, Float32}}, Tuple{}}(gs; vertexvals_init=undef)" begin
 
-        g = ValOutDiGraph{Int64, Tuple{Int32, Float32}, Tuple{}}(gd, vertexval_initializer=undef)
+        g = ValOutDiGraph{Int64, Tuple{Int32, Float32}, Tuple{}}(gd, vertexval_init=undef)
 
         @test g isa ValOutDiGraph{Int64, Tuple{Int32, Float32}, Tuple{}}
         @test g.vertexvals isa Tuple{Vector{Int32}, Vector{Float32}}
@@ -63,9 +63,9 @@ import SimpleValueGraphs: typetuple
         @test g.edgevals == ()
     end
 
-    @testset "ValDiGraph{Int64, NamedTuple{(a, b), Tuple{Int32, Float32}}, Tuple{}}(gs; vertexvals_initializer=undef)" begin
+    @testset "ValDiGraph{Int64, NamedTuple{(a, b), Tuple{Int32, Float32}}, Tuple{}}(gs; vertexvals_init=undef)" begin
 
-        g = ValDiGraph{Int64, Tuple{Int32, Float32}, Tuple{}}(gd, vertexval_initializer=undef)
+        g = ValDiGraph{Int64, Tuple{Int32, Float32}, Tuple{}}(gd, vertexval_init=undef)
 
         @test g isa ValDiGraph{Int64, Tuple{Int32, Float32}, Tuple{}}
         @test g.vertexvals isa Tuple{Vector{Int32}, Vector{Float32}}
