@@ -1,0 +1,7 @@
+[deps]
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+LightGraphs = "093fc24a-ae57-5d10-9952-331d41423f4d"
+MetaGraphs = "626554b9-1ddb-594c-aa3c-2596fe9399a5"
+SNAPDatasets = "fc66bc1b-447b-53fc-8f09-bc9cfb0b0c10"
+SimpleValueGraphs = "b43c691f-cac2-5415-8122-396fe16a49fc"
+SimpleWeightedGraphs = "47aef6b3-ad0c-573a-a1e2-d07658019622"
