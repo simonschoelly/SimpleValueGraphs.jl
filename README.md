@@ -58,13 +58,26 @@ graphplot(gv;
 
 ## Benchmarks
 
-This is a comparison of running `LightGraphs.dijkstra_shortest_paths` on the [egonets-Facebook](https://snap.stanford.edu/data/egonets-Facebook.html) graph for multiple graph types - one should note, that this function is not optimal when accessing the edge weights for most of these graph types, so in the future these benchmarks should be repeated with a more optimized function.
+This is a comparison of running `LightGraphs.dijkstra_shortest_paths` on the [egonets-Facebook](https://snap.stanford.edu/data/egonets-Facebook.html) graph for multiple graph types.
 
 | graph type                                        | time (ms) |
 | ------------------------------------------------- | --------- |
-| LightGraphs.SimpleGraph + Matrix weights          | 5.1       |
-| LightGraphs.SimpleGraph + SparseMatrixCSC weights | 7.9       |
-| SimpleWeightedGraphs.SimpleWeightedGraph          | 7.8       |
-| MetaGraphs.MetaGraph                              | 68.5      |
-| SimpleValueGraphs.ValGraph                        | 9.2       |
+| LightGraphs.SimpleGraph + Matrix weights          | 6.5       |
+| LightGraphs.SimpleGraph + SparseMatrixCSC weights | 11.4      |
+| SimpleWeightedGraphs.SimpleWeightedGraph          | 11.7      |
+| MetaGraphs.MetaGraph                              | 141.9     |
+| SimpleValueGraphs.ValGraph                        | 12.4      |
+
+Currently a lot of LightGraphs algorithm do not optimally work with graphs that store edge metadata
+internally. The next benchmark is optimized version of the same algorithm that can be found
+in `SimpleValueGraphs.Experimental.dijkstra_shortests_pasts`. Clearly, this is a huge improvement for
+`ValGraph` and `SimpleWeightedGraph`.
+
+| graph type                                        | time (ms) |
+| ------------------------------------------------- | --------- |
+| LightGraphs.SimpleGraph + Matrix weights          | 6.8       |
+| LightGraphs.SimpleGraph + SparseMatrixCSC weights | 10.8      |
+| SimpleWeightedGraphs.SimpleWeightedGraph          | 2.9       |
+| MetaGraphs.MetaGraph                              | 147.3     |
+| SimpleValueGraphs.ValGraph                        | 3.1       |
 

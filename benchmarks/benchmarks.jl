@@ -114,9 +114,26 @@ suite["dijkstra_shortest_paths"]["facebook"]["ValGraph{Int}"] =
     @benchmarkable dijkstra_shortest_paths(g, 1) setup=(g = graph_with_weights(ValGraph{Int}, :facebook_combined))
 
 
-tune!(suite, verbose = true)
-results = run(suite, verbose = true)
-println(results)
+suite["Experimental.dijkstra_shortest_paths"] = BenchmarkGroup()
+suite["Experimental.dijkstra_shortest_paths"]["facebook"] = BenchmarkGroup()
+
+suite["Experimental.dijkstra_shortest_paths"]["facebook"]["SimpleGraph{Int} + Matrix"] =
+    @benchmarkable SimpleValueGraphs.Experimental.dijkstra_shortest_paths(g, 1, m) setup=((g, m) = graph_with_weights(SimpleGraph{Int}, Matrix, :facebook_combined))
+suite["Experimental.dijkstra_shortest_paths"]["facebook"]["SimpleGraph{Int} + SparseMatrixCSC"] =
+    @benchmarkable SimpleValueGraphs.Experimental.dijkstra_shortest_paths(g, 1, m) setup=((g, m) = graph_with_weights(SimpleGraph{Int}, SparseMatrixCSC, :facebook_combined))
+suite["Experimental.dijkstra_shortest_paths"]["facebook"]["SimpleWeightedGraph{Int}"] =
+    @benchmarkable SimpleValueGraphs.Experimental.dijkstra_shortest_paths(g, 1) setup=(g = graph_with_weights(SimpleWeightedGraph{Int}, :facebook_combined))
+suite["Experimental.dijkstra_shortest_paths"]["facebook"]["MetaGraph{Int}"] =
+    @benchmarkable SimpleValueGraphs.Experimental.dijkstra_shortest_paths(g, 1) setup=(g = graph_with_weights(MetaGraph{Int}, :facebook_combined))
+suite["Experimental.dijkstra_shortest_paths"]["facebook"]["ValGraph{Int}"] =
+    @benchmarkable SimpleValueGraphs.Experimental.dijkstra_shortest_paths(g, 1) setup=(g = graph_with_weights(ValGraph{Int}, :facebook_combined))
+
+
+if !isinteractive()
+    tune!(suite, verbose = true)
+    results = run(suite, verbose = true)
+    println(results)
+end
 
 
 
