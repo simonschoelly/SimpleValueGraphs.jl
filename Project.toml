@@ -1,7 +1,7 @@
 name = "SimpleValueGraphs"
 uuid = "b43c691f-cac2-5415-8122-396fe16a49fc"
 authors = ["Simon Schoelly <sischoel@gmail.com>"]
-version = "0.2.0"
+version = "0.3.0"
 
 [deps]
 LightGraphs = "093fc24a-ae57-5d10-9952-331d41423f4d"
