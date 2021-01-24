@@ -69,7 +69,7 @@ This is a comparison of running `LightGraphs.dijkstra_shortest_paths` on the [eg
 | SimpleValueGraphs.ValGraph                        | 12.4      |
 
 Currently a lot of LightGraphs algorithm do not optimally work with graphs that store edge metadata
-internally. The next benchmark is optimized version of the same algorithm that can be found
+internally. The next benchmark is an optimized version of the same algorithm that can be found
 in `SimpleValueGraphs.Experimental.dijkstra_shortests_pasts`. Clearly, this is a huge improvement for
 `ValGraph` and `SimpleWeightedGraph`.
 
