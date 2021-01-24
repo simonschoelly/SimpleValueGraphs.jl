@@ -8,13 +8,13 @@ using InteractiveUtils
 begin
 	import Pkg
 	Pkg.activate(".")
-	
+
 	using SimpleValueGraphs
-	
+
 	# For creating reproducable random matrices
 	using Random: MersenneTwister
 	using SparseArrays
-	
+
 	# We are going to test our new packages with some functions
 	# from LightGraphs and GraphsRecipes
 	using LightGraphs
@@ -38,18 +38,19 @@ We start by importing a few packages that we are going to use later:
 md"""
 The definition of `AbstractValGraph` is
 ```julia
-abstract type AbstractValGraph{V<:Integer, V_VALS, E_VALS} <: AbstractGraph{V} end
+abstract type AbstractValGraph{V<:Integer, V_VALS, E_VALS, G_VALS} <: AbstractGraph{V} end
 ```
 where
 * `V` is the type of the vertices
 * `V_VALS` are the types of the vertex values
 * `E_VALS` are the types of the edge values
+* `G_VALS` are the types of the edge values
 
 As this type of `LightGraphs.AbstractGraph`, it can also be used with LightGraphs functions as long as we correctly implement the `AbstractGraph` interface.
 
 In our case the vertex type will be `Int` as this type is also used for indexing rows and columns in a matrix.
 
-We don't have any vertex values, so use the empty tuple type for `V_VALS`.
+We don't have any graph or vertex values, so use the empty tuple type for `V_VALS` and `G_VALS`.
 
 For the edge values we have a single type (the type of the values in our matrix). We also want to give the name `:weight` to these values. This can be done by using the named tuple type `NamedTuple{(:weight,), Tuple{T}}` where `T` is the type of the matrix values.
 
@@ -60,9 +61,10 @@ Then our definition is:
 struct GraphView{T, M<:AbstractMatrix{<:T}} <: SimpleValueGraphs.AbstractValGraph{
 		Int,
 		Tuple{},
-		NamedTuple{(:weight,), Tuple{T}}
+		NamedTuple{(:weight,), Tuple{T}},
+		Tuple{}
 	}
-	
+
 	matrix::M
 end
 
@@ -107,14 +109,14 @@ md"""
 ##### has_edge
 `has_edge(g, u, v)` should return true if there is an edge between the vertices `u` and `v`. This should be the case when the entry in the wrapped matrix is zero. We can check that by using the `iszero` function. This also means that our graph type does not work for value types that do not have `iszero` defined.
 
-We also verify that `u` and `v` are actually vertices of our graph. Ffor this we use the `vertices` function that alreay has a default implementation through the implementation of `nv`.
+We also verify that `u` and `v` are actually vertices of our graph. For this we use the `vertices` function that alreay has a default implementation through the implementation of `nv`.
 """
 
 # ╔═╡ e28e02c8-1b7f-11eb-2949-1fc7e27f6cc2
 function SimpleValueGraphs.has_edge(g::GraphView, u, v)
 	u ∉ vertices(g) && return false
 	v ∉ vertices(g) && return false
-	
+
 	return !iszero(g.matrix[u, v])
 end
 

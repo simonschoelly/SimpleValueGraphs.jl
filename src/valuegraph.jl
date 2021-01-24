@@ -26,7 +26,7 @@ mutable struct ValGraph{  V <: Integer,
                             E_VALS <: AbstractTuple,
                             V_VALS_C,
                             E_VALS_C
-                        } <: AbstractValGraph{V, V_VALS, E_VALS}
+                        } <: AbstractValGraph{V, V_VALS, E_VALS, Tuple{}}
 
     ne::Int
     fadjlist::Adjlist{V}
@@ -57,7 +57,7 @@ mutable struct ValOutDiGraph{ V <: Integer,
                                 E_VALS <: AbstractTuple,
                                 V_VALS_C,
                                 E_VALS_C
-                              } <: AbstractValGraph{V, V_VALS, E_VALS}
+                            } <: AbstractValGraph{V, V_VALS, E_VALS, Tuple{}}
 
     ne::Int
     fadjlist::Adjlist{V}
@@ -90,7 +90,7 @@ mutable struct ValDiGraph{    V <: Integer,
                                 E_VALS <: AbstractTuple,
                                 V_VALS_C,
                                 E_VALS_C
-                           } <: AbstractValGraph{V, V_VALS, E_VALS}
+                           } <: AbstractValGraph{V, V_VALS, E_VALS, Tuple{}}
 
     ne::Int
     fadjlist::Adjlist{V}

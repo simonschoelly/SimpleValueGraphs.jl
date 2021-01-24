@@ -68,6 +68,7 @@ julia> gv = ValGraph(star_graph(4), edgeval_types=(Float64,), edgeval_init=(s, d
               eltype: Int64
   vertex value types: ()
     edge value types: (Float64,)
+   graph value types: ()
 
 julia> adjacency_matrix(gv)
 4×4 AdjacencyMatrix{ValGraph{Int64,Tuple{},Tuple{Float64},Tuple{},Tuple{Array{Array{Float64,1},1}}}}:
@@ -174,7 +175,7 @@ julia> gv = ValDiGraph(path_digraph(3),  edgeval_types=(a=Float64, b=String), ed
               eltype: Int64
   vertex value types: ()
     edge value types: (a = Float64, b = String)
-
+   graph value types: ()
 
 julia> ValMatrix(gv, 1, 0.0)
 3×3 ValMatrix{Float64,ValDiGraph{Int64,Tuple{},NamedTuple{(:a, :b),Tuple{Float64,String}},Tuple{},NamedTuple{(:a, :b),Tuple{Array{Array{Float64,1},1},Array{Array{String,1},1}}}},1}:

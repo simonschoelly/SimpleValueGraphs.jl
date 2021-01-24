@@ -47,6 +47,7 @@ export
 
     hasvertexkey,
     hasedgekey,
+    hasgraphkey,
 
     get_vertexval,
     set_vertexval!,
@@ -54,6 +55,8 @@ export
     get_edgeval,
     get_edgeval_or,
     set_edgeval!,
+
+    get_graphval,
 
     inedgevals,
     outedgevals,

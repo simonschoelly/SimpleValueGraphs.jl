@@ -4,15 +4,15 @@
 # ======================================================
 
 """
-    AbstractValGraph{V, V_VALS, E_VALS} <: AbstractGraph{V}
+    AbstractValGraph{V, V_VALS, E_VALS, G_VALS} <: AbstractGraph{V}
 
-Abstract value graph with vertex type `V`, vertex values of types `V_VALS`
-and edge values of types `E_VALS`.
+Abstract value graph with vertex type `V`, vertex values of types `V_VALS`,
+edge values of types `E_VALS` and graph values of types `G_VALS`.
 
 ### See also
 [`AbstractGraph`](@ref), [`AbstractEdgeValGraph`](@ref)
 """
-abstract type AbstractValGraph{V<:Integer, V_VALS, E_VALS} <: AbstractGraph{V} end
+abstract type AbstractValGraph{V<:Integer, V_VALS, E_VALS, G_VALS} <: AbstractGraph{V} end
 
 #  ------------------------------------------------------
 #  specialised types
@@ -25,6 +25,11 @@ ZeroEdgeValGraph{V, V_VALS} = AbstractValGraph{V, V_VALS, <: AbstractNTuple{0}}
 OneVertexValGraph{V, V_VAL, E_VALS} = AbstractValGraph{V, <: AbstractNTuple{1, V_VAL}, E_VALS}
 
 ZeroVertexValGraph{V, E_VALS} = AbstractValGraph{V, <: AbstractNTuple{0}, E_VALS}
+
+OneGraphValGraph{V, V_VALS, E_VALS, G_VAL} = AbstractValGraph{V, V_VALS, E_VALS, <: AbstractNTuple{1, G_VAL}}
+
+ZeroGraphValGraph{V, V_VALS, E_VALS} = AbstractValGraph{V, V_VALS, E_VALS, <: AbstractNTuple{0}}
+
 
 # ======================================================
 # Type parameter information
@@ -91,6 +96,14 @@ function edgevals_type(G::Type{<:AbstractValGraph{V, V_VALS, <: NamedTuple}}, ke
     return fieldtype(edgevals_type(G), key)
 end
 
+
+#  ------------------------------------------------------
+#  graphvals_type
+#  ------------------------------------------------------
+
+graphvals_type(g::AbstractValGraph) = graphvals_type(typeof(g))
+
+graphvals_type(::Type{<:AbstractValGraph{V, V_VALS, E_VALS, G_VALS}}) where {V, V_VALS, E_VALS, G_VALS} = G_VALS
 
 #  ------------------------------------------------------
 #  hasedgekey & hasedgekey_or_throw
@@ -162,6 +175,31 @@ end
 
 hasvertexkey_or_throw(g::AbstractValGraph, key) = hasvertexkey_or_throw(typeof(g), key)
 
+#  ------------------------------------------------------
+#  hasgraphkey & hasgraphkey_or_throw
+#  ------------------------------------------------------
+
+function hasgraphkey(
+        G::Type{<:AbstractValGraph{V, V_VALS, E_VALS, G_VALS}},
+        key::Symbol) where {V, V_VALS, E_VALS, G_VALS <: NamedTuple}
+
+    return key ∈ G_VALS.names
+end
+
+function hasgraphkey(
+        G::Type{<:AbstractValGraph{V, V_VALS, E_VALS, G_VALS}},
+        key::Integer) where {V, V_VALS, E_VALS, G_VALS <: AbstractTuple}
+
+    return key ∈ OneTo(length(G_VALS.types))
+end
+
+function hasgraphkey_or_throw(G::Type{<:AbstractValGraph}, key)
+    hasgraphkey(G, key) && return nothing
+
+    error("$key is not a valid graph key for this graph.")
+end
+
+hasgraphkey_or_throw(g::AbstractValGraph, key) = hasgraphkey_or_throw(typeof(g), key)
 
 # ======================================================
 #  show
@@ -170,13 +208,15 @@ hasvertexkey_or_throw(g::AbstractValGraph, key) = hasvertexkey_or_throw(typeof(g
 function Base.show(io::IO, ::MIME"text/plain", g::AbstractValGraph)
     print(io, "{$(nv(g)), $(ne(g))}")
     print(io, " ", is_directed(g) ? "directed" : "undirected")
-    print(io, " $(typeof(g).name) with")
+    print(io, " $(typeof(g).name.name) with")
     println(io)
     print(io, "              eltype: $(eltype(g))")
     println(io)
     print(io, "  vertex value types: $(typetuple(vertexvals_type(g)))")
     println(io)
     print(io, "    edge value types: $(typetuple(edgevals_type(g)))")
+    println(io)
+    print(io, "   graph value types: $(typetuple(graphvals_type(g)))")
 end
 
 
@@ -304,6 +344,7 @@ julia> gv = ValDiGraph(path_digraph(3), edgeval_types=(a=Float64,), edgeval_init
               eltype: Int64
   vertex value types: ()
     edge value types: (a = Float64,)
+   graph value types: ()
 
 julia> get_edgeval(gv, 1, 2, :a)
 0.8236475079774124
@@ -343,6 +384,7 @@ julia> gv = ValDiGraph(path_digraph(3), edgeval_types=(a=Float64, b=Int), edgeva
               eltype: Int64
   vertex value types: ()
     edge value types: (a = Float64, b = Int64)
+   graph value types: ()
 
 julia> get_edgeval(gv, 1, 2, :)
 (a = 0.8236475079774124, b = 10)
@@ -380,6 +422,7 @@ julia> gv = ValDiGraph(path_digraph(3), edgeval_types=(a=Float64, b=Int), edgeva
               eltype: Int64
   vertex value types: ()
     edge value types: (a = Float64, b = Int64)
+   graph value types: ()
 
 julia> get_edgeval_or(gv, 1, 2, :, missing)
 (a = 0.8236475079774124, b = 10)
@@ -392,6 +435,35 @@ get_edgeval_or(g::AbstractValGraph, s, d, key, alternative) =
     has_edge(g, s, d) ? get_edgeval(g, s, d, key) : alternative
 
 get_edgeval_or(g::OneEdgeValGraph, s, d, alternative) = get_edgeval_or(g, s, d, 1, alternative)
+
+
+#  -----------------------------------------------------
+#  get_graphval
+#  -----------------------------------------------------
+
+"""
+    get_graphval(g::AbstractValGraph, key)
+
+Return the graph value for the key `key`. If `g` has a single
+graph value, `key` can be omitted.
+"""
+function get_graphval end
+
+get_graphval(g::AbstractValGraph, key::Symbol) =
+    get_graphval(g, Base.fieldindex(graphvals_type(g), key))
+
+get_graphval(g::OneGraphValGraph) = get_graphval(g, 1)
+
+"""
+    get_graphval(g::AbstractValGraph, :)
+
+Return all graph values.
+"""
+function get_graphval(g::AbstractValGraph, ::Colon)
+
+    G_VALS = graphvals_type(g)
+    return G_VALS(get_graphval(g, i) for i in OneTo(length(G_VALS.types)))
+end
 
 
 #  -----------------------------------------------------
