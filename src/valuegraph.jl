@@ -857,7 +857,7 @@ function get_vertexval(g::ValDiGraph, v::Integer, key::Integer)
 
     return g.vertexvals[key][v]
 end
-#
+
 #  ------------------------------------------------------
 #  set_vertexval!
 #  ------------------------------------------------------
@@ -884,6 +884,47 @@ function set_vertexval!(g::ValDiGraph, v::Integer, key::Integer, value)
     g.vertexvals[key][v] = value
 
     return true
+end
+
+
+#  ------------------------------------------------------
+#  get_graphval
+#  ------------------------------------------------------
+
+function get_graphval(g::ValGraph, key::Integer)
+
+    # TODO verify key
+
+    return g.graphvals[key]
+end
+
+function get_graphval(g::ValOutDiGraph, key::Integer)
+
+    # TODO verify key
+
+    return g.graphvals[key]
+end
+
+function get_graphval(g::ValDiGraph, key::Integer)
+
+    # TODO verify key
+
+    return g.graphvals[key]
+end
+
+function get_graphval(g::ValGraph, ::Colon)
+
+    return g.graphvals
+end
+
+function get_graphval(g::ValOutDiGraph, ::Colon)
+
+    return g.graphvals
+end
+
+function get_graphval(g::ValDiGraph, ::Colon)
+
+    return g.graphvals
 end
 
 
