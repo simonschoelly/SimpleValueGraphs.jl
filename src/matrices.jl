@@ -71,7 +71,7 @@ julia> gv = ValGraph(star_graph(4), edgeval_types=(Float64,), edgeval_init=(s, d
    graph value types: ()
 
 julia> adjacency_matrix(gv)
-4×4 AdjacencyMatrix{ValGraph{Int64,Tuple{},Tuple{Float64},Tuple{},Tuple{Array{Array{Float64,1},1}}}}:
+4×4 AdjacencyMatrix{ValGraph{Int64,Tuple{},Tuple{Float64},Tuple{},Tuple{},Tuple{Array{Array{Float64,1},1}}}}:
  0  1  1  1
  1  0  0  0
  1  0  0  0
