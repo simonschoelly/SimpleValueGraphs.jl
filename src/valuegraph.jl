@@ -1,20 +1,20 @@
 
 
-
 # ======================================================
 # Structures
 # ======================================================
 
 
 """
-    ValGraph{V <: Integer, V_VALS, E_VALS, V_VALS_C, E_VALS_C} <: AbstractValGraph
+    ValGraph{V <: Integer, V_VALS, E_VALS, G_VALS, V_VALS_C, E_VALS_C} <: AbstractValGraph
 
-A type representing an undirected simple graph with vertex and edge values.
+A type representing an undirected simple graph with vertex, edge and graph values.
 
 # Parameters
 - `V`: The type of the vertex indices. Should be a concrete subtype of `Integer`.
 - `V_VALS`: The type of the vertex values, either a `Tuple` or `NamedTuple`.
 - `E_VALS`: The type of the edge values, either a `Tuple` or `NamedTuple`.
+- `G_VALS`: The type of the edge values, either a `Tuple` or `NamedTuple`.
 - `V_VALS_C`: Internal storage parameter, is derived from `V_VALS`
 - `E_VALS_C`: Internal storage parameter, is derived from `E_VALS`
 
@@ -24,25 +24,28 @@ by the constructors so that they should usually not be manually specified.
 mutable struct ValGraph{  V <: Integer,
                             V_VALS <: AbstractTuple,
                             E_VALS <: AbstractTuple,
+                            G_VALS <: AbstractTuple,
                             V_VALS_C,
                             E_VALS_C
-                        } <: AbstractValGraph{V, V_VALS, E_VALS}
+                        } <: AbstractValGraph{V, V_VALS, E_VALS, G_VALS}
 
     ne::Int
     fadjlist::Adjlist{V}
     vertexvals::V_VALS_C
     edgevals::E_VALS_C
+    graphvals::G_VALS
 end
 
 """
-    ValOutDiGraph{V <: Integer, V_VALS, E_VALS, V_VALS_C, E_VALS_C} <: AbstractValGraph
+    ValOutDiGraph{V <: Integer, V_VALS, E_VALS, G_VALS, V_VALS_C, E_VALS_C} <: AbstractValGraph
 
-A type representing a directed simple graph with vertex and edge values.
+A type representing a directed simple graph with vertex, edge and graph values.
 
 # Parameters
 - `V`: The type of the vertex indices. Should be a concrete subtype of `Integer`.
 - `V_VALS`: The type of the vertex values, either a `Tuple` or `NamedTuple`.
 - `E_VALS`: The type of the edge values, either a `Tuple` or `NamedTuple`.
+- `G_VALS`: The type of the edge values, either a `Tuple` or `NamedTuple`.
 - `V_VALS_C`: Internal storage parameter, is derived from `V_VALS`
 - `E_VALS_C`: Internal storage parameter, is derived from `E_VALS`
 
@@ -55,26 +58,29 @@ Uses less memory than `ValDiGraph` by only storing outgoing edges.
 mutable struct ValOutDiGraph{ V <: Integer,
                                 V_VALS <: AbstractTuple,
                                 E_VALS <: AbstractTuple,
+                                G_VALS <: AbstractTuple,
                                 V_VALS_C,
                                 E_VALS_C
-                              } <: AbstractValGraph{V, V_VALS, E_VALS}
+                            } <: AbstractValGraph{V, V_VALS, E_VALS, G_VALS}
 
     ne::Int
     fadjlist::Adjlist{V}
     vertexvals::V_VALS_C
     edgevals::E_VALS_C
+    graphvals::G_VALS
 end
 
 
 """
-    ValDiGraph{V <: Integer, V_VALS, E_VALS, V_VALS_C, E_VALS_C} <: AbstractValGraph
+    ValDiGraph{V <: Integer, V_VALS, E_VALS, G_VALS, V_VALS_C, E_VALS_C} <: AbstractValGraph
 
-A type representing a directed simple graph with vertex and edge values.
+A type representing a directed simple graph with vertex, edge and graph values.
 
 # Parameters
 - `V`: The type of the vertex indices. Should be a concrete subtype of `Integer`.
 - `V_VALS`: The type of the vertex values, either a `Tuple` or `NamedTuple`.
 - `E_VALS`: The type of the edge values, either a `Tuple` or `NamedTuple`.
+- `G_VALS`: The type of the edge values, either a `Tuple` or `NamedTuple`.
 - `V_VALS_C`: Internal storage parameter, is derived from `V_VALS`
 - `E_VALS_C`: Internal storage parameter, is derived from `E_VALS`
 
@@ -88,9 +94,10 @@ back edges.
 mutable struct ValDiGraph{    V <: Integer,
                                 V_VALS <: AbstractTuple,
                                 E_VALS <: AbstractTuple,
+                                G_VALS <: AbstractTuple,
                                 V_VALS_C,
                                 E_VALS_C
-                           } <: AbstractValGraph{V, V_VALS, E_VALS}
+                           } <: AbstractValGraph{V, V_VALS, E_VALS, G_VALS}
 
     ne::Int
     fadjlist::Adjlist{V}
@@ -98,6 +105,7 @@ mutable struct ValDiGraph{    V <: Integer,
     vertexvals::V_VALS_C
     edgevals::E_VALS_C
     redgevals::E_VALS_C
+    graphvals::G_VALS
 end
 
 # ======================================================
@@ -154,56 +162,61 @@ end
 #  ------------------------------------------------------
 
 """
-    ValGraph{V = $default_eltype}(n; vertexval_types=(), edgeval_types=(), vertexval_init=nothing)
-    ValGraph{V, V_VALS, E_VALS}(n, vertexval_init=nothing)
+    ValGraph{V = $default_eltype}(n; vertexval_types=(), edgeval_types=(), vertexval_init=nothing, graphvals=())
+    ValGraph{V, V_VALS, E_VALS}(n; vertexval_init=nothing, graphvals=())
 
-Construct a `ValGraph` with `n` vertices and 0 edges with of types
+Construct a `ValGraph` with `n` vertices, zero edges and graph values `graphvals`.  The
+vertex value types are either `V_VALS` or `vertexval_types` and the edge value type are
 `edgeval_types`.
 
 If omitted, the element type `V` is $(default_eltype).
 """
-function ValGraph{V, V_VALS, E_VALS}(n::Integer, vertexval_init=nothing) where {V <: Integer, V_VALS <: AbstractTuple, E_VALS <: AbstractTuple}
+function ValGraph{V, V_VALS, E_VALS}(n::Integer; vertexval_init=nothing, graphvals=()) where {V <: Integer, V_VALS <: AbstractTuple, E_VALS <: AbstractTuple}
 
     fadjlist = Adjlist{V}(n)
     vertexvals = create_vertexvals(n, V_VALS, vertexval_init)
     edgevals = create_edgevals(n, E_VALS)
     V_VALS_C = typeof(vertexvals)
     E_VALS_C = typeof(edgevals)
+    G_VALS = typeof(graphvals)
 
-    return ValGraph{V, V_VALS, E_VALS, V_VALS_C, E_VALS_C}(0, fadjlist, vertexvals, edgevals)
+    return ValGraph{V, V_VALS, E_VALS, G_VALS, V_VALS_C, E_VALS_C}(0, fadjlist, vertexvals, edgevals, graphvals)
 end
 
 """
-    ValOutDiGraph{V = $default_eltype}(n; vertexval_types=(), edgeval_types=(), vertexval_init=nothing)
-    ValOutDiGraph{V, V_VALS, E_VALS}(n, vertexval_init=nothing)
+    ValOutDiGraph{V = $default_eltype}(n; vertexval_types=(), edgeval_types=(), vertexval_init=nothing, graphvals=())
+    ValOutDiGraph{V, V_VALS, E_VALS}(n; vertexval_init=nothing, graphvals=())
 
-Construct a `ValOutDiGraph` with `n` vertices and 0 edges of types
+Construct a `ValOutDiGraph` with `n` vertices, zero edges and graph values `graphvals`.  The
+vertex value types are either `V_VALS` or `vertexval_types` and the edge value type are
 `edgeval_types`.
-If omitted, the element type `V` is $(default_eltype).
 
+If omitted, the element type `V` is $(default_eltype).
 """
-function ValOutDiGraph{V, V_VALS, E_VALS}(n::Integer, vertexval_init=nothing) where {V<:Integer, V_VALS, E_VALS}
+function ValOutDiGraph{V, V_VALS, E_VALS}(n::Integer; vertexval_init=nothing, graphvals=()) where {V<:Integer, V_VALS, E_VALS}
 
     fadjlist = Adjlist{V}(n)
     vertexvals = create_vertexvals(n, V_VALS, vertexval_init)
     edgevals = create_edgevals(n, E_VALS)
     V_VALS_C = typeof(vertexvals)
     E_VALS_C = typeof(edgevals)
+    G_VALS = typeof(graphvals)
 
-    return ValOutDiGraph{V, V_VALS, E_VALS, V_VALS_C, E_VALS_C}(0, fadjlist, vertexvals, edgevals)
+    return ValOutDiGraph{V, V_VALS, E_VALS, G_VALS, V_VALS_C, E_VALS_C}(0, fadjlist, vertexvals, edgevals, graphvals)
 end
 
 
 """
-    ValDiGraph{V = $default_eltype}(n; vertexval_types=(), edgeval_types=(), vertexval_init=nothing)
-    ValDiGraph{V, E_VALS}(n, vertexval_init=nothing)
+    ValDiGraph{V = $default_eltype}(n; vertexval_types=(), edgeval_types=(), vertexval_init=nothing, graphvals=())
+    ValDiGraph{V, E_VALS}(n, vertexval_init=nothing; graphvals=())
 
-Construct a `ValDiGraph` with `n` vertices and 0 edges with value-types
+Construct a `ValDiGraph` with `n` vertices, zero edges and graph values `graphvals`.  The
+vertex value types are either `V_VALS` or `vertexval_types` and the edge value type are
 `edgeval_types`.
 
 If omitted, the element type `V` is $(default_eltype).
 """
-function ValDiGraph{V, V_VALS, E_VALS}(n::Integer, vertexval_init=nothing) where {V<:Integer, V_VALS, E_VALS}
+function ValDiGraph{V, V_VALS, E_VALS}(n::Integer; vertexval_init=nothing, graphvals=()) where {V<:Integer, V_VALS, E_VALS}
 
     fadjlist = Adjlist{V}(n)
     badjlist = Adjlist{V}(n)
@@ -212,26 +225,27 @@ function ValDiGraph{V, V_VALS, E_VALS}(n::Integer, vertexval_init=nothing) where
     redgevals = create_edgevals(n, E_VALS)
     V_VALS_C = typeof(vertexvals)
     E_VALS_C = typeof(edgevals)
+    G_VALS = typeof(graphvals)
 
-    return ValDiGraph{V, V_VALS, E_VALS, V_VALS_C, E_VALS_C}(
-                0, fadjlist, badjlist, vertexvals, edgevals, redgevals)
+    return ValDiGraph{V, V_VALS, E_VALS, G_VALS, V_VALS_C, E_VALS_C}(
+                0, fadjlist, badjlist, vertexvals, edgevals, redgevals, graphvals)
 end
 
 
 for G in (:ValGraph, :ValOutDiGraph, :ValDiGraph)
 
-    @eval function $G(n::Integer; vertexval_types::AbstractTypeTuple=(), edgeval_types::AbstractTypeTuple=(), vertexval_init=nothing)
+    @eval function $G(n::Integer; vertexval_types::AbstractTypeTuple=(), edgeval_types::AbstractTypeTuple=(), vertexval_init=nothing, graphvals=())
 
         V_VALS = typetuple_to_type(vertexval_types)
         E_VALS = typetuple_to_type(edgeval_types)
-        return $G{default_eltype, V_VALS, E_VALS}(n, vertexval_init)
+        return $G{default_eltype, V_VALS, E_VALS}(n, vertexval_init=vertexval_init, graphvals=graphvals)
     end
 
-    @eval function $G{V}(n::Integer; vertexval_types::AbstractTypeTuple=(), edgeval_types::AbstractTypeTuple=(), vertexval_init=nothing) where {V <: Integer}
+    @eval function $G{V}(n::Integer; vertexval_types::AbstractTypeTuple=(), edgeval_types::AbstractTypeTuple=(), vertexval_init=nothing, graphvals=()) where {V <: Integer}
 
         V_VALS = typetuple_to_type(vertexval_types)
         E_VALS = typetuple_to_type(edgeval_types)
-        return $G{V, V_VALS, E_VALS}(V(n), vertexval_init)
+        return $G{V, V_VALS, E_VALS}(V(n), vertexval_init=vertexval_init, graphvals=graphvals)
     end
 end
 
@@ -843,7 +857,7 @@ function get_vertexval(g::ValDiGraph, v::Integer, key::Integer)
 
     return g.vertexvals[key][v]
 end
-#
+
 #  ------------------------------------------------------
 #  set_vertexval!
 #  ------------------------------------------------------
@@ -870,6 +884,47 @@ function set_vertexval!(g::ValDiGraph, v::Integer, key::Integer, value)
     g.vertexvals[key][v] = value
 
     return true
+end
+
+
+#  ------------------------------------------------------
+#  get_graphval
+#  ------------------------------------------------------
+
+function get_graphval(g::ValGraph, key::Integer)
+
+    # TODO verify key
+
+    return g.graphvals[key]
+end
+
+function get_graphval(g::ValOutDiGraph, key::Integer)
+
+    # TODO verify key
+
+    return g.graphvals[key]
+end
+
+function get_graphval(g::ValDiGraph, key::Integer)
+
+    # TODO verify key
+
+    return g.graphvals[key]
+end
+
+function get_graphval(g::ValGraph, ::Colon)
+
+    return g.graphvals
+end
+
+function get_graphval(g::ValOutDiGraph, ::Colon)
+
+    return g.graphvals
+end
+
+function get_graphval(g::ValDiGraph, ::Colon)
+
+    return g.graphvals
 end
 
 

@@ -5,14 +5,16 @@
     ValGraph{V, V_VALS, E_VALS}(
         g::SimpleGraph;
         vertexval_init,
-        edgeval_init
+        edgeval_init,
+        graphvals=()
     )
     ValGraph{V = eltype(g)}(
         g::SimpleGraph;
         vertexval_types=(),
         edgeval_types=(),
         vertexval_init,
-        edgeval_init
+        edgeval_init,
+        graphvals=()
     )
 
 Construct a `ValGraph` with the same structure as `g`.
@@ -29,6 +31,7 @@ Construct a `ValGraph` with the same structure as `g`.
     graph has no edge values.
 - `vertexval_types`: A `Tuple` or `NamedTuple` of types.
 - `edgeval_types`: A `Tuple` or `NamedTuple` of types.
+- `grapvals`: A `Tuple` or `NamedTuple` of graph values.
 
 # Parameters
 - `V` the eltype of this graphs vertices. `eltype(g) if omitted.
@@ -40,7 +43,8 @@ Construct a `ValGraph` with the same structure as `g`.
 function ValGraph{V, V_VALS, E_VALS}(
             g::SimpleGraph;
             vertexval_init=nothing,
-            edgeval_init=nothing) where {V, V_VALS, E_VALS}
+            edgeval_init=nothing,
+            graphvals=()) where {V, V_VALS, E_VALS}
 
     n = nv(g)
     fadjlist = deepcopy_adjlist(V, g.fadjlist)
@@ -56,11 +60,14 @@ function ValGraph{V, V_VALS, E_VALS}(
         end
     end
 
-    gv = ValGraph{V, V_VALS, E_VALS, V_VALS_C, E_VALS_C}(
+    G_VALS = typeof(graphvals)
+
+    gv = ValGraph{V, V_VALS, E_VALS, G_VALS, V_VALS_C, E_VALS_C}(
         ne(g),
         fadjlist,
         vertexvals,
-        edgevals
+        edgevals,
+        graphvals
     )
 
     if edgeval_init != undef && length(edgevals) > 0
@@ -89,14 +96,16 @@ ValGraph(g::SimpleGraph; kwargs...) = ValGraph{eltype(g)}(g; kwargs...)
     ValOutDiGraph{V, V_VALS, E_VALS}(
         g::SimpleDiGraph;
         vertexval_init,
-        edgeval_init
+        edgeval_init,
+        graphvals=()
     )
     ValOutDiGraph{V = eltype(g)}(
         g::SimpleDiGraph;
         vertexval_types=(),
         edgeval_types=(),
         vertexval_init,
-        edgeval_init
+        edgeval_init,
+        graphvals=()
     )
 
 Construct a `ValOutDiGraph` with the same structure as `g`.
@@ -113,6 +122,7 @@ Construct a `ValOutDiGraph` with the same structure as `g`.
     graph has no edge values.
 - `vertexval_types`: A `Tuple` or `NamedTuple` of types.
 - `edgeval_types`: A `Tuple` or `NamedTuple` of types.
+- `grapvals`: A `Tuple` or `NamedTuple` of graph values.
 
 # Parameters
 - `V` the eltype of this graphs vertices. `eltype(g) if omitted.
@@ -124,7 +134,8 @@ Construct a `ValOutDiGraph` with the same structure as `g`.
 function ValOutDiGraph{V, V_VALS, E_VALS}(
             g::SimpleDiGraph;
             vertexval_init=nothing,
-            edgeval_init=nothing) where {V, V_VALS, E_VALS}
+            edgeval_init=nothing,
+            graphvals=()) where {V, V_VALS, E_VALS}
 
     n = nv(g)
     fadjlist = deepcopy_adjlist(V,g.fadjlist)
@@ -139,7 +150,9 @@ function ValOutDiGraph{V, V_VALS, E_VALS}(
         end
     end
 
-    gv = ValOutDiGraph{V, V_VALS, E_VALS, V_VALS_C, E_VALS_C}(ne(g), fadjlist, vertexvals, edgevals)
+    G_VALS = typeof(graphvals)
+
+    gv = ValOutDiGraph{V, V_VALS, E_VALS, G_VALS, V_VALS_C, E_VALS_C}(ne(g), fadjlist, vertexvals, edgevals, graphvals)
 
     if edgeval_init != undef && length(edgevals) > 0
         # TODO there is a more efficient method for this
@@ -167,14 +180,16 @@ ValOutDiGraph(g::SimpleDiGraph; kwargs...) = ValOutDiGraph{eltype(g)}(g; kwargs.
     ValDiGraph{V, V_VALS, E_VALS}(
         g::SimpleDiGraph;
         vertexval_init,
-        edgeval_init
+        edgeval_init,
+        graphvals=()
     )
     ValDiGraph{V = eltype(g)}(
         g::SimpleDiGraph;
         vertexval_types=(),
         edgeval_types=(),
         vertexval_init,
-        edgeval_init
+        edgeval_init,
+        graphvals=()
     )
 
 Construct a `ValDiGraph` with the same structure as `g`.
@@ -191,6 +206,7 @@ Construct a `ValDiGraph` with the same structure as `g`.
     graph has no edge values.
 - `vertexval_types`: A `Tuple` or `NamedTuple` of types.
 - `edgeval_types`: A `Tuple` or `NamedTuple` of types.
+- `grapvals`: A `Tuple` or `NamedTuple` of graph values.
 
 # Parameters
 - `V` the eltype of this graphs vertices. `eltype(g) if omitted.
@@ -203,7 +219,8 @@ Construct a `ValDiGraph` with the same structure as `g`.
 function ValDiGraph{V, V_VALS, E_VALS}(
             g::SimpleDiGraph;
             vertexval_init=nothing,
-            edgeval_init=nothing) where {V, V_VALS, E_VALS}
+            edgeval_init=nothing,
+            graphvals=()) where {V, V_VALS, E_VALS}
 
     n = nv(g)
     fadjlist = deepcopy_adjlist(V, g.fadjlist)
@@ -222,7 +239,9 @@ function ValDiGraph{V, V_VALS, E_VALS}(
         end
     end
 
-    gv = ValDiGraph{V, V_VALS, E_VALS, V_VALS_C, E_VALS_C}(ne(g), fadjlist, badjlist, vertexvals, edgevals, redgevals)
+    G_VALS = typeof(graphvals)
+
+    gv = ValDiGraph{V, V_VALS, E_VALS, G_VALS, V_VALS_C, E_VALS_C}(ne(g), fadjlist, badjlist, vertexvals, edgevals, redgevals, graphvals)
 
     if edgeval_init != undef && length(edgevals) > 0
         # TODO there is a more efficient method for this

@@ -2,14 +2,14 @@ using SimpleValueGraphs: hasedgekey_or_throw, AbstractValGraph, ValEdgeIter
 
 @testset "abstractvaluegraph" begin
 
-struct DummyValGraph{V, V_VALS, E_VALS, G <: AbstractValGraph{V, V_VALS, E_VALS}} <: AbstractValGraph{V, V_VALS, E_VALS}
+struct DummyValGraph{V, V_VALS, E_VALS, G_VALS, G <: AbstractValGraph{V, V_VALS, E_VALS, G_VALS}} <: AbstractValGraph{V, V_VALS, E_VALS, G_VALS}
 
     wrapped::G
 end
 
 SimpleValueGraphs.nv(g::DummyValGraph) = nv(g.wrapped)
 
-SimpleValueGraphs.is_directed(::Type{<:DummyValGraph{V, V_VALS, E_VALS, G}}) where {V, V_VALS, E_VALS, G} = is_directed(G)
+SimpleValueGraphs.is_directed(::Type{<:DummyValGraph{V, V_VALS, E_VALS, G_VALS, G}}) where {V, V_VALS, E_VALS, G_VALS, G} = is_directed(G)
 
 SimpleValueGraphs.has_edge(g::DummyValGraph, s, d) = has_edge(g.wrapped, s, d)
 
