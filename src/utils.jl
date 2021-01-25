@@ -34,6 +34,35 @@ function deepcopy_adjlist(T::Type, adjlist::Adjlist)
     return result
 end
 
+function reverse_adjlist(adjlist::Adjlist{T}) where {T <: Integer}
+
+    n = length(adjlist)
+    result = Vector{Vector{T}}(undef, n)
+
+    # calculate the lengths of the resulting vectors, so that
+    # we can allocate the right amount of space from the beginning
+    lengths = zeros(T, n)
+    @inbounds for i ∈ OneTo(n)
+        for v ∈ adjlist[i]
+            lengths[v] += one(T)
+        end
+    end
+
+    @inbounds for i ∈ OneTo(n)
+        result[i] = Vector(undef, lengths[i])
+    end
+
+    insert_after = fill!(lengths, zero(T)) # reuse space
+    @inbounds for i ∈ OneTo(n)
+        for v ∈ adjlist[i]
+            index = (insert_after[v] += one(T))
+            result[v][index] = i
+        end
+    end
+
+    return result
+end
+
 
 # TODO check if still correct
 @generated function edgevals_container_type(::Val{E_VAL}) where {E_VAL <:Tuple}

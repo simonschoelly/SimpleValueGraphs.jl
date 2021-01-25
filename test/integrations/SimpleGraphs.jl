@@ -74,4 +74,128 @@ import SimpleValueGraphs: typetuple
         @test g.edgevals == ()
         @test g.redgevals == ()
     end
+
+
+# ======================================================
+# Simple[Di]Graph from value graph constructor
+# ======================================================
+
+    @testset "SimpleGraph{$V_OUT}(g::ValGraph{$V_IN})" for V_IN ∈ (Int64, Int32, Int8, UInt8), V_OUT ∈ (Int64, Int32, Int8, UInt8)
+
+        g = ValGraph{V_IN}(5)
+        add_edge!(g, 1, 2)
+        add_edge!(g, 2, 3)
+        add_edge!(g, 5, 5)
+
+        gs = SimpleGraph{V_OUT}(g)
+        @test gs isa SimpleGraph{V_OUT}
+        @test ne(gs) == 3
+        @test gs.fadjlist == [[2], [1, 3], [2], Int[], [5]]
+
+    end
+
+    @testset "SimpleGraph(g::ValGraph{$V_IN})" for V_IN ∈ (Int64, Int32, Int8, UInt8)
+
+        g = ValGraph{V_IN}(5)
+        add_edge!(g, 1, 2)
+        add_edge!(g, 2, 3)
+        add_edge!(g, 5, 5)
+
+        gs = SimpleGraph(g)
+        @test gs isa SimpleGraph{eltype(g)}
+        @test ne(gs) == 3
+        @test gs.fadjlist == [[2], [1, 3], [2], Int[], [5]]
+    end
+
+    @testset "SimpleDiGraph{$V_OUT}(g::ValDiGraph{$V_IN})" for V_IN ∈ (Int64, Int32, Int8, UInt8), V_OUT ∈ (Int64, Int32, Int8, UInt8)
+        g = ValDiGraph{V_IN}(5)
+        add_edge!(g, 1, 2)
+        add_edge!(g, 2, 1)
+        add_edge!(g, 2, 3)
+        add_edge!(g, 2, 2)
+        add_edge!(g, 5, 5)
+
+        gs = SimpleDiGraph{V_OUT}(g)
+        @test gs isa SimpleDiGraph{V_OUT}
+        @test ne(gs) == 5
+        @test gs.fadjlist == [[2], [1, 2, 3], Int[], Int[], [5]]
+        @test gs.badjlist == [[2], [1, 2], [2], Int[], [5]]
+    end
+
+    @testset "SimpleDiGraph(g::ValDiGraph{$V_IN})" for V_IN ∈ (Int64, Int32, Int8, UInt8)
+
+        g = ValDiGraph{V_IN}(5)
+        add_edge!(g, 1, 2)
+        add_edge!(g, 2, 1)
+        add_edge!(g, 2, 3)
+        add_edge!(g, 2, 2)
+        add_edge!(g, 5, 5)
+
+        gs = SimpleDiGraph(g)
+        @test ne(gs) == 5
+        @test gs isa SimpleDiGraph{eltype(g)}
+        @test gs.fadjlist == [[2], [1, 2, 3], Int[], Int[], [5]]
+        @test gs.badjlist == [[2], [1, 2], [2], Int[], [5]]
+    end
+
+    @testset "SimpleDiGraph{$V_OUT}(g::ValOutDiGraph{$V_IN})" for V_IN ∈ (Int64, Int32, Int8, UInt8), V_OUT ∈ (Int64, Int32, Int8, UInt8)
+        g = ValOutDiGraph{V_IN}(5)
+        add_edge!(g, 1, 2)
+        add_edge!(g, 2, 1)
+        add_edge!(g, 2, 3)
+        add_edge!(g, 2, 2)
+        add_edge!(g, 5, 5)
+
+        gs = SimpleDiGraph{V_OUT}(g)
+        @test gs isa SimpleDiGraph{V_OUT}
+        @test ne(gs) == 5
+        @test gs.fadjlist == [[2], [1, 2, 3], Int[], Int[], [5]]
+        @test gs.badjlist == [[2], [1, 2], [2], Int[], [5]]
+    end
+
+    @testset "SimpleDiGraph(g::ValOutDiGraph{$V_IN})" for V_IN ∈ (Int64, Int32, Int8, UInt8)
+
+        g = ValOutDiGraph{V_IN}(5)
+        add_edge!(g, 1, 2)
+        add_edge!(g, 2, 1)
+        add_edge!(g, 2, 3)
+        add_edge!(g, 2, 2)
+        add_edge!(g, 5, 5)
+
+        gs = SimpleDiGraph(g)
+        @test ne(gs) == 5
+        @test gs isa SimpleDiGraph{eltype(g)}
+        @test gs.fadjlist == [[2], [1, 2, 3], Int[], Int[], [5]]
+        @test gs.badjlist == [[2], [1, 2], [2], Int[], [5]]
+    end
+
+    @testset "SimpleDiGraph{$V_OUT}(g::ValGraph{$V_IN})" for V_IN ∈ (Int64, Int32, Int8, UInt8), V_OUT ∈ (Int64, Int32, Int8, UInt8)
+
+        g = ValGraph{V_IN}(5)
+        add_edge!(g, 1, 2)
+        add_edge!(g, 2, 3)
+        add_edge!(g, 5, 5)
+
+        gs = SimpleDiGraph{V_OUT}(g)
+        @test gs isa SimpleDiGraph{V_OUT}
+        @test ne(gs) == 5
+        @test gs.fadjlist == [[2], [1, 3], [2], Int[], [5]]
+        @test gs.badjlist == [[2], [1, 3], [2], Int[], [5]]
+
+    end
+
+    @testset "SimpleGraph(g::ValGraph{$V_IN})" for V_IN ∈ (Int64, Int32, Int8, UInt8)
+
+        g = ValGraph{V_IN}(5)
+        add_edge!(g, 1, 2)
+        add_edge!(g, 2, 3)
+        add_edge!(g, 5, 5)
+
+        gs = SimpleDiGraph(g)
+        @test gs isa SimpleDiGraph{eltype(g)}
+        @test ne(gs) == 5
+        @test gs.fadjlist == [[2], [1, 3], [2], Int[], [5]]
+        @test gs.badjlist == [[2], [1, 3], [2], Int[], [5]]
+    end
+
 end # testset

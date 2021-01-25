@@ -264,3 +264,46 @@ end
 
 ValDiGraph(g::SimpleDiGraph; kwargs...) = ValDiGraph{eltype(g)}(g; kwargs...)
 
+
+# ======================================================
+# Simple[Di]Graph from value graph constructor
+# ======================================================
+
+function SimpleGraph{V}(g::ValGraph) where {V}
+
+    return SimpleGraph{V}(ne(g), deepcopy_adjlist(V, g.fadjlist))
+end
+
+SimpleGraph(g::ValGraph) = SimpleGraph{eltype(g)}(g)
+
+
+function SimpleDiGraph{V}(g::ValDiGraph) where {V}
+
+    return SimpleDiGraph{V}(
+                ne(g),
+                deepcopy_adjlist(V, g.fadjlist),
+                deepcopy_adjlist(V, g.badjlist))
+end
+
+SimpleDiGraph(g::ValDiGraph) = SimpleDiGraph{eltype(g)}(g)
+
+function SimpleDiGraph{V}(g::ValOutDiGraph) where {V}
+
+    fadjlist = deepcopy_adjlist(V, g.fadjlist)
+
+    return SimpleDiGraph{V}(ne(g), fadjlist, reverse_adjlist(fadjlist))
+end
+
+SimpleDiGraph(g::ValOutDiGraph) = SimpleDiGraph{eltype(g)}(g)
+
+
+function SimpleDiGraph{V}(g::ValGraph) where {V}
+
+    neg = ne(g) - num_self_loops(g) + ne(g)
+    fadjlist =  deepcopy_adjlist(V, g.fadjlist)
+    badjlist =  deepcopy_adjlist(V, fadjlist)
+
+    return SimpleDiGraph{V}(neg, fadjlist, badjlist)
+end
+
+SimpleDiGraph(g::ValGraph) = SimpleDiGraph{eltype(g)}(g)
