@@ -1,3 +1,5 @@
+
+#=
 using SimpleValueGraphs.AbstractTuples
 
 import SimpleValueGraphs: default_eltype
@@ -22,178 +24,271 @@ function testset_toplogical_equivalent(g::SimpleDiGraph, gv::ValDiGraph)
     end
 end
 
+=#
 
-# ValGraph{Int, Tuple{Float64}}(10)
-@testset "Constructor $G{\$V, \$E_VALS}(\$n)" for
-    G in (ValGraph, ValOutDiGraph, ValDiGraph)
+#  ------------------------------------------------------
+#  Constructors from other value graphs
+#  ------------------------------------------------------
 
-    @testset "Params: V = $V, E_VALS = $E_VALS" for
-         V in TEST_VERTEX_TYPES_SMALL,
-    E_VALS in TEST_EDGEVAL_TYPES_SMALL,
-         n in (V in (UInt8, Int8) ? V[0, 5, typemax(V)] : V[0, 5])
+@testset "ValGraph{$V_OUT}(::ValGraph{$V_IN}" for
+            V_IN ∈ (Int64, Int32, Int8, UInt8), V_OUT ∈ (Int64, Int32, Int8, UInt8)
 
-        g = G{V, E_VALS}(n)
+    g1 = ValGraph{V_IN}(5;
+        vertexval_types=(Int8,),
+        vertexval_init=v -> (v,),
+        edgeval_types=(a=Int8, b=Int16),
+    )
+    add_edge!(g1, 1, 2, (a=Int8(1), b=Int16(2)))
+    add_edge!(g1, 2, 3, (a=Int8(2), b=Int16(3)))
+    add_edge!(g1, 5, 5, (a=Int8(51), b=Int16(52)))
 
-        @test g isa G{V, E_VALS}
-        @test ne(g) == 0
-        @test nv(g) == n
-        gs = is_directed(G) ? SimpleDiGraph(n) : SimpleGraph(n)
-        testset_topological_equivalent(gs, g)
-        testset_isvalidgraph(g)
-
-    end
+    g2 = ValGraph{V_OUT}(g1)
+    @test g2 isa ValGraph{V_OUT, vertexvals_type(g1), edgevals_type(g1), graphvals_type(g1)}
+    @test ne(g2) == ne(g1)
+    @test g2.fadjlist == g1.fadjlist
+    @test g2.vertexvals == g1.vertexvals
+    @test g2.edgevals == g1.edgevals
+    @test g2.graphvals == g1.graphvals
 end
 
+@testset "ValGraph(::ValGraph{$V_IN}" for V_IN ∈ (Int64, Int32, Int8, UInt8)
 
-# ValGraph(10, (Float64, ))
-@testset "Constructor $G(\$n::\$V, \$edgeval_types)" for
-    G in (ValGraph, ValOutDiGraph, ValDiGraph)
+    g1 = ValGraph{V_IN}(5;
+        vertexval_types=(Int8,),
+        vertexval_init=v -> (v,),
+        edgeval_types=(Int8, Int16),
+    )
+    add_edge!(g1, 1, 2, (Int8(1), Int16(2)))
+    add_edge!(g1, 2, 3, (Int8(2), Int16(3)))
+    add_edge!(g1, 5, 5, (Int8(51), Int16(52)))
 
-    @testset "Params n = $n, V = $V; edgeval_types = $edgeval_types" for
-                V in TEST_VERTEX_TYPES_SMALL,
-    edgeval_types in tuple_of_types.(TEST_EDGEVAL_TYPES_SMALL),
-                n in (V in (UInt8, Int8) ? V[0, 5, typemax(V)] : V[0, 5])
-
-        g = G(n; edgeval_types=edgeval_types)
-
-        E_VALS_should_be = (edgeval_types isa Tuple) ?
-            Tuple{edgeval_types...} :
-            NamedTuple{keys(edgeval_types), Tuple{edgeval_types...}}
-
-        @test g isa G{default_eltype, E_VALS_should_be}
-        @test ne(g) == 0
-        @test nv(g) == n
-        gs = is_directed(G) ? SimpleDiGraph(n) : SimpleGraph(n)
-        testset_topological_equivalent(gs, g)
-        testset_isvalidgraph(g)
-    end
-
+    g2 = ValGraph(g1)
+    @test g2 isa ValGraph{eltype(g1), vertexvals_type(g1), edgevals_type(g1), graphvals_type(g1)}
+    @test ne(g2) == ne(g1)
+    @test g2.fadjlist == g1.fadjlist
+    @test g2.vertexvals == g1.vertexvals
+    @test g2.edgevals == g1.edgevals
+    @test g2.graphvals == g1.graphvals
 end
 
+@testset "ValDiGraph{$V_OUT}(::ValGraph{$V_IN}" for
+            V_IN ∈ (Int64, Int32, Int8, UInt8), V_OUT ∈ (Int64, Int32, Int8, UInt8)
 
+    g1 = ValGraph{V_IN}(5;
+        vertexval_types=(x=Int8,),
+        vertexval_init=v -> (x=Int8(v),),
+        edgeval_types=(a=Int8, b=Int16),
+    )
+    add_edge!(g1, 1, 2, (a=Int8(1), b=Int16(2)))
+    add_edge!(g1, 2, 3, (a=Int8(2), b=Int16(3)))
+    add_edge!(g1, 5, 5, (a=Int8(51), b=Int16(52)))
 
-# ValGraph(10)
-@testset "Constructor $G(\$n::\$V)" for
-    G in (ValGraph, ValOutDiGraph, ValDiGraph)
-
-    @testset "Params n = $n, V = $V" for
-        V in TEST_VERTEX_TYPES_SMALL,
-        n in (V in (UInt8, Int8) ? V[0, 5, typemax(V)] : V[0, 5])
-
-        g = G(n)
-
-        @testset "correct type" begin
-            E_VALS_should_be = (default_edgeval_types isa Tuple) ?
-                Tuple{default_edgeval_types...} :
-                NamedTuple{keys(default_edgeval_types),
-                           Tuple{default_edgeval_types...}}
-
-            @test g isa G{default_eltype, E_VALS_should_be}
-        end
-
-        @testset "0 edges" begin @test ne(g) == 0 end
-        @testset "$n vertices" begin @test ne(g) == 0 end
-        gs = is_directed(G) ? SimpleDiGraph(n) : SimpleGraph(n)
-        testset_topological_equivalent(gs, g)
-        testset_isvalidgraph(g)
-    end
+    g2 = ValDiGraph{V_OUT}(g1)
+    @test g2 isa ValDiGraph{V_OUT, vertexvals_type(g1), edgevals_type(g1), graphvals_type(g1)}
+    @test ne(g2) == 5
+    @test g2.fadjlist == g2.badjlist == [[2], [1, 3], [2], Int[], [5]]
+    @test g2.vertexvals == g1.vertexvals
+    @test g2.edgevals == g2.redgevals == g1.edgevals
+    @test g2.graphvals == g1.graphvals
 end
 
-# ValGraph(undef, gs, (Float64,))
-@testset "Constructor $G(undef, \$gs, \$edgeval_types)" for
-    G in (ValGraph, ValOutDiGraph, ValDiGraph)
+@testset "ValDiGraph(::ValGraph{$V_IN}" for V_IN ∈ (Int64, Int32, Int8, UInt8)
 
-    GS = is_directed(G) ? SimpleDiGraph : SimpleGraph
+    g1 = ValGraph{V_IN}(5;
+        vertexval_types=(x=Int8,),
+        vertexval_init=v -> (x=Int8(v),),
+        edgeval_types=(a=Int8, b=Int16),
+    )
+    add_edge!(g1, 1, 2, (a=Int8(1), b=Int16(2)))
+    add_edge!(g1, 2, 3, (a=Int8(2), b=Int16(3)))
+    add_edge!(g1, 5, 5, (a=Int8(51), b=Int16(52)))
 
-    @testset "Params: edgeval_types = $edgeval_types, gs = $info" for
-                V in TEST_VERTEX_TYPES_SMALL,
-    edgeval_types in tuple_of_types.(TEST_EDGEVAL_TYPES_SMALL),
-       (gs, info) in make_testgraphs(GS{V})
-
-
-        g = G(undef, gs; edgeval_types=edgeval_types)
-
-        @testset "correct type" begin
-            E_VALS_should_be = (edgeval_types isa Tuple) ?
-                Tuple{edgeval_types...} :
-                NamedTuple{keys(edgeval_types),
-                           Tuple{edgeval_types...}}
-
-            @test g isa G{V, E_VALS_should_be}
-        end
-        testset_topological_equivalent(gs, g)
-        testset_isvalidgraph(g, undef_edgevalues=true)
-    end
+    g2 = ValDiGraph(g1)
+    @test g2 isa ValDiGraph{eltype(g1), vertexvals_type(g1), edgevals_type(g1), graphvals_type(g1)}
+    @test ne(g2) == 5
+    @test g2.fadjlist == g2.badjlist == [[2], [1, 3], [2], Int[], [5]]
+    @test g2.vertexvals == g1.vertexvals
+    @test g2.edgevals == g2.redgevals == g1.edgevals
+    @test g2.graphvals == g1.graphvals
 end
 
-# ValGraph(undef, gs)
-@testset "Constructor $G(undef, \$gs)" for
-    G in (ValGraph, ValOutDiGraph, ValDiGraph)
+@testset "ValOutDiGraph{$V_OUT}(::ValGraph{$V_IN}" for
+            V_IN ∈ (Int64, Int32, Int8, UInt8), V_OUT ∈ (Int64, Int32, Int8, UInt8)
 
-    GS = is_directed(G) ? SimpleDiGraph : SimpleGraph
+    g1 = ValGraph{V_IN}(5;
+        vertexval_types=(x=Int8,),
+        vertexval_init=v -> (x=Int8(v),),
+        edgeval_types=(a=Int8, b=Int16),
+    )
+    add_edge!(g1, 1, 2, (a=Int8(1), b=Int16(2)))
+    add_edge!(g1, 2, 3, (a=Int8(2), b=Int16(3)))
+    add_edge!(g1, 5, 5, (a=Int8(51), b=Int16(52)))
 
-    @testset "Params: gs = $info" for
-                V in TEST_VERTEX_TYPES_SMALL,
-       (gs, info) in make_testgraphs(GS{V})
-
-
-        g = G(undef, gs)
-
-        @testset "correct type" begin
-            E_VALS_should_be = (default_edgeval_types isa Tuple) ?
-                Tuple{default_edgeval_types...} :
-                NamedTuple{keys(default_edgeval_types),
-                           Tuple{default_edgeval_types...}}
-
-            @test g isa G{V, E_VALS_should_be}
-        end
-        testset_topological_equivalent(gs, g)
-        testset_isvalidgraph(g, undef_edgevalues=true)
-    end
+    g2 = ValOutDiGraph{V_OUT}(g1)
+    @test g2 isa ValOutDiGraph{V_OUT, vertexvals_type(g1), edgevals_type(g1), graphvals_type(g1)}
+    @test ne(g2) == 5
+    @test g2.fadjlist == [[2], [1, 3], [2], Int[], [5]]
+    @test g2.vertexvals == g1.vertexvals
+    @test g2.edgevals == g1.edgevals
+    @test g2.graphvals == g1.graphvals
 end
 
+@testset "ValOutDiGraph(::ValGraph{$V_IN}" for V_IN ∈ (Int64, Int32, Int8, UInt8)
 
+    g1 = ValGraph{V_IN}(5;
+        vertexval_types=(x=Int8,),
+        vertexval_init=v -> (x=Int8(v),),
+        edgeval_types=(a=Int8, b=Int16),
+    )
+    add_edge!(g1, 1, 2, (a=Int8(1), b=Int16(2)))
+    add_edge!(g1, 2, 3, (a=Int8(2), b=Int16(3)))
+    add_edge!(g1, 5, 5, (a=Int8(51), b=Int16(52)))
 
-# ValGraph((s, d) -> (f(s, d),), gs, (Float64,))
-@testset "Constructor $G(f, \$gs, \$edgeval_types)" for
-    G in (ValGraph, ValOutDiGraph, ValDiGraph)
-
-    GS = is_directed(G) ? SimpleDiGraph : SimpleGraph
-
-
-    @testset "Params: edgeval_types = $(tuple_of_types(E_VALS)), gs = $info" for
-                V in TEST_VERTEX_TYPES_SMALL,
-           E_VALS in TEST_EDGEVAL_TYPES_SMALL,
-       (gs, info) in make_testgraphs(GS{V})
-
-
-        n = nv(gs)
-        A = rand_sample(E_VALS, n, n)
-        edgeval_types = tuple_of_types(E_VALS)
-
-        g = G((s, d) -> A[s,d], gs; edgeval_types=edgeval_types)
-
-        @testset "correct type" begin
-            E_VALS_should_be = (edgeval_types isa Tuple) ?
-                Tuple{edgeval_types...} :
-                NamedTuple{keys(edgeval_types),
-                           Tuple{edgeval_types...}}
-
-            @test g isa G{V, E_VALS_should_be}
-        end
-
-        @testset "correct values" begin
-            @test all(edges(gs)) do e
-                s, d = src(e), dst(e)
-                A[s, d] == get_val(g, s, d, :)
-            end
-        end
-
-        testset_topological_equivalent(gs, g)
-        testset_isvalidgraph(g)
-    end
+    g2 = ValOutDiGraph(g1)
+    @test g2 isa ValOutDiGraph{eltype(g1), vertexvals_type(g1), edgevals_type(g1), graphvals_type(g1)}
+    @test ne(g2) == 5
+    @test g2.fadjlist == [[2], [1, 3], [2], Int[], [5]]
+    @test g2.vertexvals == g1.vertexvals
+    @test g2.edgevals == g1.edgevals
+    @test g2.graphvals == g1.graphvals
 end
 
+@testset "ValDiGraph{$V_OUT}(::ValDiGraph{$V_IN}" for
+            V_IN ∈ (Int64, Int32, Int8, UInt8), V_OUT ∈ (Int64, Int32, Int8, UInt8)
 
+    g1 = ValDiGraph{V_IN}(5;
+        vertexval_types=(x=Int, y=Int),
+        vertexval_init=v -> (x=Int(v), y=Int(10 * v)),
+        edgeval_types=(a=Int8, b=Int16),
+    )
 
+    add_edge!(g1, 1, 2, (a=Int8(1), b=Int16(2)))
+    add_edge!(g1, 2, 3, (a=Int8(2), b=Int16(3)))
+    add_edge!(g1, 3, 2, (a=Int8(3), b=Int16(2)))
+    add_edge!(g1, 5, 5, (a=Int8(51), b=Int16(52)))
+
+    g2 = ValDiGraph{V_OUT}(g1)
+    @test g2 isa ValDiGraph{V_OUT, vertexvals_type(g1), edgevals_type(g1), graphvals_type(g1)}
+    @test ne(g2) == ne(g1)
+    @test g2.fadjlist == g1.fadjlist
+    @test g2.badjlist == g1.badjlist
+    @test g2.vertexvals == g1.vertexvals
+    @test g2.edgevals == g1.edgevals
+    @test g2.redgevals == g1.redgevals
+    @test g2.graphvals == g1.graphvals
+end
+
+@testset "ValDiGraph(::ValDiGraph{$V_IN}" for V_IN ∈ (Int64, Int32, Int8, UInt8)
+
+    g1 = ValDiGraph{V_IN}(5;
+        vertexval_types=(x=Int, y=Int),
+        vertexval_init=v -> (x=Int(v), y=Int(10 * v)),
+        edgeval_types=(a=Int8, b=Int16),
+    )
+
+    add_edge!(g1, 1, 2, (a=Int8(1), b=Int16(2)))
+    add_edge!(g1, 2, 3, (a=Int8(2), b=Int16(3)))
+    add_edge!(g1, 3, 2, (a=Int8(3), b=Int16(2)))
+    add_edge!(g1, 5, 5, (a=Int8(51), b=Int16(52)))
+
+    g2 = ValDiGraph(g1)
+    @test g2 isa ValDiGraph{eltype(g1), vertexvals_type(g1), edgevals_type(g1), graphvals_type(g1)}
+    @test ne(g2) == ne(g1)
+    @test g2.fadjlist == g1.fadjlist
+    @test g2.badjlist == g1.badjlist
+    @test g2.vertexvals == g1.vertexvals
+    @test g2.edgevals == g1.edgevals
+    @test g2.redgevals == g1.redgevals
+    @test g2.graphvals == g1.graphvals
+end
+
+@testset "ValOutDiGraph{$V_OUT}(::ValOutDiGraph{$V_IN}" for
+            V_IN ∈ (Int64, Int32, Int8, UInt8), V_OUT ∈ (Int64, Int32, Int8, UInt8)
+
+    g1 = ValOutDiGraph{V_IN}(5;
+        vertexval_types=(x=Int, y=Int),
+        vertexval_init=v -> (x=Int(v), y=Int(10 * v)),
+        edgeval_types=(a=Int8, b=Int16),
+    )
+
+    add_edge!(g1, 1, 2, (a=Int8(1), b=Int16(2)))
+    add_edge!(g1, 2, 3, (a=Int8(2), b=Int16(3)))
+    add_edge!(g1, 3, 2, (a=Int8(3), b=Int16(2)))
+    add_edge!(g1, 5, 5, (a=Int8(51), b=Int16(52)))
+
+    g2 = ValOutDiGraph{V_OUT}(g1)
+    @test g2 isa ValOutDiGraph{V_OUT, vertexvals_type(g1), edgevals_type(g1), graphvals_type(g1)}
+    @test ne(g2) == ne(g1)
+    @test g2.fadjlist == g1.fadjlist
+    @test g2.vertexvals == g1.vertexvals
+    @test g2.edgevals == g1.edgevals
+    @test g2.graphvals == g1.graphvals
+end
+
+@testset "ValOutDiGraph(::ValOutDiGraph{$V_IN}" for V_IN ∈ (Int64, Int32, Int8, UInt8)
+
+    g1 = ValDiGraph{V_IN}(5;
+        vertexval_types=(x=Int, y=Int),
+        vertexval_init=v -> (x=Int(v), y=Int(10 * v)),
+        edgeval_types=(a=Int8, b=Int16),
+    )
+
+    add_edge!(g1, 1, 2, (a=Int8(1), b=Int16(2)))
+    add_edge!(g1, 2, 3, (a=Int8(2), b=Int16(3)))
+    add_edge!(g1, 3, 2, (a=Int8(3), b=Int16(2)))
+    add_edge!(g1, 5, 5, (a=Int8(51), b=Int16(52)))
+
+    g2 = ValOutDiGraph(g1)
+    @test g2 isa ValOutDiGraph{eltype(g1), vertexvals_type(g1), edgevals_type(g1), graphvals_type(g1)}
+    @test ne(g2) == ne(g1)
+    @test g2.fadjlist == g1.fadjlist
+    @test g2.vertexvals == g1.vertexvals
+    @test g2.edgevals == g1.edgevals
+    @test g2.graphvals == g1.graphvals
+end
+
+@testset "ValOutDiGraph{$V_OUT}(::ValDiGraph{$V_IN}" for
+            V_IN ∈ (Int64, Int32, Int8, UInt8), V_OUT ∈ (Int64, Int32, Int8, UInt8)
+
+    g1 = ValOutDiGraph{V_IN}(5;
+        vertexval_types=(x=Int, y=Int),
+        vertexval_init=v -> (x=Int(v), y=Int(10 * v)),
+        edgeval_types=(a=Int8, b=Int16),
+    )
+
+    add_edge!(g1, 1, 2, (a=Int8(1), b=Int16(2)))
+    add_edge!(g1, 2, 3, (a=Int8(2), b=Int16(3)))
+    add_edge!(g1, 3, 2, (a=Int8(3), b=Int16(2)))
+    add_edge!(g1, 5, 5, (a=Int8(51), b=Int16(52)))
+
+    g2 = ValOutDiGraph{V_OUT}(g1)
+    @test g2 isa ValOutDiGraph{V_OUT, vertexvals_type(g1), edgevals_type(g1), graphvals_type(g1)}
+    @test ne(g2) == ne(g1)
+    @test g2.fadjlist == g1.fadjlist
+    @test g2.vertexvals == g1.vertexvals
+    @test g2.edgevals == g1.edgevals
+    @test g2.graphvals == g1.graphvals
+end
+
+@testset "ValOutDiGraph(::ValDiGraph{$V_IN}" for V_IN ∈ (Int64, Int32, Int8, UInt8)
+
+    g1 = ValDiGraph{V_IN}(5;
+        vertexval_types=(x=Int, y=Int),
+        vertexval_init=v -> (x=Int(v), y=Int(10 * v)),
+        edgeval_types=(a=Int8, b=Int16),
+    )
+
+    add_edge!(g1, 1, 2, (a=Int8(1), b=Int16(2)))
+    add_edge!(g1, 2, 3, (a=Int8(2), b=Int16(3)))
+    add_edge!(g1, 3, 2, (a=Int8(3), b=Int16(2)))
+    add_edge!(g1, 5, 5, (a=Int8(51), b=Int16(52)))
+
+    g2 = ValOutDiGraph(g1)
+    @test g2 isa ValOutDiGraph{eltype(g1), vertexvals_type(g1), edgevals_type(g1), graphvals_type(g1)}
+    @test ne(g2) == ne(g1)
+    @test g2.fadjlist == g1.fadjlist
+    @test g2.vertexvals == g1.vertexvals
+    @test g2.edgevals == g1.edgevals
+    @test g2.graphvals == g1.graphvals
+end
 

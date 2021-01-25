@@ -34,6 +34,18 @@ function deepcopy_adjlist(T::Type, adjlist::Adjlist)
     return result
 end
 
+# TODO do we have a nicer way to specify the type?
+function copy_vertexvals(vertexvals::AbstractTuple)
+
+    return map(copy, vertexvals)
+end
+
+# TODO do we have a nicer way to specify the type?
+function copy_edgevals(edgevals::AbstractTuple)
+
+    return map(vv -> map(v -> copy(v), vv), edgevals)
+end
+
 function reverse_adjlist(adjlist::Adjlist{T}) where {T <: Integer}
 
     n = length(adjlist)

@@ -44,6 +44,7 @@ export
 
     vertexvals_type,
     edgevals_type,
+    graphvals_type,
 
     hasvertexkey,
     hasedgekey,
