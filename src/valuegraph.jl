@@ -249,6 +249,125 @@ for G in (:ValGraph, :ValOutDiGraph, :ValDiGraph)
     end
 end
 
+#  ------------------------------------------------------
+#  Constructors from other value graphs
+#  ------------------------------------------------------
+
+function ValGraph{V}(g::ValGraph) where {V}
+
+    neg = ne(g)
+    fadjlist = deepcopy_adjlist(V, g.fadjlist)
+    vertexvals = copy_vertexvals(g.vertexvals)
+    edgevals = copy_edgevals(g.edgevals)
+
+    V_VALS = vertexvals_type(g)
+    E_VALS = edgevals_type(g)
+    G_VALS = graphvals_type(g)
+    V_VALS_C = typeof(vertexvals)
+    E_VALS_C = typeof(edgevals)
+
+    return ValGraph{V, V_VALS, E_VALS, G_VALS, V_VALS_C, E_VALS_C}(neg, fadjlist, vertexvals, edgevals, g.graphvals)
+end
+
+ValGraph(g::ValGraph) = ValGraph{eltype(g)}(g)
+
+
+function ValDiGraph{V}(g::ValDiGraph) where {V}
+
+    neg = ne(g)
+    fadjlist = deepcopy_adjlist(V, g.fadjlist)
+    badjlist = deepcopy_adjlist(V, g.badjlist)
+    vertexvals = copy_vertexvals(g.vertexvals)
+    edgevals = copy_edgevals(g.edgevals)
+    redgevals= copy_edgevals(g.redgevals)
+
+    V_VALS = vertexvals_type(g)
+    E_VALS = edgevals_type(g)
+    G_VALS = graphvals_type(g)
+    V_VALS_C = typeof(vertexvals)
+    E_VALS_C = typeof(edgevals)
+
+    return ValDiGraph{V, V_VALS, E_VALS, G_VALS, V_VALS_C, E_VALS_C}(neg, fadjlist, badjlist, vertexvals, edgevals, redgevals, g.graphvals)
+end
+
+ValDiGraph(g::ValDiGraph) = ValDiGraph{eltype(g)}(g)
+
+function ValDiGraph{V}(g::ValGraph) where {V}
+
+    neg = ne(g) - num_self_loops(g) + ne(g)
+    fadjlist = deepcopy_adjlist(V, g.fadjlist)
+    badjlist = deepcopy_adjlist(V, g.fadjlist)
+    vertexvals = copy_vertexvals(g.vertexvals)
+    edgevals = copy_edgevals(g.edgevals)
+    redgevals= copy_edgevals(g.edgevals)
+
+    V_VALS = vertexvals_type(g)
+    E_VALS = edgevals_type(g)
+    G_VALS = graphvals_type(g)
+    V_VALS_C = typeof(vertexvals)
+    E_VALS_C = typeof(edgevals)
+
+    return ValDiGraph{V, V_VALS, E_VALS, G_VALS, V_VALS_C, E_VALS_C}(neg, fadjlist, badjlist, vertexvals, edgevals, redgevals, g.graphvals)
+end
+
+ValDiGraph(g::ValGraph) = ValDiGraph{eltype(g)}(g)
+
+# TODO ValOutDiGraph -> ValDiGraph
+
+
+function ValOutDiGraph{V}(g::ValOutDiGraph) where {V}
+
+    neg = ne(g)
+    fadjlist = deepcopy_adjlist(V, g.fadjlist)
+    vertexvals = copy_vertexvals(g.vertexvals)
+    edgevals = copy_edgevals(g.edgevals)
+
+    V_VALS = vertexvals_type(g)
+    E_VALS = edgevals_type(g)
+    G_VALS = graphvals_type(g)
+    V_VALS_C = typeof(vertexvals)
+    E_VALS_C = typeof(edgevals)
+
+    return ValOutDiGraph{V, V_VALS, E_VALS, G_VALS, V_VALS_C, E_VALS_C}(neg, fadjlist, vertexvals, edgevals, g.graphvals)
+end
+
+ValOutDiGraph(g::ValOutDiGraph) = ValOutDiGraph{eltype(g)}(g)
+
+function ValOutDiGraph{V}(g::ValDiGraph) where {V}
+
+    neg = ne(g)
+    fadjlist = deepcopy_adjlist(V, g.fadjlist)
+    vertexvals = copy_vertexvals(g.vertexvals)
+    edgevals = copy_edgevals(g.edgevals)
+
+    V_VALS = vertexvals_type(g)
+    E_VALS = edgevals_type(g)
+    G_VALS = graphvals_type(g)
+    V_VALS_C = typeof(vertexvals)
+    E_VALS_C = typeof(edgevals)
+
+    return ValOutDiGraph{V, V_VALS, E_VALS, G_VALS, V_VALS_C, E_VALS_C}(neg, fadjlist, vertexvals, edgevals, g.graphvals)
+end
+
+ValOutDiGraph(g::ValDiGraph) = ValOutDiGraph{eltype(g)}(g)
+
+function ValOutDiGraph{V}(g::ValGraph) where {V}
+
+    neg = ne(g) - num_self_loops(g) + ne(g)
+    fadjlist = deepcopy_adjlist(V, g.fadjlist)
+    vertexvals = copy_vertexvals(g.vertexvals)
+    edgevals = copy_edgevals(g.edgevals)
+
+    V_VALS = vertexvals_type(g)
+    E_VALS = edgevals_type(g)
+    G_VALS = graphvals_type(g)
+    V_VALS_C = typeof(vertexvals)
+    E_VALS_C = typeof(edgevals)
+
+    return ValOutDiGraph{V, V_VALS, E_VALS, G_VALS, V_VALS_C, E_VALS_C}(neg, fadjlist, vertexvals, edgevals, g.graphvals)
+end
+
+ValOutDiGraph(g::ValGraph) = ValOutDiGraph{eltype(g)}(g)
 
 # =========================================================
 # Interface
