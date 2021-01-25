@@ -23,6 +23,7 @@ register_test("interface/iterators.jl")
 register_test("interface/modifiers.jl")
 # register_test("interface/valuegraph.jl")
 register_test("matrices.jl")
+register_test("operators.jl")
 
 
 @testset "ValueGraphs" begin
