@@ -287,6 +287,23 @@ end
 
 SimpleDiGraph(g::ValDiGraph) = SimpleDiGraph{eltype(g)}(g)
 
+function SimpleDiGraph{V}(g::ValOutDiGraph) where {V}
 
-# TODO ValOutDiGraph -> SimpleDiGraph
-# TODO ValGraph -> SimpleGraph
+    fadjlist = deepcopy_adjlist(V, g.fadjlist)
+
+    return SimpleDiGraph{V}(ne(g), fadjlist, reverse_adjlist(fadjlist))
+end
+
+SimpleDiGraph(g::ValOutDiGraph) = SimpleDiGraph{eltype(g)}(g)
+
+
+function SimpleDiGraph{V}(g::ValGraph) where {V}
+
+    neg = ne(g) - num_self_loops(g) + ne(g)
+    fadjlist =  deepcopy_adjlist(V, g.fadjlist)
+    badjlist =  deepcopy_adjlist(V, fadjlist)
+
+    return SimpleDiGraph{V}(neg, fadjlist, badjlist)
+end
+
+SimpleDiGraph(g::ValGraph) = SimpleDiGraph{eltype(g)}(g)
