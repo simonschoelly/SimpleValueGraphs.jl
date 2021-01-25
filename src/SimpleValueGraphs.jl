@@ -19,7 +19,8 @@ import LightGraphs:
     add_edge!, rem_edge!, has_edge,
     inneighbors, outneighbors,
     zero,
-    adjacency_matrix
+    adjacency_matrix,
+    squash
 
 import Base: show, iterate, length,
     getindex, size, ==, hash
@@ -64,6 +65,8 @@ export
 
     AdjacencyMatrix,
     ValMatrix,
+
+    squash,
 
     # overridden methods from LightGraphs
     nv,
@@ -121,6 +124,7 @@ include("abstractvaluegraph.jl")
 include("valueedge.jl")
 include("valuegraph.jl")
 include("matrices.jl")
+include("operators.jl")
 
 include("integrations/SimpleGraphs.jl")
 
