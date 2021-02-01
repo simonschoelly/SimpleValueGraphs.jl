@@ -19,11 +19,14 @@ SimpleValueGraphs.get_edgeval(g::DummyValGraph, s, d, key::Integer) =
 SimpleValueGraphs.get_vertexval(g::DummyValGraph, v, key::Integer) =
     get_vertexval(g.wrapped, v, key)
 
-SimpleValueGraphs.get_vertexval(g::DummyValGraph, v, key::Integer) =
-    get_vertexval(g.wrapped, v, key)
+SimpleValueGraphs.set_vertexval!(g::DummyValGraph, v, key::Integer, value) =
+    set_vertexval!(g.wrapped, v, key, value)
 
 SimpleValueGraphs.get_edgeval(g::DummyValGraph, s, d, key::Integer) =
     get_edgeval(g.wrapped, s, d, key)
+
+SimpleValueGraphs.set_edgeval!(g::DummyValGraph, s, d, key::Integer, value) =
+    set_edgeval!(g.wrapped, s, d, key, value)
 
 SimpleValueGraphs.get_graphval(g::DummyValGraph, key::Integer) =
     get_graphval(g.wrapped, key)
@@ -425,6 +428,55 @@ end
     @test get_vertexval(g1, 1) == 1
     @test get_vertexval(g1, 2) == 2
 end
+
+@testset "set_vertexval!" begin
+
+    g0 = DummyValGraph(ValDiGraph(2));
+
+    g1 = DummyValGraph(ValGraph(Int8(2);
+        vertexval_types=(Int64, ),
+        vertexval_init=v -> (v, )
+    ))
+
+    g2 = DummyValGraph(ValOutDiGraph(UInt16(2);
+        vertexval_types=(a=Int64, b=String),
+        vertexval_init=v -> (a=v, b="$v")
+    ))
+
+    @test set_vertexval!(g0, 2, :, ()) == true
+    @test set_vertexval!(g0, 0, :, ()) == false
+
+    @test set_vertexval!(g1, 1, 11) == true
+    @test get_vertexval(g1, 1) == 11
+    @test get_vertexval(g1, 2) == 2
+    @test set_vertexval!(g1, 2, 22) == true
+    @test get_vertexval(g1, 1) == 11
+    @test get_vertexval(g1, 2) == 22
+    @test set_vertexval!(g1, 3, 33) == false
+    @test get_vertexval(g1, 1) == 11
+    @test get_vertexval(g1, 2) == 22
+
+    @test set_vertexval!(g1, 1, :, (111,)) == true
+    @test get_vertexval(g1, 1) == 111
+    @test get_vertexval(g1, 2) == 22
+    @test set_vertexval!(g1, 0, :, (44,)) == false
+    @test get_vertexval(g1, 1) == 111
+    @test get_vertexval(g1, 2) == 22
+
+    @test set_vertexval!(g2, 1, :a, 11) == true
+    @test get_vertexval(g2, 1, :) == (a=11, b="1")
+    @test get_vertexval(g2, 2, :) == (a=2, b="2")
+    @test set_vertexval!(g2, 2, :b, "22") == true
+    @test get_vertexval(g2, 1, :) == (a=11, b="1")
+    @test get_vertexval(g2, 2, :) == (a=2, b="22")
+    @test set_vertexval!(g2, 3, :b, "33") == false
+    @test get_vertexval(g2, 1, :) == (a=11, b="1")
+    @test get_vertexval(g2, 2, :) == (a=2, b="22")
+    @test set_vertexval!(g2, 1, :, (a=111, b="111")) == true
+    @test get_vertexval(g2, 1, :) == (a=111, b="111")
+    @test get_vertexval(g2, 2, :) == (a=2, b="22")
+end
+
 
 @testset "get_edgeval" begin
 
