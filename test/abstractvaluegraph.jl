@@ -236,6 +236,61 @@ end
     @test inneighbors(g2, 5) == [4]
 end
 
+@testset "outedgevals" begin
+
+    g4 = ValOutDiGraph{Int16}(4, edgeval_types=(a=String,))
+    add_edge!(g4, 1, 2, (a="12",))
+    add_edge!(g4, 2, 2, (a="22",))
+    add_edge!(g4, 1, 4, (a="14",))
+    add_edge!(g4, 4, 1, (a="41",))
+    g4 = DummyValGraph(g4)
+
+    @test outedgevals(g4, 1) == ["12", "14"]
+    @test outedgevals(g4, 2) == ["22"]
+    @test outedgevals(g4, 3) == []
+    @test outedgevals(g4, 4) == ["41"]
+
+    @test outedgevals(g4, 1, 1) == ["12", "14"]
+    @test outedgevals(g4, 2, 1) == ["22"]
+    @test outedgevals(g4, 3, 1) == []
+    @test outedgevals(g4, 4, 1) == ["41"]
+
+    @test outedgevals(g4, 1, :a) == ["12", "14"]
+    @test outedgevals(g4, 2, :a) == ["22"]
+    @test outedgevals(g4, 3, :a) == []
+    @test outedgevals(g4, 4, :a) == ["41"]
+
+    @test outedgevals(g4, 1, :) == [(a="12",), (a="14",)]
+    @test outedgevals(g4, 2, :) == [(a="22",)]
+    @test outedgevals(g4, 3, :) == []
+    @test outedgevals(g4, 4, :) == [(a="41",)]
+
+
+    g3 = ValGraph{UInt64}(3, edgeval_types=(x=String, y=Tuple{Int, Int}))
+    add_edge!(g3, 1, 2, (x="12", y=(1,2)))
+    add_edge!(g3, 2, 3, (x="23", y=(2,3)))
+    add_edge!(g3, 3, 3, (x="33", y=(3,3)))
+    g3 = DummyValGraph(g3)
+
+    @test outedgevals(g3, 1, 1) == ["12"]
+    @test outedgevals(g3, 2, 1) == ["12", "23"]
+    @test outedgevals(g3, 3, 1) == ["23", "33"]
+    @test outedgevals(g3, 1, 2) == [(1,2)]
+    @test outedgevals(g3, 2, 2) == [(1,2), (2,3)]
+    @test outedgevals(g3, 3, 2) == [(2,3), (3,3)]
+
+    @test outedgevals(g3, 1, :x) == ["12"]
+    @test outedgevals(g3, 2, :x) == ["12", "23"]
+    @test outedgevals(g3, 3, :x) == ["23", "33"]
+    @test outedgevals(g3, 1, :y) == [(1,2)]
+    @test outedgevals(g3, 2, :y) == [(1,2), (2,3)]
+    @test outedgevals(g3, 3, :y) == [(2,3), (3,3)]
+
+    @test outedgevals(g3, 1, :) == [(x="12", y=(1,2))]
+    @test outedgevals(g3, 2, :) == [(x="12", y=(1,2)), (x="23", y=(2,3))]
+    @test outedgevals(g3, 3, :) == [(x="23", y=(2,3)), (x="33", y=(3,3))]
+end
+
 @testset "inedgevals" begin
 
     g4 = ValDiGraph(4, edgeval_types=(a=String,))
@@ -260,6 +315,12 @@ end
     @test inedgevals(g4, 3, :a) == []
     @test inedgevals(g4, 4, :a) == ["14"]
 
+    @test inedgevals(g4, 1, :) == [(a="41",)]
+    @test inedgevals(g4, 2, :) == [(a="12",), (a="22",)]
+    @test inedgevals(g4, 3, :) == []
+    @test inedgevals(g4, 4, :) == [(a="14",)]
+
+
     g3 = ValDiGraph{UInt8}(3, edgeval_types=(x=String, y=Tuple{Int, Int}))
     add_edge!(g3, 1, 2, (x="12", y=(1,2)))
     add_edge!(g3, 2, 3, (x="23", y=(2,3)))
@@ -280,6 +341,10 @@ end
     @test inedgevals(g3, 1, :y) == []
     @test inedgevals(g3, 2, :y) == [(1,2), (3,2)]
     @test inedgevals(g3, 3, :y) == [(2,3), (3,3)]
+
+    @test inedgevals(g3, 1, :) == []
+    @test inedgevals(g3, 2, :) == [(x="12", y=(1,2)), (x="32", y=(3,2))]
+    @test inedgevals(g3, 3, :) == [(x="23", y=(2,3)), (x="33", y=(3,3))]
 end
 
 @testset "get_vertexval" begin
