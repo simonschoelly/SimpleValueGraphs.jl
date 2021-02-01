@@ -28,9 +28,33 @@ end
         @test e isa ValEdge{V, E_VALS}
     end
 
+    @testset "ValEdge{$V}($u, $v, $values)" begin
+
+        src_should, dst_should = minmax(u, v)
+        e = ValEdge{V}(u, v, values)
+        e_rev = ValEdge{V}(v, u, values)
+
+        @test e.src == e_rev.src == src_should
+        @test e.dst == e_rev.dst == dst_should
+        @test e.src <= e.dst
+        @test e.values == values
+        @test e isa ValEdge{V, E_VALS}
+    end
+
+
     @testset "ValDiEdge($V($u), $V($v), $values)" begin
 
         e = ValDiEdge(u, v, values)
+
+        @test e.src == u
+        @test e.dst == v
+        @test e.values == values
+        @test e isa ValDiEdge{V, E_VALS}
+    end
+
+    @testset "ValDiEdge{$V}($u, $v, $values)" begin
+
+        e = ValDiEdge{V}(u, v, values)
 
         @test e.src == u
         @test e.dst == v
