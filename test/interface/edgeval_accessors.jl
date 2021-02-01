@@ -120,7 +120,28 @@ import SimpleValueGraphs: typetuple
             end
         end
     end
+
+    @testset "set_edgeval(g, s, d, :, values) where values must be converted to E_VALS)" begin
+
+        g1 = ValGraph(2, edgeval_types=(Int8, Float32))
+        add_edge!(g1, 1, 2, (1.0, 2))
+        set_edgeval!(g1, 1, 2, :, (11.0, 22))
+        @test get_edgeval(g1, 1, 2, :) == (11, 22.0)
+
+        g2 = ValDiGraph(2, edgeval_types=(a=Int8, b=Float32))
+        add_edge!(g2, 1, 2, (a=1.0, b=2))
+        set_edgeval!(g2, 1, 2, :, (a=11.0, b=22))
+        @test get_edgeval(g2, 1, 2, :) == (a=11, b=22.0)
+
+        g3 = ValOutDiGraph(2, edgeval_types=(a=Union{Int, Nothing, Missing},))
+        add_edge!(g3, 1, 2, (a=1,))
+        set_edgeval!(g3, 1, 2, :, (a=nothing,))
+        @test get_edgeval(g3, 1, 2) == nothing
+        set_edgeval!(g3, 1, 2, :, (a=missing,))
+        @test ismissing(get_edgeval(g3, 1, 2))
+    end
 end
+
 
 @testset "Edgeval getters" begin
 

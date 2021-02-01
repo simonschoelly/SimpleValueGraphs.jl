@@ -84,6 +84,40 @@ end
     @test get_edgeval(g1, 1, 3, :) == (a='z', b=4.0)
 end
 
+# make sure that adding an edge works even if the edge values are slightly different,
+# as long as the values can be converted
+@testset "add_ege! 4" begin
+
+    g1 = ValGraph{Int8}(2, edgeval_types=(Int16, Int16, Float32))
+    add_edge!(g1, 1, Int16(2), (3, 4.0, 5.0))
+    @test get_edgeval(g1, 1, 2, :) == (3, 4, 5.0)
+
+    g2 = ValDiGraph{UInt8}(3, edgeval_types=(a=Int32, b=Float64, c=Union{Nothing, Int16}))
+    add_edge!(g2, UInt8(1), Int16(2), (a=Int8(3), b=Float32(4.0), c=Int32(5.0)))
+    @test get_edgeval(g2, 1, 2, :) == (a=3, b=4.0, c=5)
+
+    g3 = ValOutDiGraph{UInt8}(3, edgeval_types=(a=Int32, b=Float64, c=Union{Nothing, Int16}))
+    add_edge!(g3, UInt8(1), Int16(2), (a=Int8(3), b=Float32(4.0), c=nothing))
+    @test get_edgeval(g3, 1, 2, :) == (a=3, b=4.0, c=nothing)
+
+end
+
+@testset "add_vertex!" begin
+
+    g1 = ValGraph{Int8}(0, vertexval_types=(Int16, Int16, Float32), vertexval_init=undef)
+    add_vertex!(g1, (3, 4.0, 5.0))
+    @test get_vertexval(g1, 1, :) == (3, 4, 5.0)
+
+    g2 = ValDiGraph{UInt8}(0, vertexval_types=(a=Int32, b=Float64, c=Union{Nothing, Int16}), vertexval_init=undef)
+    add_vertex!(g2, (a=Int8(3), b=Float32(4.0), c=Int32(5.0)))
+    @test get_vertexval(g2, Int16(1), :) == (a=3, b=4.0, c=5)
+
+    g3 = ValOutDiGraph{UInt8}(0, vertexval_types=(a=Int32, b=Float64, c=Union{Nothing, Int16}), vertexval_init=undef)
+    add_vertex!(g3, (a=Int8(3), b=Float32(4.0), c=nothing))
+    @test get_vertexval(g3, 1, :) == (a=3, b=4.0, c=nothing)
+
+end
+
 @testset "rem_edge! 1" begin
     g = ValGraph{Int, Tuple{}, NamedTuple{(:a,), Tuple{Int}}}(3)
 

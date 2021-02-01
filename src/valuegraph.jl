@@ -396,8 +396,9 @@ LG.ne(g::ValOutDiGraph) = g.ne
 function LG.add_edge!(g::ValGraph{V, V_VALS, E_VALS},
                    s::Integer,
                    d::Integer,
-                   values::E_VALS) where {V, V_VALS, E_VALS}
+                   values) where {V, V_VALS, E_VALS}
 
+    values = convert(E_VALS, values)
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
 
@@ -429,21 +430,22 @@ end
 function LG.add_edge!(g::ValOutDiGraph{V, V_VALS, E_VALS},
                    s::Integer,
                    d::Integer,
-                   value::E_VALS) where {V, V_VALS, E_VALS}
+                   values) where {V, V_VALS, E_VALS}
 
+    values = convert(E_VALS, values)
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
     edgevals = g.edgevals
     @inbounds list = g.fadjlist[s]
     index = searchsortedfirst(list, d)
     @inbounds if index <= length(list) && list[index] == d
-        # edge already there, replace value, but return false
-        set_values_for_index!(edgevals, s, index, value)
+        # edge already there, replace values, but return false
+        set_values_for_index!(edgevals, s, index, values)
         return false
     end
 
     insert!(list, index, d)
-    insert_values_for_index!(edgevals, s, index, value)
+    insert_values_for_index!(edgevals, s, index, values)
     g.ne += 1
     return true # edge successfully added
 end
@@ -451,26 +453,27 @@ end
 function LG.add_edge!(g::ValDiGraph{V, V_VALS, E_VALS},
                    s::Integer,
                    d::Integer,
-                   value::E_VALS) where {V, V_VALS, E_VALS}
+                   values) where {V, V_VALS, E_VALS}
 
+    values = convert(E_VALS, values)
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
     @inbounds list = g.fadjlist[s]
     index = searchsortedfirst(list, d)
     @inbounds if index <= length(list) && list[index] == d
-        # edge already there, replace value, but return false
-        set_values_for_index!(g.edgevals, s, index, value)
+        # edge already there, replace values, but return false
+        set_values_for_index!(g.edgevals, s, index, values)
         return false
     end
 
     insert!(list, index, d)
-    insert_values_for_index!(g.edgevals, s, index, value)
+    insert_values_for_index!(g.edgevals, s, index, values)
     g.ne += 1
 
     @inbounds list = g.badjlist[d]
     index = searchsortedfirst(list, s)
     insert!(list, index, s)
-    insert_values_for_index!(g.redgevals, d, index, value)
+    insert_values_for_index!(g.redgevals, d, index, values)
 
     return true # edge successfully added
 end
@@ -538,7 +541,9 @@ end
 #  add_vertex!
 #  ------------------------------------------------------
 
-function LG.add_vertex!(g::ValGraph{V, V_VALS, E_VALS}, values::V_VALS) where {V, V_VALS, E_VALS}
+function LG.add_vertex!(g::ValGraph{V, V_VALS, E_VALS}, values) where {V, V_VALS, E_VALS}
+
+    values = convert(V_VALS, values)
 
     if V != BigInt && nv(g) == typemax(V)
         # maybe consider capping at nv(g) - 1
@@ -557,7 +562,9 @@ function LG.add_vertex!(g::ValGraph{V, V_VALS, E_VALS}, values::V_VALS) where {V
     return true
 end
 
-function LG.add_vertex!(g::ValOutDiGraph{V, V_VALS, E_VALS}, values::V_VALS) where {V, V_VALS, E_VALS}
+function LG.add_vertex!(g::ValOutDiGraph{V, V_VALS, E_VALS}, values) where {V, V_VALS, E_VALS}
+
+    values = convert(V_VALS, values)
 
     if V != BigInt && nv(g) == typemax(V)
         # maybe consider capping at nv(g) - 1
@@ -576,7 +583,9 @@ function LG.add_vertex!(g::ValOutDiGraph{V, V_VALS, E_VALS}, values::V_VALS) whe
     return true
 end
 
-function LG.add_vertex!(g::ValDiGraph{V, V_VALS, E_VALS}, values::V_VALS) where {V, V_VALS, E_VALS}
+function LG.add_vertex!(g::ValDiGraph{V, V_VALS, E_VALS}, values) where {V, V_VALS, E_VALS}
+
+    values = convert(V_VALS, values)
 
     if V != BigInt && nv(g) == typemax(V)
         # maybe consider capping at nv(g) - 1
@@ -906,6 +915,10 @@ function set_edgeval!(g::ValDiGraph, s::Integer, d::Integer, key::Integer, value
 end
 
 function set_edgeval!(g::ValGraph, s::Integer, d::Integer, ::Colon, values)
+
+    E_VALS = edgevals_type(g)
+    values = convert(E_VALS, values)
+
     verts = vertices(g)
     (s in verts && d in verts) || return false
     @inbounds list = g.fadjlist[s]
@@ -922,6 +935,10 @@ function set_edgeval!(g::ValGraph, s::Integer, d::Integer, ::Colon, values)
 end
 
 function set_edgeval!(g::ValOutDiGraph, s::Integer, d::Integer, ::Colon, values)
+
+    E_VALS = edgevals_type(g)
+    values = convert(E_VALS, values)
+
     verts = vertices(g)
     (s in verts && d in verts) || return false
     @inbounds list = g.fadjlist[s]
@@ -934,6 +951,10 @@ function set_edgeval!(g::ValOutDiGraph, s::Integer, d::Integer, ::Colon, values)
 end
 
 function set_edgeval!(g::ValDiGraph, s::Integer, d::Integer, ::Colon, values)
+
+    E_VALS = edgevals_type(g)
+    values = convert(E_VALS, values)
+
     verts = vertices(g)
     (s in verts && d in verts) || return false
     @inbounds list = g.fadjlist[s]
