@@ -530,6 +530,59 @@ end
     @test get_edgeval(g2, 4, 3) == 4
 end
 
+@testset "set_edgeval!" begin
+
+    g_simple = SimpleGraph(Edge.([(1, 1), (2, 3)]))
+    g_simple_di = SimpleDiGraph(Edge.([(1, 1), (1, 2), (3, 4), (4, 3)]))
+
+    g0 = DummyValGraph(ValGraph(g_simple))
+    g1 = DummyValGraph(
+        ValGraph(g_simple;
+                 edgeval_types=(a=Int64, b=String),
+                 edgeval_init=(s, d) ->(a=s, b="$d")
+    ))
+    g2 = DummyValGraph(
+        ValDiGraph(g_simple_di;
+                 edgeval_types=(Int64,),
+                 edgeval_init=(s, d) ->(s,)
+    ))
+
+    @test set_edgeval!(g0, 1, 1, :, ()) == true
+    @test set_edgeval!(g0, 2, 3, :, ()) == true
+    @test set_edgeval!(g0, 3, 2, :, ()) == true
+    @test set_edgeval!(g0, 1, 3, :, ()) == false
+    @test set_edgeval!(g0, 3, 3, :, ()) == false
+
+    @test set_edgeval!(g1, 1, 1, :a, 11) == true
+    @test outedgevals(g1, 1, :) == [(a=11, b="1")]
+    @test outedgevals(g1, 2, :) == [(a=2, b="3")]
+    @test outedgevals(g1, 3, :) == [(a=2, b="3")]
+    @test set_edgeval!(g1, 2, 3, :b, "33") == true
+    @test outedgevals(g1, 1, :) == [(a=11, b="1")]
+    @test outedgevals(g1, 2, :) == [(a=2, b="33")]
+    @test outedgevals(g1, 3, :) == [(a=2, b="33")]
+    @test set_edgeval!(g1, 1, 2, :b, "22") == false
+    @test outedgevals(g1, 1, :) == [(a=11, b="1")]
+    @test outedgevals(g1, 2, :) == [(a=2, b="33")]
+    @test outedgevals(g1, 3, :) == [(a=2, b="33")]
+    @test set_edgeval!(g1, 3, 2, :, (a=222, b="333")) == true
+    @test outedgevals(g1, 1, :) == [(a=11, b="1")]
+    @test outedgevals(g1, 2, :) == [(a=222, b="333")]
+    @test outedgevals(g1, 3, :) == [(a=222, b="333")]
+
+    @test set_edgeval!(g2, 3, 4, 33) == true
+    @test outedgevals(g2, 1) == [1, 1]
+    @test outedgevals(g2, 2) == []
+    @test outedgevals(g2, 3) == [33]
+    @test outedgevals(g2, 4) == [4]
+    @test set_edgeval!(g2, 1, 3, 11) == false
+    @test outedgevals(g2, 1) == [1, 1]
+    @test outedgevals(g2, 2) == []
+    @test outedgevals(g2, 3) == [33]
+    @test outedgevals(g2, 4) == [4]
+
+end
+
 @testset "get_graphval" begin
 
     g1 = DummyValGraph(ValGraph(1, graphvals=(1, "2")))
