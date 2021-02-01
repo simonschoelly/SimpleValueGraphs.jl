@@ -34,6 +34,8 @@ SimpleValueGraphs.get_graphval(g::DummyValGraph, key::Integer) =
 SimpleValueGraphs.set_graphval!(g::DummyValGraph, key::Integer, value) =
     set_graphval!(g.wrapped, key, value)
 
+SimpleValueGraphs.add_vertex!(g::DummyValGraph, values) = add_vertex!(g.wrapped, values)
+
 @testset "eltype" begin
 
     @test eltype(DummyValGraph{Int8}) == Int8
@@ -631,5 +633,21 @@ end
     @test get_graphval(g4, :) == ()
 end
 
+@testset "add_vertex!" begin
+
+    ga = DummyValGraph(ValGraph{UInt64}(0, edgeval_types=(a=Int64, b=Char)))
+    gb = DummyValGraph(ValDiGraph{Int8}(0))
+
+    add_vertex!(ga)
+    @test nv(ga) == 1
+    add_vertex!(ga)
+    @test nv(ga) == 2
+
+    add_vertex!(gb)
+    @test nv(gb) == 1
+    add_vertex!(gb)
+    @test nv(gb) == 2
+end
 
 end # testset
+
