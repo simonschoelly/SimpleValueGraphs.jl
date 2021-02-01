@@ -28,9 +28,33 @@ end
         @test e isa ValEdge{V, E_VALS}
     end
 
+    @testset "ValEdge{$V}($u, $v, $values)" begin
+
+        src_should, dst_should = minmax(u, v)
+        e = ValEdge{V}(u, v, values)
+        e_rev = ValEdge{V}(v, u, values)
+
+        @test e.src == e_rev.src == src_should
+        @test e.dst == e_rev.dst == dst_should
+        @test e.src <= e.dst
+        @test e.values == values
+        @test e isa ValEdge{V, E_VALS}
+    end
+
+
     @testset "ValDiEdge($V($u), $V($v), $values)" begin
 
         e = ValDiEdge(u, v, values)
+
+        @test e.src == u
+        @test e.dst == v
+        @test e.values == values
+        @test e isa ValDiEdge{V, E_VALS}
+    end
+
+    @testset "ValDiEdge{$V}($u, $v, $values)" begin
+
+        e = ValDiEdge{V}(u, v, values)
 
         @test e.src == u
         @test e.dst == v
@@ -128,6 +152,21 @@ end
         @test get_edgeval(e, :) == get_edgeval(e_rev, :)
         @test typeof(e) == typeof(e_rev)
     end
+end
 
+@testset "hash" begin
+
+    @test hash(ValEdge(1, 2, (a=3, b=4))) == hash(ValEdge(1, 2, (a=3, b=4)), UInt(0))
+    @test hash(ValDiEdge(1, 2, (a=3, b=4))) == hash(ValDiEdge(1, 2, (a=3, b=4)), UInt(0))
+
+    @test hash(ValEdge(1, 2, (a=3, b=4))) != hash(ValEdge(1, 2))
+    @test hash(ValDiEdge(1, 2, (a=3, b=4))) != hash(ValDiEdge(1, 2))
+    @test hash(ValDiEdge(1, 2, (a=3, b=4))) != hash(ValDiEdge(2, 1, (a=3, b=4)))
+    @test hash(ValEdge(1, 2)) != hash(ValEdge(1, 3))
+    @test hash(ValDiEdge(1, 2)) != hash(ValDiEdge(1, 3))
+    @test hash(ValEdge(1, 3)) != hash(ValEdge(2, 3))
+    @test hash(ValDiEdge(1, 3)) != hash(ValDiEdge(2, 3))
+    @test hash(ValEdge{Int8}(1, 2, (a=3, b=4))) == hash(ValEdge{Int16}(1, 2, (a=3, b=4)))
+    @test hash(ValDiEdge{Int8}(1, 3, (a=3, b=4))) != hash(ValDiEdge{Int16}(1, 2, (a=3, b=4)))
 
 end

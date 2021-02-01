@@ -1,4 +1,4 @@
-using SimpleValueGraphs: hasedgekey_or_throw, AbstractValGraph, ValEdgeIter
+using SimpleValueGraphs: hasedgekey_or_throw, hasvertexkey_or_throw, hasgraphkey_or_throw, AbstractValGraph, ValEdgeIter
 
 @testset "abstractvaluegraph" begin
 
@@ -19,17 +19,22 @@ SimpleValueGraphs.get_edgeval(g::DummyValGraph, s, d, key::Integer) =
 SimpleValueGraphs.get_vertexval(g::DummyValGraph, v, key::Integer) =
     get_vertexval(g.wrapped, v, key)
 
-SimpleValueGraphs.get_vertexval(g::DummyValGraph, v, key::Integer) =
-    get_vertexval(g.wrapped, v, key)
+SimpleValueGraphs.set_vertexval!(g::DummyValGraph, v, key::Integer, value) =
+    set_vertexval!(g.wrapped, v, key, value)
 
 SimpleValueGraphs.get_edgeval(g::DummyValGraph, s, d, key::Integer) =
     get_edgeval(g.wrapped, s, d, key)
+
+SimpleValueGraphs.set_edgeval!(g::DummyValGraph, s, d, key::Integer, value) =
+    set_edgeval!(g.wrapped, s, d, key, value)
 
 SimpleValueGraphs.get_graphval(g::DummyValGraph, key::Integer) =
     get_graphval(g.wrapped, key)
 
 SimpleValueGraphs.set_graphval!(g::DummyValGraph, key::Integer, value) =
     set_graphval!(g.wrapped, key, value)
+
+SimpleValueGraphs.add_vertex!(g::DummyValGraph, values) = add_vertex!(g.wrapped, values)
 
 @testset "eltype" begin
 
@@ -93,6 +98,40 @@ end
     @test !hasedgekey(typeof(g2), 2)
 end
 
+@testset "hasedgekey_or_throw" begin
+
+    g0 = DummyValGraph(ValOutDiGraph(Int8(0)))
+    g1 = DummyValGraph(ValGraph(1; edgeval_types=(a=Int, b=String)))
+    g2 = DummyValGraph(ValDiGraph(2; edgeval_types=(Int, )))
+
+    G0 = typeof(g0)
+    G1 = typeof(g1)
+    G2 = typeof(g2)
+
+    @test_throws Exception hasedgekey_or_throw(g0, 1)
+    @test_throws Exception hasedgekey_or_throw(G0, 1)
+    @test_throws Exception hasedgekey_or_throw(g0, 0)
+    @test_throws Exception hasedgekey_or_throw(G0, 0)
+
+    @test hasedgekey_or_throw(g1, :a) == nothing
+    @test hasedgekey_or_throw(G1, :a) == nothing
+    @test hasedgekey_or_throw(g1, :b) == nothing
+    @test hasedgekey_or_throw(G1, :b) == nothing
+    @test_throws Exception hasedgekey_or_throw(g1, :c)
+    @test_throws Exception hasedgekey_or_throw(G1, :c)
+    @test hasedgekey_or_throw(g1, 1) == nothing
+    @test hasedgekey_or_throw(G1, 1) == nothing
+    @test hasedgekey_or_throw(g1, 2) == nothing
+    @test hasedgekey_or_throw(G1, 2) == nothing
+    @test_throws Exception hasedgekey_or_throw(g1, 3)
+    @test_throws Exception hasedgekey_or_throw(G1, 3)
+
+    @test hasedgekey_or_throw(g2, 1) == nothing
+    @test hasedgekey_or_throw(G2, 1) == nothing
+    @test_throws Exception hasedgekey_or_throw(g2, 0)
+    @test_throws Exception hasedgekey_or_throw(G2, 2)
+end
+
 @testset "hasvertexkey" begin
 
     g1 = DummyValGraph(ValGraph(0; vertexval_types=(xy=Bool, ), vertexval_init=undef))
@@ -120,7 +159,113 @@ end
     @test !hasvertexkey(typeof(g2), 3)
 end
 
-# TODO should we also test the non-exported hasvertexkey_or_throw, hasedgekey_or_throw?
+@testset "hasvertexkey_or_throw" begin
+
+    g0 = DummyValGraph(ValOutDiGraph(Int8(0)))
+    g1 = DummyValGraph(ValGraph(0; vertexval_types=(xy=Bool, ), vertexval_init=undef))
+    g2 = DummyValGraph(ValDiGraph(0; vertexval_types=(Int, Int), vertexval_init=undef))
+
+    G0 = typeof(g0)
+    G1 = typeof(g1)
+    G2 = typeof(g2)
+
+    @test_throws Exception hasvertexkey_or_throw(g0, 1)
+    @test_throws Exception hasvertexkey_or_throw(G0, 1)
+    @test_throws Exception hasvertexkey_or_throw(g0, 0)
+    @test_throws Exception hasvertexkey_or_throw(G0, 0)
+
+    @test hasvertexkey_or_throw(g1, :xy) == nothing
+    @test hasvertexkey_or_throw(G1, :xy) == nothing
+    @test_throws Exception hasvertexkey_or_throw(g1, :uv)
+    @test_throws Exception hasvertexkey_or_throw(G1, :uv)
+    @test hasvertexkey_or_throw(g1, 1) == nothing
+    @test hasvertexkey_or_throw(G1, 1) == nothing
+    @test_throws Exception hasvertexkey_or_throw(g1, 0)
+    @test_throws Exception hasvertexkey_or_throw(G1, 0)
+    @test_throws Exception hasvertexkey_or_throw(g1, 2)
+    @test_throws Exception hasvertexkey_or_throw(G1, 2)
+
+    @test hasvertexkey_or_throw(g2, Int8(1)) == nothing
+    @test hasvertexkey_or_throw(G2, Int8(1)) == nothing
+    @test hasvertexkey_or_throw(g2, UInt8(2)) == nothing
+    @test hasvertexkey_or_throw(G2, UInt8(2)) == nothing
+    @test_throws Exception hasvertexkey_or_throw(g2, 0)
+    @test_throws Exception hasvertexkey_or_throw(G2, UInt8(0))
+    @test_throws Exception hasvertexkey_or_throw(g2, 3)
+    @test_throws Exception hasvertexkey_or_throw(G2, 3)
+end
+
+@testset "hasgraphkey" begin
+
+    g0 = DummyValGraph(ValOutDiGraph(Int8(0)))
+    g1 = DummyValGraph(ValGraph(0; graphvals=(xy=Bool, )))
+    g2 = DummyValGraph(ValDiGraph(0; graphvals=(10, -20)))
+
+    G0 = typeof(g0)
+    G1 = typeof(g1)
+    G2 = typeof(g2)
+
+    @test !hasgraphkey(g0, 1)
+    @test !hasgraphkey(G0, 1)
+    @test !hasgraphkey(g0, 0)
+    @test !hasgraphkey(G0, 0)
+
+    @test hasgraphkey(g1, :xy)
+    @test hasgraphkey(G1, :xy)
+    @test !hasgraphkey(g1, :uv)
+    @test !hasgraphkey(G1, :uv)
+    @test hasgraphkey(g1, 1)
+    @test hasgraphkey(G1, 1)
+    @test !hasgraphkey(g1, 0)
+    @test !hasgraphkey(G1, 0)
+    @test !hasgraphkey(g1, 2)
+    @test !hasgraphkey(G1, 2)
+
+    @test hasgraphkey(g2, Int8(1))
+    @test hasgraphkey(G2, Int8(1))
+    @test hasgraphkey(g2, UInt8(2))
+    @test hasgraphkey(G2, UInt8(2))
+    @test !hasgraphkey(g2, 0)
+    @test !hasgraphkey(G2, UInt8(0))
+    @test !hasgraphkey(g2, 3)
+    @test !hasgraphkey(G2, 3)
+end
+
+@testset "hasgraphkey_or_throw" begin
+
+    g0 = DummyValGraph(ValOutDiGraph(Int8(0)))
+    g1 = DummyValGraph(ValGraph(0; graphvals=(xy=Bool, )))
+    g2 = DummyValGraph(ValDiGraph(0; graphvals=(10, -20)))
+
+    G0 = typeof(g0)
+    G1 = typeof(g1)
+    G2 = typeof(g2)
+
+    @test_throws Exception hasgraphkey_or_throw(g0, 1)
+    @test_throws Exception hasgraphkey_or_throw(G0, 1)
+    @test_throws Exception hasgraphkey_or_throw(g0, 0)
+    @test_throws Exception hasgraphkey_or_throw(G0, 0)
+
+    @test hasgraphkey_or_throw(g1, :xy) == nothing
+    @test hasgraphkey_or_throw(G1, :xy) == nothing
+    @test_throws Exception hasgraphkey_or_throw(g1, :uv)
+    @test_throws Exception hasgraphkey_or_throw(G1, :uv)
+    @test hasgraphkey_or_throw(g1, 1) == nothing
+    @test hasgraphkey_or_throw(G1, 1) == nothing
+    @test_throws Exception hasgraphkey_or_throw(g1, 0)
+    @test_throws Exception hasgraphkey_or_throw(G1, 0)
+    @test_throws Exception hasgraphkey_or_throw(g1, 2)
+    @test_throws Exception hasgraphkey_or_throw(G1, 2)
+
+    @test hasgraphkey_or_throw(g2, Int8(1)) == nothing
+    @test hasgraphkey_or_throw(G2, Int8(1)) == nothing
+    @test hasgraphkey_or_throw(g2, UInt8(2)) == nothing
+    @test hasgraphkey_or_throw(G2, UInt8(2)) == nothing
+    @test_throws Exception hasgraphkey_or_throw(g2, 0)
+    @test_throws Exception hasgraphkey_or_throw(G2, UInt8(0))
+    @test_throws Exception hasgraphkey_or_throw(g2, 3)
+    @test_throws Exception hasgraphkey_or_throw(G2, 3)
+end
 
 # TODO test show
 
@@ -390,6 +535,55 @@ end
     @test get_vertexval(g1, 2) == 2
 end
 
+@testset "set_vertexval!" begin
+
+    g0 = DummyValGraph(ValDiGraph(2));
+
+    g1 = DummyValGraph(ValGraph(Int8(2);
+        vertexval_types=(Int64, ),
+        vertexval_init=v -> (v, )
+    ))
+
+    g2 = DummyValGraph(ValOutDiGraph(UInt16(2);
+        vertexval_types=(a=Int64, b=String),
+        vertexval_init=v -> (a=v, b="$v")
+    ))
+
+    @test set_vertexval!(g0, 2, :, ()) == true
+    @test set_vertexval!(g0, 0, :, ()) == false
+
+    @test set_vertexval!(g1, 1, 11) == true
+    @test get_vertexval(g1, 1) == 11
+    @test get_vertexval(g1, 2) == 2
+    @test set_vertexval!(g1, 2, 22) == true
+    @test get_vertexval(g1, 1) == 11
+    @test get_vertexval(g1, 2) == 22
+    @test set_vertexval!(g1, 3, 33) == false
+    @test get_vertexval(g1, 1) == 11
+    @test get_vertexval(g1, 2) == 22
+
+    @test set_vertexval!(g1, 1, :, (111,)) == true
+    @test get_vertexval(g1, 1) == 111
+    @test get_vertexval(g1, 2) == 22
+    @test set_vertexval!(g1, 0, :, (44,)) == false
+    @test get_vertexval(g1, 1) == 111
+    @test get_vertexval(g1, 2) == 22
+
+    @test set_vertexval!(g2, 1, :a, 11) == true
+    @test get_vertexval(g2, 1, :) == (a=11, b="1")
+    @test get_vertexval(g2, 2, :) == (a=2, b="2")
+    @test set_vertexval!(g2, 2, :b, "22") == true
+    @test get_vertexval(g2, 1, :) == (a=11, b="1")
+    @test get_vertexval(g2, 2, :) == (a=2, b="22")
+    @test set_vertexval!(g2, 3, :b, "33") == false
+    @test get_vertexval(g2, 1, :) == (a=11, b="1")
+    @test get_vertexval(g2, 2, :) == (a=2, b="22")
+    @test set_vertexval!(g2, 1, :, (a=111, b="111")) == true
+    @test get_vertexval(g2, 1, :) == (a=111, b="111")
+    @test get_vertexval(g2, 2, :) == (a=2, b="22")
+end
+
+
 @testset "get_edgeval" begin
 
     g_simple = SimpleGraph(Edge.([(1, 1), (2, 3)]))
@@ -442,6 +636,59 @@ end
     @test get_edgeval(g2, 4, 3) == 4
 end
 
+@testset "set_edgeval!" begin
+
+    g_simple = SimpleGraph(Edge.([(1, 1), (2, 3)]))
+    g_simple_di = SimpleDiGraph(Edge.([(1, 1), (1, 2), (3, 4), (4, 3)]))
+
+    g0 = DummyValGraph(ValGraph(g_simple))
+    g1 = DummyValGraph(
+        ValGraph(g_simple;
+                 edgeval_types=(a=Int64, b=String),
+                 edgeval_init=(s, d) ->(a=s, b="$d")
+    ))
+    g2 = DummyValGraph(
+        ValDiGraph(g_simple_di;
+                 edgeval_types=(Int64,),
+                 edgeval_init=(s, d) ->(s,)
+    ))
+
+    @test set_edgeval!(g0, 1, 1, :, ()) == true
+    @test set_edgeval!(g0, 2, 3, :, ()) == true
+    @test set_edgeval!(g0, 3, 2, :, ()) == true
+    @test set_edgeval!(g0, 1, 3, :, ()) == false
+    @test set_edgeval!(g0, 3, 3, :, ()) == false
+
+    @test set_edgeval!(g1, 1, 1, :a, 11) == true
+    @test outedgevals(g1, 1, :) == [(a=11, b="1")]
+    @test outedgevals(g1, 2, :) == [(a=2, b="3")]
+    @test outedgevals(g1, 3, :) == [(a=2, b="3")]
+    @test set_edgeval!(g1, 2, 3, :b, "33") == true
+    @test outedgevals(g1, 1, :) == [(a=11, b="1")]
+    @test outedgevals(g1, 2, :) == [(a=2, b="33")]
+    @test outedgevals(g1, 3, :) == [(a=2, b="33")]
+    @test set_edgeval!(g1, 1, 2, :b, "22") == false
+    @test outedgevals(g1, 1, :) == [(a=11, b="1")]
+    @test outedgevals(g1, 2, :) == [(a=2, b="33")]
+    @test outedgevals(g1, 3, :) == [(a=2, b="33")]
+    @test set_edgeval!(g1, 3, 2, :, (a=222, b="333")) == true
+    @test outedgevals(g1, 1, :) == [(a=11, b="1")]
+    @test outedgevals(g1, 2, :) == [(a=222, b="333")]
+    @test outedgevals(g1, 3, :) == [(a=222, b="333")]
+
+    @test set_edgeval!(g2, 3, 4, 33) == true
+    @test outedgevals(g2, 1) == [1, 1]
+    @test outedgevals(g2, 2) == []
+    @test outedgevals(g2, 3) == [33]
+    @test outedgevals(g2, 4) == [4]
+    @test set_edgeval!(g2, 1, 3, 11) == false
+    @test outedgevals(g2, 1) == [1, 1]
+    @test outedgevals(g2, 2) == []
+    @test outedgevals(g2, 3) == [33]
+    @test outedgevals(g2, 4) == [4]
+
+end
+
 @testset "get_graphval" begin
 
     g1 = DummyValGraph(ValGraph(1, graphvals=(1, "2")))
@@ -490,5 +737,21 @@ end
     @test get_graphval(g4, :) == ()
 end
 
+@testset "add_vertex!" begin
+
+    ga = DummyValGraph(ValGraph{UInt64}(0, edgeval_types=(a=Int64, b=Char)))
+    gb = DummyValGraph(ValDiGraph{Int8}(0))
+
+    add_vertex!(ga)
+    @test nv(ga) == 1
+    add_vertex!(ga)
+    @test nv(ga) == 2
+
+    add_vertex!(gb)
+    @test nv(gb) == 1
+    add_vertex!(gb)
+    @test nv(gb) == 2
+end
 
 end # testset
+

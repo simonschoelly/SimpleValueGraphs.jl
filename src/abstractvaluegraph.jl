@@ -193,6 +193,8 @@ function hasgraphkey(
     return key ∈ OneTo(length(G_VALS.types))
 end
 
+hasgraphkey(g::AbstractValGraph, key) = hasgraphkey(typeof(g), key)
+
 function hasgraphkey_or_throw(G::Type{<:AbstractValGraph}, key)
     hasgraphkey(G, key) && return nothing
 
@@ -489,7 +491,7 @@ function set_edgeval!(g::AbstractValGraph, s, d, ::Colon, values)
 
     # TODO currently we cannot convert from tuples to named tuples or vice versa
     values = convert(E_VALS, values)
-    for (i, value) in values
+    for (i, value) in enumerate(values)
         set_edgeval!(g, s, d, i, value)
     end
 
