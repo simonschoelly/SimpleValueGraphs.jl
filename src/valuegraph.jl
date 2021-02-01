@@ -398,7 +398,7 @@ function LG.add_edge!(g::ValGraph{V, V_VALS, E_VALS},
                    d::Integer,
                    values) where {V, V_VALS, E_VALS}
 
-    values = convert(E_VALS, values)
+    values = convert_to_tuple(E_VALS, values)
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
 
@@ -432,7 +432,7 @@ function LG.add_edge!(g::ValOutDiGraph{V, V_VALS, E_VALS},
                    d::Integer,
                    values) where {V, V_VALS, E_VALS}
 
-    values = convert(E_VALS, values)
+    values = convert_to_tuple(E_VALS, values)
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
     edgevals = g.edgevals
@@ -455,7 +455,7 @@ function LG.add_edge!(g::ValDiGraph{V, V_VALS, E_VALS},
                    d::Integer,
                    values) where {V, V_VALS, E_VALS}
 
-    values = convert(E_VALS, values)
+    values = convert_to_tuple(E_VALS, values)
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
     @inbounds list = g.fadjlist[s]
@@ -543,7 +543,7 @@ end
 
 function LG.add_vertex!(g::ValGraph{V, V_VALS, E_VALS}, values) where {V, V_VALS, E_VALS}
 
-    values = convert(V_VALS, values)
+    values = convert_to_tuple(V_VALS, values)
 
     if V != BigInt && nv(g) == typemax(V)
         # maybe consider capping at nv(g) - 1
@@ -564,7 +564,7 @@ end
 
 function LG.add_vertex!(g::ValOutDiGraph{V, V_VALS, E_VALS}, values) where {V, V_VALS, E_VALS}
 
-    values = convert(V_VALS, values)
+    values = convert_to_tuple(V_VALS, values)
 
     if V != BigInt && nv(g) == typemax(V)
         # maybe consider capping at nv(g) - 1
@@ -585,7 +585,7 @@ end
 
 function LG.add_vertex!(g::ValDiGraph{V, V_VALS, E_VALS}, values) where {V, V_VALS, E_VALS}
 
-    values = convert(V_VALS, values)
+    values = convert_to_tuple(V_VALS, values)
 
     if V != BigInt && nv(g) == typemax(V)
         # maybe consider capping at nv(g) - 1
@@ -917,7 +917,7 @@ end
 function set_edgeval!(g::ValGraph, s::Integer, d::Integer, ::Colon, values)
 
     E_VALS = edgevals_type(g)
-    values = convert(E_VALS, values)
+    values = convert_to_tuple(E_VALS, values)
 
     verts = vertices(g)
     (s in verts && d in verts) || return false
@@ -937,7 +937,7 @@ end
 function set_edgeval!(g::ValOutDiGraph, s::Integer, d::Integer, ::Colon, values)
 
     E_VALS = edgevals_type(g)
-    values = convert(E_VALS, values)
+    values = convert_to_tuple(E_VALS, values)
 
     verts = vertices(g)
     (s in verts && d in verts) || return false
@@ -953,7 +953,7 @@ end
 function set_edgeval!(g::ValDiGraph, s::Integer, d::Integer, ::Colon, values)
 
     E_VALS = edgevals_type(g)
-    values = convert(E_VALS, values)
+    values = convert_to_tuple(E_VALS, values)
 
     verts = vertices(g)
     (s in verts && d in verts) || return false
