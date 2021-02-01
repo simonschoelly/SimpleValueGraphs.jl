@@ -148,7 +148,7 @@ end
 function create_vertexvals(n, V_VALS::Type{<:AbstractTuple}, f::Function)
     vertexvals = Tuple( Vector{T}(undef, n) for T in V_VALS.types )
     for v in 1:n
-        t = f(v)
+        t = convert_to_tuple(V_VALS, f(v))
         for i in 1:length(V_VALS.types)
             vertexvals[i][v] = t[i]
         end
