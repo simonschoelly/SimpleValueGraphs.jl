@@ -25,6 +25,12 @@ SimpleValueGraphs.get_vertexval(g::DummyValGraph, v, key::Integer) =
 SimpleValueGraphs.get_edgeval(g::DummyValGraph, s, d, key::Integer) =
     get_edgeval(g.wrapped, s, d, key)
 
+SimpleValueGraphs.get_graphval(g::DummyValGraph, key::Integer) =
+    get_graphval(g.wrapped, key)
+
+SimpleValueGraphs.set_graphval!(g::DummyValGraph, key::Integer, value) =
+    set_graphval!(g.wrapped, key, value)
+
 @testset "eltype" begin
 
     @test eltype(DummyValGraph{Int8}) == Int8
@@ -434,6 +440,54 @@ end
     @test get_edgeval(g2, 1, 2) == 1
     @test get_edgeval(g2, 3, 4) == 3
     @test get_edgeval(g2, 4, 3) == 4
+end
+
+@testset "get_graphval" begin
+
+    g1 = DummyValGraph(ValGraph(1, graphvals=(1, "2")))
+    g2 = DummyValGraph(ValDiGraph(2, graphvals=(x=1, y="2")))
+    g3 = DummyValGraph(ValOutDiGraph(3, graphvals=(a="1", )))
+    g4 = DummyValGraph(ValOutDiGraph(Int(4)))
+
+    @test get_graphval(g1, :) == (1, "2")
+
+    @test get_graphval(g2, :x) == 1
+    @test get_graphval(g2, :y) == "2"
+    @test get_graphval(g2, :) == (x=1, y="2")
+
+    @test get_graphval(g3) == "1"
+    @test get_graphval(g3, :a) == "1"
+    @test get_graphval(g3, :) == (a="1",)
+
+    @test get_graphval(g4, :) == ()
+end
+
+@testset "set_graphval!" begin
+
+    g1 = DummyValGraph(ValGraph(1, graphvals=(1, "2")))
+    g2 = DummyValGraph(ValDiGraph(2, graphvals=(x=1, y="2")))
+    g3 = DummyValGraph(ValOutDiGraph(3, graphvals=(a="1", )))
+    g4 = DummyValGraph(ValOutDiGraph(Int(4)))
+
+    set_graphval!(g1, :, (10, "20"))
+    @test get_graphval(g1, :) == (10, "20")
+
+    set_graphval!(g2, :x , 10)
+    @test get_graphval(g2, :) == (x=10, y="2")
+    set_graphval!(g2, :y, "20")
+    @test get_graphval(g2, :) == (x=10, y="20")
+    set_graphval!(g2, :, (x=100, y="200"))
+    @test get_graphval(g2, :) == (x=100, y="200")
+
+    set_graphval!(g3, "10")
+    @test get_graphval(g3) == "10"
+    set_graphval!(g3, :, (a="100",))
+    @test get_graphval(g3) == "100"
+    set_graphval!(g3, :a, "1000")
+    @test get_graphval(g3) == "1000"
+
+    set_graphval!(g4, :, ())
+    @test get_graphval(g4, :) == ()
 end
 
 
