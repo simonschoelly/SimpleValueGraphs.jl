@@ -1,4 +1,4 @@
-using SimpleValueGraphs: hasedgekey_or_throw, AbstractValGraph, ValEdgeIter
+using SimpleValueGraphs: hasedgekey_or_throw, hasvertexkey_or_throw, hasgraphkey_or_throw, AbstractValGraph, ValEdgeIter
 
 @testset "abstractvaluegraph" begin
 
@@ -161,7 +161,43 @@ end
     @test !hasvertexkey(typeof(g2), 3)
 end
 
-# TODO should we also test the non-exported hasvertexkey_or_throw, hasedgekey_or_throw?
+@testset "hasvertexkey_or_throw" begin
+
+    g0 = DummyValGraph(ValOutDiGraph(Int8(0)))
+    g1 = DummyValGraph(ValGraph(0; vertexval_types=(xy=Bool, ), vertexval_init=undef))
+    g2 = DummyValGraph(ValDiGraph(0; vertexval_types=(Int, Int), vertexval_init=undef))
+
+    G0 = typeof(g0)
+    G1 = typeof(g1)
+    G2 = typeof(g2)
+
+    @test_throws Exception hasvertexkey_or_throw(g0, 1)
+    @test_throws Exception hasvertexkey_or_throw(G0, 1)
+    @test_throws Exception hasvertexkey_or_throw(g0, 0)
+    @test_throws Exception hasvertexkey_or_throw(G0, 0)
+    @test_throws Exception hasvertexkey_or_throw(g0, :a)
+    @test_throws Exception hasvertexkey_or_throw(G0, :a)
+
+    @test hasvertexkey_or_throw(g1, :xy) == nothing
+    @test hasvertexkey_or_throw(G1, :xy) == nothing
+    @test_throws Exception hasvertexkey_or_throw(g1, :uv)
+    @test_throws Exception hasvertexkey_or_throw(G1, :uv)
+    @test hasvertexkey_or_throw(g1, 1) == nothing
+    @test hasvertexkey_or_throw(G1, 1) == nothing
+    @test_throws Exception hasvertexkey_or_throw(g1, 0)
+    @test_throws Exception hasvertexkey_or_throw(G1, 0)
+    @test_throws Exception hasvertexkey_or_throw(g1, 2)
+    @test_throws Exception hasvertexkey_or_throw(G1, 2)
+
+    @test hasvertexkey_or_throw(g2, Int8(1)) == nothing
+    @test hasvertexkey_or_throw(G2, Int8(1)) == nothing
+    @test hasvertexkey_or_throw(g2, UInt8(2)) == nothing
+    @test hasvertexkey_or_throw(G2, UInt8(2)) == nothing
+    @test_throws Exception hasvertexkey_or_throw(g2, 0)
+    @test_throws Exception hasvertexkey_or_throw(G2, UInt8(0))
+    @test_throws Exception hasvertexkey_or_throw(g2, 3)
+    @test_throws Exception hasvertexkey_or_throw(G2, 3)
+end
 
 # TODO test show
 
