@@ -312,7 +312,7 @@ get_vertexval(g::OneVertexValGraph, v) = get_vertexval(g, v, 1)
 """
     get_vertexval(g::AbstractValGraph, v, :)
 
-Return all vertex value for vertex `v`.
+Return all vertex values for vertex `v`.
 """
 function get_vertexval(g::AbstractValGraph, v, ::Colon)
 
@@ -551,12 +551,20 @@ outedgevals(g::AbstractValGraph, u, key::Integer) =
     [get_edgeval(g, u, v, key) for v in outneighbors(g, u)]
 
 
+"""
+    outedgevals(g::AbstractValGraph, v, :)
+
+Return an iterator of all edge values of outgoing edges from `v` to its neighbors.
+"""
+outedgevals(g::AbstractValGraph, u, ::Colon) =
+    [get_edgeval(g, u, v, :) for v in outneighbors(g, u)]
+
 #  ------------------------------------------------------
 #  inedgevals
 #  ------------------------------------------------------
 
 """
-    inneighbors(g::AbstractValGraph, v [, key])
+    inedgevals(g::AbstractValGraph, v [, key])
 
 Return an iterator of edge values of ingoing edges from neighbors of `v`.
 
@@ -573,7 +581,13 @@ inedgevals(g::AbstractValGraph, v, key::Symbol) =
 inedgevals(g::AbstractValGraph, v, key::Integer) =
     [get_edgeval(g, u, v, key) for u in inneighbors(g, v)]
 
+"""
+    inedgevals(g::AbstractValGraph, v, :)
 
+Return an iterator of all edge values of ingoing edges from neighbors of `v`.
+"""
+inedgevals(g::AbstractValGraph, v, ::Colon) =
+    [get_edgeval(g, u, v, :) for u in inneighbors(g, v)]
 
 # ======================================================
 # Edge Iterator
