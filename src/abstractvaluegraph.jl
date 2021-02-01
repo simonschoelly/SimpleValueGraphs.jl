@@ -527,6 +527,46 @@ function set_vertexval!(g::AbstractValGraph, v, ::Colon, values)
     return true
 end
 
+#  ------------------------------------------------------
+#  set_graphval!
+#  ------------------------------------------------------
+
+"""
+    set_graphval!(g::AbstractValGraph, key, value)
+
+Set the graph value specified by `g` to `value`. If `g` has only a single graph
+value, `key` can be omitted.
+
+### See also
+[`get_graphval`](@ref), [`set_vertexval!`](@ref), [`set_edgeval!`](@ref)
+"""
+function set_graphval! end
+
+set_graphval!(g::OneGraphValGraph, value) = set_graphval!(g, 1, value)
+
+set_graphval!(g::AbstractValGraph, key::Symbol, value) =
+    set_graphval!(g, Base.fieldindex(graphvals_type(g), key), value)
+
+"""
+    set_graphval!(g::AbstractValGraph, :, values)
+
+Set all graph values of `g` to `values`.
+### See also
+[`get_graphval`](@ref), [`set_vertexval!`](@ref), [`set_edgeval!`](@ref)
+"""
+function set_graphval!(g::AbstractValGraph, ::Colon, values)
+
+    G_VALS = graphvals_type(g)
+
+    # TODO currently we cannot convert from tuples to named tuples or vice versa
+    values = convert(G_VALS, values)
+    for (key, value) in enumerate(values)
+        set_graphval!(g, key, value)
+    end
+
+    return true
+end
+
 
 #  ------------------------------------------------------
 #  outedgevals

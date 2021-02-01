@@ -59,6 +59,7 @@ export
     set_edgeval!,
 
     get_graphval,
+    set_graphval!,
 
     inedgevals,
     outedgevals,

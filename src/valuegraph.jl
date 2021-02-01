@@ -1046,6 +1046,27 @@ function get_graphval(g::ValDiGraph, ::Colon)
     return g.graphvals
 end
 
+#  ------------------------------------------------------
+#  set_graphval!
+#  ------------------------------------------------------
+
+function set_graphval!(g::ValGraph, key::Integer, value)
+
+    g.graphvals = replace_in_tuple(g.graphvals, key, value)
+    return true
+end
+
+function set_graphval!(g::ValOutDiGraph, key::Integer, value)
+
+    g.graphvals = replace_in_tuple(g.graphvals, key, value)
+    return true
+end
+
+function set_graphval!(g::ValDiGraph, key::Integer, value)
+
+    g.graphvals = replace_in_tuple(g.graphvals, key, value)
+    return true
+end
 
 #  ------------------------------------------------------
 #  is_directed

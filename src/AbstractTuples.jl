@@ -13,7 +13,8 @@ export
     AbstractTuple,
     NamedNTuple, AbstractNTuple,
     TypeTuple, NamedTypeTuple, AbstractTypeTuple,
-    typetuple_to_type, typetuple
+    typetuple_to_type, typetuple,
+    replace_in_tuple
 
 # ======================================================
 # Abstract tuple types
@@ -160,6 +161,29 @@ end
 function typetuple(TT::Type{<:NamedTuple})
 
     return NamedTuple{Tuple(TT.names)}(TT.types)
+end
+
+# ======================================================
+# replace_in_tuple
+# ======================================================
+
+"""
+    replace_in_tuple(t::Tuple, key, value)
+    replace_in_tuple(t::NamedTuple, key, value)
+
+Return a copy of `t` where the value specified by `key` has been replaced by `value`.
+Does not add additional fields if key does not exist.
+"""
+function replace_in_tuple end
+
+replace_in_tuple(t::Tuple, key, v) = Base.setindex(t, v, key)
+replace_in_tuple(nt::NamedTuple, key::Symbol, v) =
+    replace_in_tuple(nt, Base.fieldindex(typeof(nt), key), v)
+
+function replace_in_tuple(nt::NamedTuple, key::Integer, v)
+
+    T = typeof(nt)
+    return T(replace_in_tuple(Tuple(nt), key, v))
 end
 
 
