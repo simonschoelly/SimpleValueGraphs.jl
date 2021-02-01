@@ -571,7 +571,7 @@ inedgevals(g::AbstractValGraph, v, key::Symbol) =
     inedgevals(g, v, Base.fieldindex(edgevals_type(g), key))
 
 inedgevals(g::AbstractValGraph, v, key::Integer) =
-    [get_edgeval(g, u, v, key) for v in inneighbors(g, v)]
+    [get_edgeval(g, u, v, key) for u in inneighbors(g, v)]
 
 
 
