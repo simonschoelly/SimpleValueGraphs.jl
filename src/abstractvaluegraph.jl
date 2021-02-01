@@ -193,6 +193,8 @@ function hasgraphkey(
     return key ∈ OneTo(length(G_VALS.types))
 end
 
+hasgraphkey(g::AbstractValGraph, key) = hasgraphkey(typeof(g), key)
+
 function hasgraphkey_or_throw(G::Type{<:AbstractValGraph}, key)
     hasgraphkey(G, key) && return nothing
 

@@ -112,8 +112,6 @@ end
     @test_throws Exception hasedgekey_or_throw(G0, 1)
     @test_throws Exception hasedgekey_or_throw(g0, 0)
     @test_throws Exception hasedgekey_or_throw(G0, 0)
-    @test_throws Exception hasedgekey_or_throw(g0, :a)
-    @test_throws Exception hasedgekey_or_throw(G0, :a)
 
     @test hasedgekey_or_throw(g1, :a) == nothing
     @test hasedgekey_or_throw(G1, :a) == nothing
@@ -175,8 +173,6 @@ end
     @test_throws Exception hasvertexkey_or_throw(G0, 1)
     @test_throws Exception hasvertexkey_or_throw(g0, 0)
     @test_throws Exception hasvertexkey_or_throw(G0, 0)
-    @test_throws Exception hasvertexkey_or_throw(g0, :a)
-    @test_throws Exception hasvertexkey_or_throw(G0, :a)
 
     @test hasvertexkey_or_throw(g1, :xy) == nothing
     @test hasvertexkey_or_throw(G1, :xy) == nothing
@@ -197,6 +193,78 @@ end
     @test_throws Exception hasvertexkey_or_throw(G2, UInt8(0))
     @test_throws Exception hasvertexkey_or_throw(g2, 3)
     @test_throws Exception hasvertexkey_or_throw(G2, 3)
+end
+
+@testset "hasgraphkey" begin
+
+    g0 = DummyValGraph(ValOutDiGraph(Int8(0)))
+    g1 = DummyValGraph(ValGraph(0; graphvals=(xy=Bool, )))
+    g2 = DummyValGraph(ValDiGraph(0; graphvals=(10, -20)))
+
+    G0 = typeof(g0)
+    G1 = typeof(g1)
+    G2 = typeof(g2)
+
+    @test !hasgraphkey(g0, 1)
+    @test !hasgraphkey(G0, 1)
+    @test !hasgraphkey(g0, 0)
+    @test !hasgraphkey(G0, 0)
+
+    @test hasgraphkey(g1, :xy)
+    @test hasgraphkey(G1, :xy)
+    @test !hasgraphkey(g1, :uv)
+    @test !hasgraphkey(G1, :uv)
+    @test hasgraphkey(g1, 1)
+    @test hasgraphkey(G1, 1)
+    @test !hasgraphkey(g1, 0)
+    @test !hasgraphkey(G1, 0)
+    @test !hasgraphkey(g1, 2)
+    @test !hasgraphkey(G1, 2)
+
+    @test hasgraphkey(g2, Int8(1))
+    @test hasgraphkey(G2, Int8(1))
+    @test hasgraphkey(g2, UInt8(2))
+    @test hasgraphkey(G2, UInt8(2))
+    @test !hasgraphkey(g2, 0)
+    @test !hasgraphkey(G2, UInt8(0))
+    @test !hasgraphkey(g2, 3)
+    @test !hasgraphkey(G2, 3)
+end
+
+@testset "hasgraphkey_or_throw" begin
+
+    g0 = DummyValGraph(ValOutDiGraph(Int8(0)))
+    g1 = DummyValGraph(ValGraph(0; graphvals=(xy=Bool, )))
+    g2 = DummyValGraph(ValDiGraph(0; graphvals=(10, -20)))
+
+    G0 = typeof(g0)
+    G1 = typeof(g1)
+    G2 = typeof(g2)
+
+    @test_throws Exception hasgraphkey_or_throw(g0, 1)
+    @test_throws Exception hasgraphkey_or_throw(G0, 1)
+    @test_throws Exception hasgraphkey_or_throw(g0, 0)
+    @test_throws Exception hasgraphkey_or_throw(G0, 0)
+
+    @test hasgraphkey_or_throw(g1, :xy) == nothing
+    @test hasgraphkey_or_throw(G1, :xy) == nothing
+    @test_throws Exception hasgraphkey_or_throw(g1, :uv)
+    @test_throws Exception hasgraphkey_or_throw(G1, :uv)
+    @test hasgraphkey_or_throw(g1, 1) == nothing
+    @test hasgraphkey_or_throw(G1, 1) == nothing
+    @test_throws Exception hasgraphkey_or_throw(g1, 0)
+    @test_throws Exception hasgraphkey_or_throw(G1, 0)
+    @test_throws Exception hasgraphkey_or_throw(g1, 2)
+    @test_throws Exception hasgraphkey_or_throw(G1, 2)
+
+    @test hasgraphkey_or_throw(g2, Int8(1)) == nothing
+    @test hasgraphkey_or_throw(G2, Int8(1)) == nothing
+    @test hasgraphkey_or_throw(g2, UInt8(2)) == nothing
+    @test hasgraphkey_or_throw(G2, UInt8(2)) == nothing
+    @test_throws Exception hasgraphkey_or_throw(g2, 0)
+    @test_throws Exception hasgraphkey_or_throw(G2, UInt8(0))
+    @test_throws Exception hasgraphkey_or_throw(g2, 3)
+    @test_throws Exception hasgraphkey_or_throw(G2, 3)
 end
 
 # TODO test show
