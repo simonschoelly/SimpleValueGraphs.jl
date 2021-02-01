@@ -14,7 +14,8 @@ export
     NamedNTuple, AbstractNTuple,
     TypeTuple, NamedTypeTuple, AbstractTypeTuple,
     typetuple_to_type, typetuple,
-    replace_in_tuple
+    replace_in_tuple,
+    convert_to_tuple
 
 # ======================================================
 # Abstract tuple types
@@ -186,5 +187,13 @@ function replace_in_tuple(nt::NamedTuple, key::Integer, v)
     return T(replace_in_tuple(Tuple(nt), key, v))
 end
 
+# ======================================================
+# convert_to_tuple
+# ======================================================
+
+# TODO document behaviour
+convert_to_tuple(T::Type{<:NamedTuple}, nt::NamedTuple) = convert(T, nt)
+convert_to_tuple(T::Type{<:Tuple}, t::Tuple) = convert(T, t)
+convert_to_tuple(T::Type{<:NamedTuple}, t::Tuple) = T((t))
 
 end # Module

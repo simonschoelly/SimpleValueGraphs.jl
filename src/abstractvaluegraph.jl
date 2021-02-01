@@ -490,7 +490,7 @@ function set_edgeval!(g::AbstractValGraph, s, d, ::Colon, values)
     E_VALS = edgevals_type(g)
 
     # TODO currently we cannot convert from tuples to named tuples or vice versa
-    values = convert(E_VALS, values)
+    values = convert_to_tuple(E_VALS, values)
     for (i, value) in enumerate(values)
         set_edgeval!(g, s, d, i, value)
     end
@@ -521,7 +521,7 @@ function set_vertexval!(g::AbstractValGraph, v, ::Colon, values)
     V_VALS = vertexvals_type(g)
 
     # TODO currently we cannot convert from tuples to named tuples or vice versa
-    values = convert(V_VALS, values)
+    values = convert_to_tuple(V_VALS, values)
     for (i, value) in enumerate(values)
         set_vertexval!(g, v, i, value)
     end
@@ -561,7 +561,7 @@ function set_graphval!(g::AbstractValGraph, ::Colon, values)
     G_VALS = graphvals_type(g)
 
     # TODO currently we cannot convert from tuples to named tuples or vice versa
-    values = convert(G_VALS, values)
+    values = convert_to_tuple(G_VALS, values)
     for (key, value) in enumerate(values)
         set_graphval!(g, key, value)
     end
