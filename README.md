@@ -8,12 +8,12 @@
 [![codecov](https://codecov.io/gh/simonschoelly/SimpleValueGraphs.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/simonschoelly/SimpleValueGraphs.jl)
 [![](https://img.shields.io/badge/chat-Zulip%23graphs-yellow)](https://julialang.zulipchat.com/#narrow/stream/228745-graphs)
 
-This is [LightGraphs.jl](https://github.com/JuliaGraphs/LightGraphs.jl) compatible package for graphs with multiple, homogeneous vertex and edge metadata. In particular it provides:
+SimpleValueGraphs is as [LightGraphs.jl](https://github.com/JuliaGraphs/LightGraphs.jl) compatible package for graphs with multiple, homogeneous vertex, edge and graph metadata. In particular it provides:
 - an abstract interface for graphs with metadata
 - concrete implementations of mutable graphs with metadata
 
 Compared to [SimpleWeightedGraphs.jl](https://github.com/JuliaGraphs/SimpleWeightedGraphs.jl) it has the following advantages:
-- vertex metadata
+- vertex and graph metadata
 - multiple edge metadata
 - faster structural modifications of graphs
 
