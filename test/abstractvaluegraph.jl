@@ -93,6 +93,42 @@ end
     @test !hasedgekey(typeof(g2), 2)
 end
 
+@testset "hasedgekey_or_throw" begin
+
+    g0 = DummyValGraph(ValOutDiGraph(Int8(0)))
+    g1 = DummyValGraph(ValGraph(1; edgeval_types=(a=Int, b=String)))
+    g2 = DummyValGraph(ValDiGraph(2; edgeval_types=(Int, )))
+
+    G0 = typeof(g0)
+    G1 = typeof(g1)
+    G2 = typeof(g2)
+
+    @test_throws Exception hasedgekey_or_throw(g0, 1)
+    @test_throws Exception hasedgekey_or_throw(G0, 1)
+    @test_throws Exception hasedgekey_or_throw(g0, 0)
+    @test_throws Exception hasedgekey_or_throw(G0, 0)
+    @test_throws Exception hasedgekey_or_throw(g0, :a)
+    @test_throws Exception hasedgekey_or_throw(G0, :a)
+
+    @test hasedgekey_or_throw(g1, :a) == nothing
+    @test hasedgekey_or_throw(G1, :a) == nothing
+    @test hasedgekey_or_throw(g1, :b) == nothing
+    @test hasedgekey_or_throw(G1, :b) == nothing
+    @test_throws Exception hasedgekey_or_throw(g1, :c)
+    @test_throws Exception hasedgekey_or_throw(G1, :c)
+    @test hasedgekey_or_throw(g1, 1) == nothing
+    @test hasedgekey_or_throw(G1, 1) == nothing
+    @test hasedgekey_or_throw(g1, 2) == nothing
+    @test hasedgekey_or_throw(G1, 2) == nothing
+    @test_throws Exception hasedgekey_or_throw(g1, 3)
+    @test_throws Exception hasedgekey_or_throw(G1, 3)
+
+    @test hasedgekey_or_throw(g2, 1) == nothing
+    @test hasedgekey_or_throw(G2, 1) == nothing
+    @test_throws Exception hasedgekey_or_throw(g2, 0)
+    @test_throws Exception hasedgekey_or_throw(G2, 2)
+end
+
 @testset "hasvertexkey" begin
 
     g1 = DummyValGraph(ValGraph(0; vertexval_types=(xy=Bool, ), vertexval_init=undef))
