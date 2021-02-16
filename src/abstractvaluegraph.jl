@@ -259,17 +259,23 @@ LG.inneighbors(g::AbstractValGraph, v) = is_directed(g) ? [u for u ∈ vertices(
 
 """
     add_edge!(g::AbstractValGraph, s, d, [values])
+    add_edge!(g::AbstractValGraph, s, d; val=value)
 
 Add an edge `e = (s, d, values)` to a graph `g` and set the edge values.
 
 If `g` does not have and edge values, `values` can be omitted.
+
+For graphs with a single edge value, that value can also be specified with
+the `val` keyword argument.
 
 Return `true` if the edge was added successfully, otherwise return `false`.
 If the edge already exists, return `false` but still change the edge values.
 """
 function add_edge! end
 
-LG.add_edge!(g::ZeroEdgeValGraph, s, d) = add_edge!(g, s, d, edgevals_type(g)(()))
+LG.add_edge!(g::ZeroEdgeValGraph, s, d) = add_edge!(g, s, d, ())
+
+LG.add_edge!(g::OneEdgeValGraph, s, d; val) = add_edge!(g, s, d, tuple(val))
 
 
 #  -----------------------------------------------------
@@ -278,16 +284,22 @@ LG.add_edge!(g::ZeroEdgeValGraph, s, d) = add_edge!(g, s, d, edgevals_type(g)(()
 
 """
     add_vertex!(g::AbstractValGraph[, values])
+    add_vertex!(g::AbstractValGraph; val=value)
 
 Add an vertex to a graph `g` and set the vertex values.
 
 If `g` does not have vertex values, `values` can be omitted.
 
+For graphs with a single vertex value, that value can also be specified with
+the `val` keyword argument.
+
 Return `true` if the vertex was added successfully, otherwise return `false`.
 """
 function add_vertex! end
 
-LG.add_vertex!(g::ZeroVertexValGraph) = add_vertex!(g, vertexvals_type(g)(()))
+LG.add_vertex!(g::ZeroVertexValGraph) = add_vertex!(g, ())
+
+LG.add_vertex!(g::OneVertexValGraph; val) = add_vertex!(g, tuple(val))
 
 
 # ======================================================
