@@ -36,6 +36,8 @@ SimpleValueGraphs.set_graphval!(g::DummyValGraph, key::Integer, value) =
 
 SimpleValueGraphs.add_vertex!(g::DummyValGraph, values) = add_vertex!(g.wrapped, values)
 
+SimpleValueGraphs.add_edge!(g::DummyValGraph, s, d, values) = add_edge!(g.wrapped, s, d, values)
+
 @testset "eltype" begin
 
     @test eltype(DummyValGraph{Int8}) == Int8
@@ -737,6 +739,26 @@ end
     @test get_graphval(g4, :) == ()
 end
 
+@testset "add_edge!(g, s, d, val=...)" begin
+
+    ga = DummyValGraph(ValGraph{UInt64}(4, edgeval_types=(a=Int64,)))
+    gb = DummyValGraph(ValDiGraph{Int8}(2, edgeval_types=(String,)))
+
+    add_edge!(ga, 1, 2, val=100)
+    @test ne(ga) == 1
+    @test get_edgeval(ga, 1, 2) == 100
+    add_edge!(ga, 3, 3, val=200)
+    @test ne(ga) == 2
+    @test get_edgeval(ga, 3, 3) == 200
+
+    add_edge!(gb, 1, 2, val="abc")
+    @test ne(gb) == 1
+    @test get_edgeval(gb, 1, 2) == "abc"
+    add_edge!(gb, 2, 1, val="xyz")
+    @test ne(gb) == 2
+    @test get_edgeval(gb, 2, 1) == "xyz"
+end
+
 @testset "add_vertex!" begin
 
     ga = DummyValGraph(ValGraph{UInt64}(0, edgeval_types=(a=Int64, b=Char)))
@@ -752,6 +774,27 @@ end
     add_vertex!(gb)
     @test nv(gb) == 2
 end
+
+@testset "add_vertex!(g, val=...)" begin
+
+    ga = DummyValGraph(ValGraph{UInt64}(0, vertexval_types=(a=Int64,), vertexval_init=undef))
+    gb = DummyValGraph(ValDiGraph{Int8}(0, vertexval_types=(String,), vertexval_init=undef))
+
+    add_vertex!(ga, val=100)
+    @test nv(ga) == 1
+    @test get_vertexval(ga, 1) == 100
+    add_vertex!(ga, val=200)
+    @test nv(ga) == 2
+    @test get_vertexval(ga, 2) == 200
+
+    add_vertex!(gb, val="abc")
+    @test nv(gb) == 1
+    @test get_vertexval(gb, 1) == "abc"
+    add_vertex!(gb, val="xyz")
+    @test nv(gb) == 2
+    @test get_vertexval(gb, 2) == "xyz"
+end
+
 
 end # testset
 
