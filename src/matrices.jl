@@ -235,7 +235,7 @@ function SparseMatrixCSC(matrix::ValMatrix{Tv, <: Union{ValGraph, ValDiGraph}, k
     nnz_idx = 1
     @inbounds colptr[1] = 1
     for v in vertices(g)
-        for (u, val) in zip(inneighbors(g, v), inedgevals(g, v))
+        for (u, val) in zip(inneighbors(g, v), inedgevals(g, v, key))
             @inbounds rowval[nnz_idx] = u
             @inbounds nzval[nnz_idx] = val
             nnz_idx += 1
@@ -261,7 +261,7 @@ function SparseMatrixCSC(matrix::ValMatrix{Tv, <: ValOutDiGraph, key}) where {Tv
     nnz_idx = 1
     @inbounds colptr[1] = 1
     for u in vertices(g)
-        for (v, val) in zip(outneighbors(g, u), outedgevals(g, u))
+        for (v, val) in zip(outneighbors(g, u), outedgevals(g, u, key))
             @inbounds rowval[nnz_idx] = v
             @inbounds nzval[nnz_idx] = val
             nnz_idx += 1
