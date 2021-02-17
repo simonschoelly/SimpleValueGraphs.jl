@@ -25,6 +25,7 @@ mutable struct ValGraph{  V <: Integer,
                             V_VALS <: AbstractTuple,
                             E_VALS <: AbstractTuple,
                             G_VALS <: AbstractTuple,
+                            # TODO v0.4 restrict containers to Tuple
                             V_VALS_C,
                             E_VALS_C
                         } <: AbstractValGraph{V, V_VALS, E_VALS, G_VALS}
@@ -59,6 +60,7 @@ mutable struct ValOutDiGraph{ V <: Integer,
                                 V_VALS <: AbstractTuple,
                                 E_VALS <: AbstractTuple,
                                 G_VALS <: AbstractTuple,
+                                # TODO v0.4 restrict containers to Tuple
                                 V_VALS_C,
                                 E_VALS_C
                             } <: AbstractValGraph{V, V_VALS, E_VALS, G_VALS}
@@ -95,6 +97,7 @@ mutable struct ValDiGraph{    V <: Integer,
                                 V_VALS <: AbstractTuple,
                                 E_VALS <: AbstractTuple,
                                 G_VALS <: AbstractTuple,
+                                # TODO v0.4 restrict containers to Tuple
                                 V_VALS_C,
                                 E_VALS_C
                            } <: AbstractValGraph{V, V_VALS, E_VALS, G_VALS}
@@ -121,32 +124,28 @@ The default eltype to use in a graph constructor when no eltype is specified.
 """
 const default_eltype = Int32
 
-function create_edgevals(n, E_VAL::Type{<:Tuple})
-    return Tuple( Adjlist{T}(n) for T in E_VAL.types )
+@generated function create_edgevals(n, ::Type{E_VALS}) where {E_VALS <: AbstractTuple}
+    args = Expr[]
+    for T in fieldtypes(E_VALS)
+        push!(args, :(Adjlist{$T}(n)))
+    end
+    return Expr(:call, :tuple, args...)
 end
 
-function create_edgevals(n, E_VAL::Type{<:NamedTuple})
-    return NamedTuple{Tuple(E_VAL.names)}(Tuple( Adjlist{T}(n) for T in E_VAL.types ))
-end
-
-function create_vertexvals(n, V_VALS::Type{<:NTuple{0}}, ::Nothing)
+function create_vertexvals(n, V_VALS::Type{<:AbstractNTuple{0}}, ::Nothing)
     return tuple()
 end
 
-function create_vertexvals(n, V_VALS::Type{<:NamedNTuple{0}}, ::Nothing)
-    return NamedTuple()
-end
-
-function create_vertexvals(n, V_VALS::Type{<:Tuple}, ::UndefInitializer)
-    return Tuple( Vector{T}(undef, n) for T in V_VALS.types )
-end
-
-function create_vertexvals(n, V_VALS::Type{<:NamedTuple}, ::UndefInitializer)
-    return NamedTuple{Tuple(V_VALS.names)}(Tuple( Vector{T}(undef, n) for T in V_VALS.types ))
+@generated function create_vertexvals(n, ::Type{V_VALS}, ::UndefInitializer) where {V_VALS <: AbstractTuple}
+    args = Expr[]
+    for T in fieldtypes(V_VALS)
+        push!(args, :(Vector{$T}(undef, n)))
+    end
+    return Expr(:call, :tuple, args...)
 end
 
 function create_vertexvals(n, V_VALS::Type{<:AbstractTuple}, f::Function)
-    vertexvals = Tuple( Vector{T}(undef, n) for T in V_VALS.types )
+    vertexvals = create_vertexvals(n, V_VALS, undef)
     for v in 1:n
         t = convert_to_tuple(V_VALS, f(v))
         for i in 1:length(V_VALS.types)

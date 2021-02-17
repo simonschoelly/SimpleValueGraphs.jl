@@ -26,6 +26,21 @@ end
 
 =#
 
+@testset "constructor type stability" begin
+
+    @inferred ValGraph(1)
+    @inferred ValDiGraph(1)
+    @inferred ValOutDiGraph(1)
+
+    @inferred ValGraph{Int8}(1)
+    @inferred ValDiGraph{UInt8}(1)
+    @inferred ValOutDiGraph{Int16}(1)
+
+    @inferred ValGraph{Int8, Tuple{Int64, String}, Tuple{}}(1, vertexval_init=undef)
+    @inferred ValDiGraph{UInt8, Tuple{}, @NamedTuple{a::Union{Missing, Int}, b::Vector}}(1)
+    @inferred ValOutDiGraph{Int16, @NamedTuple{a::Int, b::Int}, Tuple{String}}(1, vertexval_init=undef)
+end
+
 #  ------------------------------------------------------
 #  Constructors from other value graphs
 #  ------------------------------------------------------
