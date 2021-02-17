@@ -14,6 +14,7 @@ makedocs(
             "Modifying graphs" => "modification.md",
             "Matrices" => "matrices.md",
         ],
+        "Custom Value Graph types" => "custom-valuegraph-types.md"
       #  "AbstractValGraph interface" => "abstractgraph.md",
       #  "Integration with other packages" => "integration.md",
       #  "Internals" => "internals.md",
