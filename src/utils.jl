@@ -77,14 +77,8 @@ end
 
 
 # TODO check if still correct
-@generated function edgevals_container_type(::Val{E_VAL}) where {E_VAL <:Tuple}
-    R = Tuple{( Adjlist{T} for T in E_VAL.types )...}
-    return :($R)
-end
-
-# TODO check if still correct
-@generated function edgevals_container_type(::Val{E_VAL}) where {E_VAL <:NamedTuple}
-    R = NamedTuple{ Tuple(E_VAL.names), Tuple{( Adjlist{T} for T in E_VAL.types )...}}
+@generated function edgevals_container_type(::Val{E_VALS}) where {E_VALS <: AbstractTuple}
+    R = Tuple{( Adjlist{T} for T in E_VALS.types )...}
     return :($R)
 end
 
