@@ -377,7 +377,7 @@ julia> get_edgeval(gv, 1, 3)
 ERROR: No such edge
 
 julia> get_edgeval(gv, 1, 2, :b)
-ERROR: type NamedTuple has no field b
+ERROR: b is not a valid edge key for this graph.
 ```
 """
 get_edgeval(g::AbstractValGraph, s, d, key::Symbol) =
