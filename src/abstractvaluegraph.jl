@@ -339,6 +339,10 @@ end
 #  get_edgeval
 #  -----------------------------------------------------
 
+# TODO unfortunately I have not found a way yet to make the generic
+# get_edgeval(g, s, d, ::Symbol) function typesafe yet so that concrete
+# graph types might need to implement this function for extra performance
+
 """
     get_edgeval(g::AbstractValGraph, s, d, key)
 
