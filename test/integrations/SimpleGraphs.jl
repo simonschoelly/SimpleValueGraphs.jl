@@ -24,7 +24,7 @@ import SimpleValueGraphs: typetuple
         @test g isa ValOutDiGraph{Int32, NamedTuple{(), Tuple{}}, Tuple{}}
         @test g.ne == 4
         @test g.fadjlist == [[], [2, 3], [4], [3]]
-        @test g.vertexvals == ()
+        @test g.vertexvals == NamedTuple()
         @test g.edgevals == ()
     end
 
@@ -37,8 +37,8 @@ import SimpleValueGraphs: typetuple
         @test g.fadjlist == [[], [2, 3], [4], [3]]
         @test g.badjlist == [[], [2], [2, 4], [3]]
         @test g.vertexvals == ()
-        @test g.edgevals == ()
-        @test g.redgevals == ()
+        @test g.edgevals == NamedTuple()
+        @test g.redgevals == NamedTuple()
     end
 
     @testset "ValGraph{UInt64, Tuple{Int32, Float32}, Tuple{}}(gs; vertexvals_init=undef)" begin

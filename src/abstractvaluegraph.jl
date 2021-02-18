@@ -339,6 +339,10 @@ end
 #  get_edgeval
 #  -----------------------------------------------------
 
+# TODO unfortunately I have not found a way yet to make the generic
+# get_edgeval(g, s, d, ::Symbol) function typesafe yet so that concrete
+# graph types might need to implement this function for extra performance
+
 """
     get_edgeval(g::AbstractValGraph, s, d, key)
 
@@ -373,7 +377,7 @@ julia> get_edgeval(gv, 1, 3)
 ERROR: No such edge
 
 julia> get_edgeval(gv, 1, 2, :b)
-ERROR: type NamedTuple has no field b
+ERROR: b is not a valid edge key for this graph.
 ```
 """
 get_edgeval(g::AbstractValGraph, s, d, key::Symbol) =

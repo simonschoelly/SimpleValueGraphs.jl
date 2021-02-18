@@ -25,9 +25,8 @@ mutable struct ValGraph{  V <: Integer,
                             V_VALS <: AbstractTuple,
                             E_VALS <: AbstractTuple,
                             G_VALS <: AbstractTuple,
-                            # TODO v0.4 restrict containers to Tuple
-                            V_VALS_C,
-                            E_VALS_C
+                            V_VALS_C <: AbstractTuple,
+                            E_VALS_C <: AbstractTuple
                         } <: AbstractValGraph{V, V_VALS, E_VALS, G_VALS}
 
     ne::Int
@@ -60,9 +59,8 @@ mutable struct ValOutDiGraph{ V <: Integer,
                                 V_VALS <: AbstractTuple,
                                 E_VALS <: AbstractTuple,
                                 G_VALS <: AbstractTuple,
-                                # TODO v0.4 restrict containers to Tuple
-                                V_VALS_C,
-                                E_VALS_C
+                                V_VALS_C <: AbstractTuple,
+                                E_VALS_C <: AbstractTuple
                             } <: AbstractValGraph{V, V_VALS, E_VALS, G_VALS}
 
     ne::Int
@@ -97,9 +95,8 @@ mutable struct ValDiGraph{    V <: Integer,
                                 V_VALS <: AbstractTuple,
                                 E_VALS <: AbstractTuple,
                                 G_VALS <: AbstractTuple,
-                                # TODO v0.4 restrict containers to Tuple
-                                V_VALS_C,
-                                E_VALS_C
+                                V_VALS_C <: AbstractTuple,
+                                E_VALS_C <: AbstractTuple
                            } <: AbstractValGraph{V, V_VALS, E_VALS, G_VALS}
 
     ne::Int
@@ -124,7 +121,7 @@ The default eltype to use in a graph constructor when no eltype is specified.
 """
 const default_eltype = Int32
 
-@generated function create_edgevals(n, ::Type{E_VALS}) where {E_VALS <: AbstractTuple}
+@generated function create_edgevals(n, ::Type{E_VALS}) where {E_VALS <: Tuple}
     args = Expr[]
     for T in fieldtypes(E_VALS)
         push!(args, :(Adjlist{$T}(n)))
@@ -132,17 +129,35 @@ const default_eltype = Int32
     return Expr(:call, :tuple, args...)
 end
 
-function create_vertexvals(n, V_VALS::Type{<:AbstractNTuple{0}}, ::Nothing)
-    return tuple()
+@generated function create_edgevals(n, ::Type{E_VALS}) where {E_VALS <: NamedTuple}
+    args = Expr[]
+    for T in fieldtypes(E_VALS)
+        push!(args, :(Adjlist{$T}(n)))
+    end
+    names = fieldnames(E_VALS)
+    return Expr(:call, Expr(:curly, :NamedTuple, names), Expr(:call, :tuple, args...))
 end
 
-@generated function create_vertexvals(n, ::Type{V_VALS}, ::UndefInitializer) where {V_VALS <: AbstractTuple}
+create_vertexvals(n, V_VALS::Type{<:NTuple{0}}, ::Nothing) = ()
+create_vertexvals(n, V_VALS::Type{<:NamedNTuple{0}}, ::Nothing) = (;)
+
+@generated function create_vertexvals(n, ::Type{V_VALS}, ::UndefInitializer) where {V_VALS <: Tuple}
     args = Expr[]
     for T in fieldtypes(V_VALS)
         push!(args, :(Vector{$T}(undef, n)))
     end
     return Expr(:call, :tuple, args...)
 end
+
+@generated function create_vertexvals(n, ::Type{V_VALS}, ::UndefInitializer) where {V_VALS <: NamedTuple}
+    args = Expr[]
+    for T in fieldtypes(V_VALS)
+        push!(args, :(Vector{$T}(undef, n)))
+    end
+    names = fieldnames(V_VALS)
+    return Expr(:call, Expr(:curly, :NamedTuple, names), Expr(:call, :tuple, args...))
+end
+
 
 function create_vertexvals(n, V_VALS::Type{<:AbstractTuple}, f::Function)
     vertexvals = create_vertexvals(n, V_VALS, undef)
@@ -652,13 +667,21 @@ end
 #  get_edgeval
 #  ------------------------------------------------------
 
-
-function get_edgeval(g::ValGraph, s::Integer, d::Integer, key::Integer)
+@inbounds function get_edgeval(g::ValGraph, s::Integer, d::Integer, key::Integer)
 
     hasedgekey_or_throw(g, key) # TODO might be sufficient to just check index
+    return _get_edgeval(g, s, d, g.edgevals[key])
+end
+
+@inbounds function get_edgeval(g::ValGraph, s::Integer, d::Integer, key::Symbol)
+
+    hasedgekey_or_throw(g, key)
+    return _get_edgeval(g, s, d, g.edgevals[key])
+end
+
+function _get_edgeval(g::ValGraph, s::Integer, d::Integer, adjlist::Adjlist)
 
     verts = vertices(g)
-
     (s in verts && d in verts) || error("No such edge")
     @inbounds list_s = g.fadjlist[s]
     @inbounds list_d = g.fadjlist[d]
@@ -669,46 +692,81 @@ function get_edgeval(g::ValGraph, s::Integer, d::Integer, key::Integer)
 
     index = searchsortedfirst(list_s, d)
     @inbounds if index <= length(list_s) && list_s[index] == d
-        return g.edgevals[key][s][index]
+        return adjlist[s][index]
     end
     # TODO more specific error
     error("No such edge")
 end
 
-function get_edgeval(g::ValOutDiGraph, s::Integer, d::Integer, key::Integer)
 
-   hasedgekey_or_throw(g, key)
+@inline function get_edgeval(g::ValOutDiGraph, s::Integer, d::Integer, key::Integer)
+
+    hasedgekey_or_throw(g, key)
+    return _get_edgeval(g, s, d, g.edgevals[key])
+end
+
+@inbounds function get_edgeval(g::ValOutDiGraph, s::Integer, d::Integer, key::Symbol)
+
+    hasedgekey_or_throw(g, key)
+    return _get_edgeval(g, s, d, g.edgevals[key])
+end
+
+function _get_edgeval(g::ValOutDiGraph, s::Integer, d::Integer, adjlist::Adjlist)
 
     verts = vertices(g)
     (s in verts && d in verts) || error("No such edge")
     @inbounds list_s = g.fadjlist[s]
     index = searchsortedfirst(list_s, d)
     @inbounds if index <= length(list_s) && list_s[index] == d
-        return g.edgevals[key][s][index]
+        return adjlist[s][index]
     end
     error("No such edge")
 end
 
-function get_edgeval(g::ValDiGraph, s::Integer, d::Integer, key::Integer)
+@inline function get_edgeval(g::ValDiGraph, s::Integer, d::Integer, key::Integer)
 
     hasedgekey_or_throw(g, key)
+
+    return _get_edgeval(g, s, d, g.edgevals[key])
+end
+
+@inbounds function get_edgeval(g::ValDiGraph, s::Integer, d::Integer, key::Symbol)
+
+    hasedgekey_or_throw(g, key)
+    return _get_edgeval(g, s, d, g.edgevals[key])
+end
+
+function _get_edgeval(g::ValDiGraph, s::Integer, d::Integer, adjlist::Adjlist)
 
     verts = vertices(g)
     (s in verts && d in verts) || error("No such edge")
     @inbounds list_s = g.fadjlist[s]
     index = searchsortedfirst(list_s, d)
     @inbounds if index <= length(list_s) && list_s[index] == d
-        return g.edgevals[key][s][index]
+        return adjlist[s][index]
     end
     error("No such edge")
 end
 
-function get_edgeval_or(g::ValGraph, s::Integer, d::Integer, key::Integer, alternative)
+#  ------------------------------------------------------
+#  get_edgeval_or
+#  ------------------------------------------------------
+
+@inline function get_edgeval_or(g::ValGraph, s::Integer, d::Integer, key::Integer, alternative)
 
     hasedgekey_or_throw(g, key)
+    return _get_edgeval_or(g, s, d, g.edgevals[key], alternative)
+end
+
+@inline function get_edgeval_or(g::ValGraph, s::Integer, d::Integer, key::Symbol, alternative)
+
+    hasedgekey_or_throw(g, key)
+    return _get_edgeval_or(g, s, d, g.edgevals[key], alternative)
+end
+
+function _get_edgeval_or(g::ValGraph, s::Integer, d::Integer, adjlist::Adjlist, alternative)
 
     verts = vertices(g)
-
     (s in verts && d in verts) || return alternative
     @inbounds list_s = g.fadjlist[s]
     @inbounds list_d = g.fadjlist[d]
@@ -719,39 +777,62 @@ function get_edgeval_or(g::ValGraph, s::Integer, d::Integer, key::Integer, alter
 
     index = searchsortedfirst(list_s, d)
     @inbounds if index <= length(list_s) && list_s[index] == d
-        return g.edgevals[key][s][index]
+        return adjlist[s][index]
     end
     return alternative
 end
 
-function get_edgeval_or(g::ValOutDiGraph, s::Integer, d::Integer, key::Integer, alternative)
+@inline function get_edgeval_or(g::ValOutDiGraph, s::Integer, d::Integer, key::Integer, alternative)
 
     hasedgekey_or_throw(g, key)
+    return _get_edgeval_or(g, s, d, g.edgevals[key], alternative)
+end
+
+@inline function get_edgeval_or(g::ValOutDiGraph, s::Integer, d::Integer, key::Symbol, alternative)
+
+    hasedgekey_or_throw(g, key)
+    return _get_edgeval_or(g, s, d, g.edgevals[key], alternative)
+end
+
+function _get_edgeval_or(g::ValOutDiGraph, s::Integer, d::Integer, adjlist::Adjlist, alternative)
 
     verts = vertices(g)
     (s in verts && d in verts) || return alternative
     @inbounds list_s = g.fadjlist[s]
     index = searchsortedfirst(list_s, d)
     @inbounds if index <= length(list_s) && list_s[index] == d
-        return g.edgevals[key][s][index]
+        return adjlist[s][index]
     end
     return alternative
 end
 
-function get_edgeval_or(g::ValDiGraph, s::Integer, d::Integer, key::Integer, alternative)
+@inline function get_edgeval_or(g::ValDiGraph, s::Integer, d::Integer, key::Integer, alternative)
 
     hasedgekey_or_throw(g, key)
+    return _get_edgeval_or(g, s, d, g.edgevals[key], alternative)
+end
+
+@inline function get_edgeval_or(g::ValDiGraph, s::Integer, d::Integer, key::Symbol, alternative)
+
+    hasedgekey_or_throw(g, key)
+    return _get_edgeval_or(g, s, d, g.edgevals[key], alternative)
+end
+
+function _get_edgeval_or(g::ValDiGraph, s::Integer, d::Integer, adjlist::Adjlist, alternative)
 
     verts = vertices(g)
     (s in verts && d in verts) || return alternative
     @inbounds list_s = g.fadjlist[s]
     index = searchsortedfirst(list_s, d)
     @inbounds if index <= length(list_s) && list_s[index] == d
-        return g.edgevals[key][s][index]
+        return adjlist[s][index]
     end
     return alternative
 end
 
+#  ------------------------------------------------------
+#  get_edgeval(g, s, d, :)
+#  ------------------------------------------------------
 
 function get_edgeval(g::ValGraph, s::Integer, d::Integer, ::Colon)
 
@@ -799,7 +880,7 @@ end
 
 
 #  -----------------------------------------------------
-#  get_edgeval_or
+#  get_edgeval_or(g, s, d, :)
 #  -----------------------------------------------------
 
 function get_edgeval_or(g::ValGraph, s::Integer, d::Integer, ::Colon, alternative)
@@ -976,26 +1057,48 @@ end
 
 # TODO maybe implement also for Colon
 
-function get_vertexval(g::ValGraph, v::Integer, key::Integer)
+@inline function get_vertexval(g::ValGraph, v::Integer, key::Integer)
 
     # TODO verify key, vertex
-
-    return g.vertexvals[key][v]
+    return _get_vertexval(g, v, g.vertexvals[key])
 end
 
-function get_vertexval(g::ValOutDiGraph, v::Integer, key::Integer)
+@inline function get_vertexval(g::ValGraph, v::Integer, key::Symbol)
 
     # TODO verify key, vertex
-
-    return g.vertexvals[key][v]
+    return _get_vertexval(g, v, g.vertexvals[key])
 end
 
-function get_vertexval(g::ValDiGraph, v::Integer, key::Integer)
+_get_vertexval(g::ValGraph, v::Integer, list::Vector) = list[v]
+
+@inline function get_vertexval(g::ValOutDiGraph, v::Integer, key::Integer)
 
     # TODO verify key, vertex
-
-    return g.vertexvals[key][v]
+    return _get_vertexval(g, v, g.vertexvals[key])
 end
+
+@inline function get_vertexval(g::ValOutDiGraph, v::Integer, key::Symbol)
+
+    # TODO verify key, vertex
+    return _get_vertexval(g, v, g.vertexvals[key])
+end
+
+_get_vertexval(g::ValOutDiGraph, v::Integer, list::Vector) = list[v]
+
+@inline function get_vertexval(g::ValDiGraph, v::Integer, key::Integer)
+
+    # TODO verify key, vertex
+    return _get_vertexval(g, v, g.vertexvals[key])
+end
+
+@inline function get_vertexval(g::ValDiGraph, v::Integer, key::Symbol)
+
+    # TODO verify key, vertex
+    return _get_vertexval(g, v, g.vertexvals[key])
+end
+
+_get_vertexval(g::ValDiGraph, v::Integer, list::Vector) = list[v]
+
 
 #  ------------------------------------------------------
 #  set_vertexval!
