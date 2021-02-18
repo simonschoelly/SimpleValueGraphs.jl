@@ -638,6 +638,89 @@ end
     @test get_edgeval(g2, 4, 3) == 4
 end
 
+@testset "get_edgeval_or" begin
+
+    g_simple = SimpleGraph(Edge.([(1, 1), (2, 3)]))
+    g_simple_di = SimpleDiGraph(Edge.([(1, 1), (1, 2), (3, 4), (4, 3)]))
+
+    g0 = DummyValGraph(ValGraph(g_simple))
+    g1 = DummyValGraph(
+        ValGraph(g_simple;
+                 edgeval_types=(a=Int64, b=String),
+                 edgeval_init=(s, d) ->(a=s, b="$d")
+    ))
+    g2 = DummyValGraph(
+        ValDiGraph(g_simple_di;
+                 edgeval_types=(Int64,),
+                 edgeval_init=(s, d) ->(s,)
+    ))
+
+    @test get_edgeval_or(g0, 1, 1, :, nothing) == ()
+    @test get_edgeval_or(g0, 2, 3, :, nothing) == ()
+    @test get_edgeval_or(g0, 3, 2, :, "xyz") == ()
+    @test get_edgeval_or(g0, 2, 2, :, nothing) == nothing
+    @test get_edgeval_or(g0, 1, 3, :, "xyz") == "xyz"
+    @test get_edgeval_or(g0, 1, 10, :, "xyz") == "xyz"
+
+    @test get_edgeval_or(g1, 1, 1, :, nothing) == (a=1, b="1")
+    @test get_edgeval_or(g1, 2, 3, :, nothing) == (a=2, b="3")
+    @test get_edgeval_or(g1, 3, 2, :, "xyz") == (a=2, b="3")
+    @test get_edgeval_or(g1, 3, 3, :, "xyz") == "xyz"
+    @test get_edgeval_or(g1, 1, 3, :, nothing) == nothing
+    @test get_edgeval_or(g1, 0, 3, :, nothing) == nothing
+
+    @test get_edgeval_or(g2, 1, 1, :, nothing) == (1,)
+    @test get_edgeval_or(g2, 1, 2, :, nothing) == (1,)
+    @test get_edgeval_or(g2, 3, 4, :, "xyz") == (3,)
+    @test get_edgeval_or(g2, 4, 3, :, "xyz") == (4,)
+    @test get_edgeval_or(g2, 3, 4, :, nothing) == (3,)
+    @test get_edgeval_or(g2, 4, 3, :, nothing) == (4,)
+    @test get_edgeval_or(g2, 2, 1, :, nothing) == nothing
+    @test get_edgeval_or(g2, 2, 2, :, "xyz") == "xyz"
+    @test get_edgeval_or(g2, 2, 10, :, "xyz") == "xyz"
+
+    @test get_edgeval_or(g1, 1, 1, 1, nothing) == 1
+    @test get_edgeval_or(g1, 2, 3, 1, nothing) == 2
+    @test get_edgeval_or(g1, 3, 2, 1, "xyz") == 2
+    @test get_edgeval_or(g1, 2, 2, 1, nothing) == nothing
+    @test get_edgeval_or(g1, 3, 1, 1, "xyz") == "xyz"
+    @test get_edgeval_or(g1, 3, 10, 1, "xyz") == "xyz"
+
+    @test get_edgeval_or(g1, 1, 1, 2, nothing) == "1"
+    @test get_edgeval_or(g1, 2, 3, 2, "xyz") == "3"
+    @test get_edgeval_or(g1, 3, 2, 2, "xyz") == "3"
+    @test get_edgeval_or(g1, 3, 3, 2, nothing) == nothing
+    @test get_edgeval_or(g1, 1, 3, 2, "xyz") == "xyz"
+    @test get_edgeval_or(g1, 0, 3, 2, "xyz") == "xyz"
+
+    @test get_edgeval_or(g2, 1, 1, 1, nothing) == 1
+    @test get_edgeval_or(g2, 1, 2, 1, nothing) == 1
+    @test get_edgeval_or(g2, 3, 4, 1, "xyz") == 3
+    @test get_edgeval_or(g2, 4, 3, 1, "xyz") == 4
+    @test get_edgeval_or(g2, 2, 2, 1, nothing) == nothing
+    @test get_edgeval_or(g2, 3, 3, 1, "xyz") == "xyz"
+    @test get_edgeval_or(g2, 0, 10, 1, "xyz") == "xyz"
+
+    @test get_edgeval_or(g1, 1, 1, :a, nothing) == 1
+    @test get_edgeval_or(g1, 2, 3, :a, nothing) == 2
+    @test get_edgeval_or(g1, 3, 2, :a, nothing) == 2
+    @test get_edgeval_or(g1, 1, 1, :b, "xyz") == "1"
+    @test get_edgeval_or(g1, 2, 3, :b, "xyz") == "3"
+    @test get_edgeval_or(g1, 3, 2, :b, "xyz") == "3"
+    @test get_edgeval_or(g1, 2, 2, :b, nothing) == nothing
+    @test get_edgeval_or(g1, 1, 2, :b, "xyz") == "xyz"
+    @test get_edgeval_or(g1, 0, 0, :b, "xyz") == "xyz"
+
+    @test get_edgeval_or(g2, 1, 1, nothing) == 1
+    @test get_edgeval_or(g2, 1, 2, nothing) == 1
+    @test get_edgeval_or(g2, 3, 4, "xyz") == 3
+    @test get_edgeval_or(g2, 4, 3, "xyz") == 4
+    @test get_edgeval_or(g2, 2, 1, nothing) == nothing
+    @test get_edgeval_or(g2, 1, 3, "xyz") == "xyz"
+    @test get_edgeval_or(g2, 10, 10, "xyz") == "xyz"
+end
+
+
 @testset "set_edgeval!" begin
 
     g_simple = SimpleGraph(Edge.([(1, 1), (2, 3)]))
