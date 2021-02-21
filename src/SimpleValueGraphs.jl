@@ -20,7 +20,7 @@ import LightGraphs:
     inneighbors, outneighbors,
     zero,
     adjacency_matrix,
-    squash
+    squash, reverse
 
 import Base: show, iterate, length,
     getindex, size, ==, hash
@@ -67,8 +67,6 @@ export
     AdjacencyMatrix,
     ValMatrix,
 
-    squash,
-
     # overridden methods from LightGraphs
     nv,
     ne,
@@ -97,13 +95,16 @@ export
 
     adjacency_matrix,
 
+    squash, reverse,
+
+    zero,
+
     # overridden methods from Base
     iterate,
     length,
     size,
     getindex,
     show,
-    zero,
     ==,
     hash,
 
