@@ -682,43 +682,55 @@ Base.eltype(iter::ValEdgeIter) = eltype(typeof(iter))
 
 function Base.iterate(iter::ValEdgeIter)
 
-    verts = vertices(iter.graph)
+    g = iter.graph
 
-    isempty(verts) && return nothing
+    vertices_iter = vertices(g)
+    vertices_next = iterate(vertices_iter)
+    vertices_next == nothing && return nothing
 
-    iterate(iter, (vertices=verts, i=1, j=1))
+    u, _ = vertices_next
+    outneighbors_iter = outneighbors(g, u)
+    outneighbors_next = iterate(outneighbors_iter)
+
+    iterate(iter, (vertices_iter, vertices_next, outneighbors_iter, outneighbors_next))
 end
 
+# TODO this function might be faster if we could ensure
+# that none of the fields of state can be nothing
+# TODO might replace get_edgeval with outedgevals
 function Base.iterate(iter::ValEdgeIter{G, key}, state) where {G, key}
 
-    verts = state.vertices
-    i = state.i
-    j = state.j
-    graph = iter.graph
+    g = iter.graph
 
-    while i <= length(verts)
-        u = verts[i]
-        while j <= length(verts)
-            v = verts[j]
-            if !is_directed(graph) && u > v
-                j += 1
-                continue
+    vertices_iter, vertices_next, outneighbors_iter, outneighbors_next = state
+
+    # at this point vertices_next != nothing
+    u, vertices_state = vertices_next
+
+    while outneighbors_next == nothing
+        vertices_next = iterate(vertices_iter, vertices_state)
+        vertices_next == nothing && return nothing
+        u, vertices_state = vertices_next
+        outneighbors_iter = outneighbors(g, u)
+        outneighbors_next = iterate(outneighbors_iter)
+        if !is_directed(g)
+            while outneighbors_next != nothing && outneighbors_next[1] < u
+                outneighbors_next = iterate(outneighbors_iter, outneighbors_next[2])
             end
-            if has_edge(graph, u, v)
-                new_state = (vertices=verts, i=i, j=j+1)
-                edge = if key == nothing
-                        eltype(iter)(u, v, ())
-                    else
-                        eltype(iter)(u, v, get_edgeval(graph, u, v, :))
-                    end
-                return (edge, new_state)
-            end
-            j += 1
         end
-        i += 1
-        j = 1
     end
-    return nothing
+
+    v, outneighbors_state = outneighbors_next
+    edge = if key == nothing
+                eltype(iter)(u, v, ())
+            else
+                eltype(iter)(u, v, get_edgeval(g, u, v, :))
+            end
+
+    outneighbors_next = iterate(outneighbors_iter, outneighbors_state)
+
+    return edge, (vertices_iter, vertices_next, outneighbors_iter, outneighbors_next)
+
 end
 
 
