@@ -2,41 +2,6 @@ using SimpleValueGraphs: hasedgekey_or_throw, hasvertexkey_or_throw, hasgraphkey
 
 @testset "abstractvaluegraph" begin
 
-struct DummyValGraph{V, V_VALS, E_VALS, G_VALS, G <: AbstractValGraph{V, V_VALS, E_VALS, G_VALS}} <: AbstractValGraph{V, V_VALS, E_VALS, G_VALS}
-
-    wrapped::G
-end
-
-SimpleValueGraphs.nv(g::DummyValGraph) = nv(g.wrapped)
-
-SimpleValueGraphs.is_directed(::Type{<:DummyValGraph{V, V_VALS, E_VALS, G_VALS, G}}) where {V, V_VALS, E_VALS, G_VALS, G} = is_directed(G)
-
-SimpleValueGraphs.has_edge(g::DummyValGraph, s, d) = has_edge(g.wrapped, s, d)
-
-SimpleValueGraphs.get_edgeval(g::DummyValGraph, s, d, key::Integer) =
-    get_edgeval(g.wrapped, s, d, key)
-
-SimpleValueGraphs.get_vertexval(g::DummyValGraph, v, key::Integer) =
-    get_vertexval(g.wrapped, v, key)
-
-SimpleValueGraphs.set_vertexval!(g::DummyValGraph, v, key::Integer, value) =
-    set_vertexval!(g.wrapped, v, key, value)
-
-SimpleValueGraphs.get_edgeval(g::DummyValGraph, s, d, key::Integer) =
-    get_edgeval(g.wrapped, s, d, key)
-
-SimpleValueGraphs.set_edgeval!(g::DummyValGraph, s, d, key::Integer, value) =
-    set_edgeval!(g.wrapped, s, d, key, value)
-
-SimpleValueGraphs.get_graphval(g::DummyValGraph, key::Integer) =
-    get_graphval(g.wrapped, key)
-
-SimpleValueGraphs.set_graphval!(g::DummyValGraph, key::Integer, value) =
-    set_graphval!(g.wrapped, key, value)
-
-SimpleValueGraphs.add_vertex!(g::DummyValGraph, values) = add_vertex!(g.wrapped, values)
-
-SimpleValueGraphs.add_edge!(g::DummyValGraph, s, d, values) = add_edge!(g.wrapped, s, d, values)
 
 @testset "eltype" begin
 
