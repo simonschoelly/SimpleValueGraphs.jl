@@ -39,9 +39,11 @@ end
     @test nv(rg) == nv(g2) == 6
 
     @test get_vertexval(rg, 6) == get_vertexval(g2, 6) == 6
-    set_vertexval!(rg, 6, 600)
+    set_vertexval!(rg, 6, :, (600, ))
     @test get_vertexval(rg, 6, :) == get_vertexval(g2, 6, :) == (a=600,)
+    set_vertexval!(rg, 6, 1, 600)
     @test get_vertexval(rg, 6, 1) == get_vertexval(g2, 6, 1) == 600
+    set_vertexval!(rg, 6, :a, 600)
     @test get_vertexval(rg, 6, :a) == get_vertexval(g2, 6, :a) == 600
 
     @test get_edgeval(rg, 1, 2) == get_edgeval(g2, 2, 1) == "def"
