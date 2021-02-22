@@ -61,26 +61,38 @@ reverse(rg::Reverse) = rg.graph
 
 nv(rg::Reverse) = nv(rg.graph)
 
-has_edge(rg::Reverse, s, d) =  has_edge(rg.graph, d, s)
+has_edge(rg::Reverse, s::Integer, d::Integer) =  has_edge(rg.graph, d, s)
 
 LG.is_directed(RG::Type{<:Reverse}) = is_directed(_graphtype(RG))
 
 zero(RG::Type{<:Reverse}) = Reverse{_graphtype(RG)}(zero(RG))
 
-get_vertexval(rg::Reverse, v, key) = get_vertexval(rg.graph, v, key)
+get_vertexval(rg::Reverse, v::Integer, key::Integer) = get_vertexval(rg.graph, v, key)
+get_vertexval(rg::Reverse, v::Integer, key::Symbol) = get_vertexval(rg.graph, v, key)
+get_vertexval(rg::Reverse, v::Integer, ::Colon) = get_vertexval(rg.graph, v, :)
 
-set_vertexval!(rg::Reverse, v, key, value) = set_vertexval!(rg.graph, v, key, value)
+set_vertexval!(rg::Reverse, v::Integer, key::Integer, value) = set_vertexval!(rg.graph, v, key, value)
+set_vertexval!(rg::Reverse, v::Integer, key::Symbol, value) = set_vertexval!(rg.graph, v, key, value)
+set_vertexval!(rg::Reverse, v::Integer, ::Colon, values) = set_vertexval!(rg.graph, v, :, values)
 
-get_edgeval(rg::Reverse, s, d, key) = get_edgeval(rg.graph, d, s, key)
+get_edgeval(rg::Reverse, s::Integer, d::Integer, key::Integer) = get_edgeval(rg.graph, d, s, key)
+get_edgeval(rg::Reverse, s::Integer, d::Integer, key::Symbol) = get_edgeval(rg.graph, d, s, key)
+get_edgeval(rg::Reverse, s::Integer, d::Integer, ::Colon) = get_edgeval(rg.graph, d, s, :)
 
-set_edgeval!(rg::Reverse, s, d, key, value) = set_edgeval!(rg.graph, d, s, key, value)
+set_edgeval!(rg::Reverse, s::Integer, d::Integer, key::Integer, value) = set_edgeval!(rg.graph, d, s, key, value)
+set_edgeval!(rg::Reverse, s::Integer, d::Integer, key::Symbol, value) = set_edgeval!(rg.graph, d, s, key, value)
+set_edgeval!(rg::Reverse, s::Integer, d::Integer, ::Colon, values) = set_edgeval!(rg.graph, d, s, :, values)
 
-get_graphval(rg::Reverse, key) = get_graphval(rg.graph, key)
+get_graphval(rg::Reverse, key::Integer) = get_graphval(rg.graph, key)
+get_graphval(rg::Reverse, key::Symbol) = get_graphval(rg.graph, key)
+get_graphval(rg::Reverse, ::Colon) = get_graphval(rg.graph, :)
 
-set_graphval!(rg::Reverse, key, value) = set_graphval!(rg.graph, key, value)
+set_graphval!(rg::Reverse, key::Integer, value) = set_graphval!(rg.graph, key, value)
+set_graphval!(rg::Reverse, key::Symbol, value) = set_graphval!(rg.graph, key, value)
+set_graphval!(rg::Reverse, ::Colon, values) = set_graphval!(rg.graph, :, value)
 
 add_vertex!(rg::Reverse, values) = add_vertex!(rg.graph, values)
 
-add_edge!(rg::Reverse, s, d, values) = add_edge!(rg.graph, d, s, values)
+add_edge!(rg::Reverse, s::Integer, d::Integer, values) = add_edge!(rg.graph, d, s, values)
 
 ne(rg::Reverse) = ne(rg.graph)
