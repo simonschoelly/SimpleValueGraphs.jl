@@ -13,19 +13,19 @@ end
 @testset "reverse" begin
 
     g1 = DummyValGraph(ValGraph(2, edgeval_types=(a=String,)))
-    add_edge!(g, 1, 2, val="xyz")
+    add_edge!(g1, 1, 2, val="xyz")
     @test reverse(g1) === g1
 
-    g2 = DummyValGraph(ValDiGraph(5, vertexval_types=(Int,), vertexval_init = (v,)
-                                  edgevaly_types=(a=String,), graphvals=(b=Int,)))
-    add_edge!(g, 1, 2, "abc")
-    add_edge!(g, 2, 1, "def")
-    add_edge!(g, 3, 4, "ghi")
-    add_edge!(g, 4, 4, "jkl")
+    g2 = DummyValGraph(ValDiGraph(5, vertexval_types=(Int,), vertexval_init=v -> (v,),
+                                  edgeval_types=(a=String,), graphvals=(b=Int,)))
+    add_edge!(g2, 1, 2, val="abc")
+    add_edge!(g2, 2, 1, val="def")
+    add_edge!(g2, 3, 4, val="ghi")
+    add_edge!(g2, 4, 4, val="jkl")
 
     rg = reverse(g2)
 
-    @test rg isa Reverse
+    @test rg isa SimpleValueGraphs.Reverse
     @test rg.graph === g2
 
     @test nv(rg) == nv(g2) == 5
