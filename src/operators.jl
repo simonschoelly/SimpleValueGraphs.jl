@@ -32,6 +32,12 @@ end
 #    reverse
 # ==================================
 
+"""
+    Reverse
+
+Lazy wrapper for value graphs that reverses the directions of the graphs edges.
+If this object is mutated, the wrapped graph is mutated as well.
+"""
 struct Reverse{V, V_VALS, E_VALS, G_VALS, G<:AbstractValGraph{V, V_VALS, E_VALS, G_VALS}} <: AbstractValGraph{V, V_VALS, E_VALS, G_VALS}
 
     graph::G
@@ -39,6 +45,12 @@ end
 
 _graphtype(::Type{<:Reverse{V, V_VALS, E_VALS, G_VALS, G}}) where {V, V_VALS, E_VALS, G_VALS, G} = G
 
+"""
+    reverse(g::AbstractValGraph)
+
+Reverse the direction of the edges of `g`. Can also return `Reverse(g)` - a lazy
+wrapper around `g`.
+"""
 reverse(g::AbstractValGraph) = is_directed(g) ? Reverse(g) : g
 
 reverse(rg::Reverse) = rg.graph
