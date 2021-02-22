@@ -89,7 +89,7 @@ get_graphval(rg::Reverse, ::Colon) = get_graphval(rg.graph, :)
 
 set_graphval!(rg::Reverse, key::Integer, value) = set_graphval!(rg.graph, key, value)
 set_graphval!(rg::Reverse, key::Symbol, value) = set_graphval!(rg.graph, key, value)
-set_graphval!(rg::Reverse, ::Colon, values) = set_graphval!(rg.graph, :, value)
+set_graphval!(rg::Reverse, ::Colon, values) = set_graphval!(rg.graph, :, values)
 
 add_vertex!(rg::Reverse, values) = add_vertex!(rg.graph, values)
 
