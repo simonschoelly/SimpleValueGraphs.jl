@@ -80,15 +80,38 @@ julia> adjacency_matrix(gv)
 """
 LG.adjacency_matrix(g::AbstractValGraph) = AdjacencyMatrix(g)
 
+## ---------------------------------------------------------------
+##       LinearAlgebra
+## ---------------------------------------------------------------
+
 LinearAlgebra.ishermitian(::AdjacencyMatrix{<:ValGraph}) = true
 LinearAlgebra.issymmetric(::AdjacencyMatrix{<:ValGraph}) = true
 
 LinearAlgebra.adjoint(matrix::AdjacencyMatrix{<:ValGraph}) = matrix
 LinearAlgebra.transpose(matrix::AdjacencyMatrix{<:ValGraph}) = matrix
 
+# TODO consider implementing matrix x matrix multiplication
+# TODO consider implementing the 5-argument version of mul! instead
+function LinearAlgebra.mul!(y::AbstractVector, matrix::AdjacencyMatrix, b::AbstractVector)
+
+    Base.require_one_based_indexing(y, matrix, b)
+    n = length(y)
+    size(matrix, 1) == n || throw(DimensionMismatch())
+    length(b) == n || throw(DimensionMismatch())
+    g = matrix.graph
+
+    for i in 1:n
+        s = false * zero(eltype(b))
+        @simd for j in outneighbors(g, i)
+            @inbounds s += true * b[j]
+        end
+        @inbounds y[i] = s
+    end
+    return y
+end
 
 ##  ------------------------------------------------------
-##  SparseMatrixCSC
+##  AdjacencyMatrix ->SparseMatrixCSC
 ##  ------------------------------------------------------
 
 function SparseMatrixCSC(matrix::AdjacencyMatrix{<: Union{ValGraph, ValDiGraph}})
