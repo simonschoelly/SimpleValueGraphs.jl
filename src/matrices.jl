@@ -201,13 +201,13 @@ julia> gv = ValDiGraph(path_digraph(3),  edgeval_types=(a=Float64, b=String), ed
    graph value types: ()
 
 julia> ValMatrix(gv, 1, 0.0)
-3×3 ValMatrix{Float64,ValDiGraph{Int64,Tuple{},NamedTuple{(:a, :b),Tuple{Float64,String}},Tuple{},Tuple{},NamedTuple{(:a, :b),Tuple{Array{Array{Float64,1},1},Array{Array{String,1},1}}}},1}:
+3×3 ValMatrix{Float64, ValDiGraph{Int64,Tuple{}, NamedTuple{(:a, :b), Tuple{Float64, String}}, Tuple{}, Tuple{}, NamedTuple{(:a, :b), Tuple{Array{Array{Float64, 1}, 1},Array{Array{String, 1}, 1}}}}, 1}:
  0.0  0.823648  0.0
  0.0  0.0       0.823648
  0.0  0.0       0.0
 
 julia> ValMatrix(gv, :b, nothing)
-3×3 ValMatrix{Union{Nothing, String},ValDiGraph{Int64,Tuple{},NamedTuple{(:a, :b),Tuple{Float64,String}},Tuple{},Tuple{},NamedTuple{(:a, :b),Tuple{Array{Array{Float64,1},1},Array{Array{String,1},1}}}},:b}:
+3×3 ValMatrix{Union{Nothing, String}, ValDiGraph{Int64, Tuple{}, NamedTuple{(:a, :b), Tuple{Float64, String}}, Tuple{}, Tuple{}, NamedTuple{(:a, :b), Tuple{Array{Array{Float64, 1},1},Array{Array{String,1}, 1}}}}, :b}:
  nothing  "1-2"    nothing
  nothing  nothing  "2-3"
  nothing  nothing  nothing
