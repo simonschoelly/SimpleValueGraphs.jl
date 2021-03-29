@@ -201,7 +201,7 @@ julia> gv = ValDiGraph(path_digraph(3),  edgeval_types=(a=Float64, b=String), ed
    graph value types: ()
 
 julia> ValMatrix(gv, 1, 0.0)
-3×3 ValMatrix{Float64, ValDiGraph{Int64, Tuple{}, NamedTuple{(:a, :b), Tuple{Float64, String}}, Tuple{}, Tuple{}, NamedTuple{(:a, :b), Tuple{Vector{Vector{Float64}}, Vector{Vector{String}}}}}, 1
+3×3 ValMatrix{Float64, ValDiGraph{Int64, Tuple{}, NamedTuple{(:a, :b), Tuple{Float64, String}}, Tuple{}, Tuple{}, NamedTuple{(:a, :b), Tuple{Vector{Vector{Float64}}, Vector{Vector{String}}}}}, 1}:
  0.0  0.823648  0.0
  0.0  0.0       0.823648
  0.0  0.0       0.0
