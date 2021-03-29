@@ -1,4 +1,4 @@
-using LinearAlgebra: ishermitian, issymmetric
+using LinearAlgebra: ishermitian, issymmetric, mul!
 using SparseArrays: AbstractSparseMatrix
 using SimpleValueGraphs: OneEdgeValGraph
 using LightGraphs: DefaultDistance
@@ -56,6 +56,27 @@ using LightGraphs: DefaultDistance
             end
         end
 
+    end
+
+    @testset "mul! with AdjacencyMatrix and Vector" begin
+
+        g1 = ValGraph{Int8}(6)
+        add_edge!(g1, 2, 3)
+        add_edge!(g1, 2, 4)
+        add_edge!(g1, 5, 5)
+        v1 = zeros(Float64, 6)
+        mul!(v1, adjacency_matrix(g1), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+        @test v1 == [0.0, 7.0, 2.0, 2.0, 5.0, 0.0]
+
+        g2 = ValDiGraph{Int16}(6)
+        add_edge!(g2, 1, 1)
+        add_edge!(g2, 2, 3)
+        add_edge!(g2, 3, 4)
+        add_edge!(g2, 4, 3)
+        add_edge!(g2, 4, 5)
+        v2 = zeros(Int16, 6)
+        mul!(v2, adjacency_matrix(g2), [1, 2, 3, 4, 5, 6])
+        @test v2 == [1, 3, 4, 8, 0, 0]
     end
 
     @testset "ValMatrix" begin
