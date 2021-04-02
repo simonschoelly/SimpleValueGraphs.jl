@@ -91,7 +91,7 @@ function edgevals_type(G::Type{<:AbstractValGraph}, key::Integer)
     return fieldtype(edgevals_type(G), Int(key))
 end
 
-function edgevals_type(G::Type{<:AbstractValGraph{V, V_VALS, <: NamedTuple}}, key::Symbol) where {V, V_VALS}
+function edgevals_type(G::Type{<:AbstractValGraph}, key::Symbol)
 
     return fieldtype(edgevals_type(G), key)
 end
@@ -117,17 +117,14 @@ Return true if `key` is an edge value key for this graph.
 """
 hasedgekey(g::AbstractValGraph, key) = hasedgekey(typeof(g), key)
 
-function hasedgekey(
-            G::Type{<:AbstractValGraph{V, V_VALS, E_VALS}},
-            key::Symbol) where {V, V_VALS, E_VALS <: NamedTuple}
+function hasedgekey(G::Type{<:AbstractValGraph}, key::Symbol)
 
-    return key in E_VALS.names
+    return hasfield(edgevals_type(G), key)
 end
 
-function hasedgekey(
-            G::Type{<:AbstractValGraph{V, V_VALS, E_VALS}},
-            key::Integer) where {V, V_VALS, E_VALS <: AbstractTuple}
+function hasedgekey(G::Type{<:AbstractValGraph}, key::Integer)
 
+    E_VALS = edgevals_type(G)
     return key in OneTo(length(E_VALS.types))
 end
 
@@ -151,17 +148,14 @@ hasedgekey_or_throw(g::AbstractValGraph, key) = hasedgekey_or_throw(typeof(g), k
 
 Return true if `key` is a vertex value key for this graph.
 """
-function hasvertexkey(
-            G::Type{<:AbstractValGraph{V, V_VALS}},
-            key::Symbol) where {V, V_VALS <: NamedTuple}
+function hasvertexkey(G::Type{<:AbstractValGraph}, key::Symbol)
 
-    return key in V_VALS.names
+    return hasfield(vertexvals_type(G), key)
 end
 
-function hasvertexkey(
-            G::Type{<:AbstractValGraph{V, V_VALS}},
-            key::Integer) where {V, V_VALS <: AbstractTuple}
+function hasvertexkey(G::Type{<:AbstractValGraph}, key::Integer)
 
+    V_VALS = vertexvals_type(G)
     return key in OneTo(length(V_VALS.types))
 end
 
@@ -179,17 +173,14 @@ hasvertexkey_or_throw(g::AbstractValGraph, key) = hasvertexkey_or_throw(typeof(g
 #  hasgraphkey & hasgraphkey_or_throw
 #  ------------------------------------------------------
 
-function hasgraphkey(
-        G::Type{<:AbstractValGraph{V, V_VALS, E_VALS, G_VALS}},
-        key::Symbol) where {V, V_VALS, E_VALS, G_VALS <: NamedTuple}
+function hasgraphkey(G::Type{<:AbstractValGraph}, key::Symbol)
 
-    return key ∈ G_VALS.names
+    return hasfield(graphvals_type(G), key)
 end
 
-function hasgraphkey(
-        G::Type{<:AbstractValGraph{V, V_VALS, E_VALS, G_VALS}},
-        key::Integer) where {V, V_VALS, E_VALS, G_VALS <: AbstractTuple}
+function hasgraphkey(G::Type{<:AbstractValGraph}, key::Integer)
 
+    G_VALS = graphvals_type(G)
     return key ∈ OneTo(length(G_VALS.types))
 end
 
@@ -665,10 +656,11 @@ ValEdgeIter(g, key) = ValEdgeIter{typeof(g)}(g, key)
 
 Base.length(iter::ValEdgeIter) = count(_ -> true, iter)
 
-function Base.eltype(::Type{<:ValEdgeIter{G, key}}) where
-        {V, V_VALS, E_VALS, G <: AbstractValGraph{V, V_VALS, E_VALS}, key}
+function Base.eltype(::Type{<:ValEdgeIter{G, key}}) where {G, key}
 
     E = is_directed(G) ? ValDiEdge : ValEdge
+    V = eltype(G)
+    E_VALS = edgevals_type(G)
 
     if key == nothing
         # TODO it might better to return an empty named tuple type in case
