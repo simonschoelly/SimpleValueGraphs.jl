@@ -91,7 +91,7 @@ function edgevals_type(G::Type{<:AbstractValGraph}, key::Integer)
     return fieldtype(edgevals_type(G), Int(key))
 end
 
-function edgevals_type(G::Type{<:AbstractValGraph{V, V_VALS, <: NamedTuple}}, key::Symbol) where {V, V_VALS}
+function edgevals_type(G::Type{<:AbstractValGraph}, key::Symbol)
 
     return fieldtype(edgevals_type(G), key)
 end
@@ -117,11 +117,9 @@ Return true if `key` is an edge value key for this graph.
 """
 hasedgekey(g::AbstractValGraph, key) = hasedgekey(typeof(g), key)
 
-function hasedgekey(
-            G::Type{<:AbstractValGraph{V, V_VALS, E_VALS}},
-            key::Symbol) where {V, V_VALS, E_VALS <: NamedTuple}
+function hasedgekey(G::Type{<:AbstractValGraph}, key::Symbol)
 
-    return key in E_VALS.names
+    return hasfield(edgevals_type(G), key)
 end
 
 function hasedgekey(G::Type{<:AbstractValGraph}, key::Integer)
@@ -150,11 +148,9 @@ hasedgekey_or_throw(g::AbstractValGraph, key) = hasedgekey_or_throw(typeof(g), k
 
 Return true if `key` is a vertex value key for this graph.
 """
-function hasvertexkey(
-            G::Type{<:AbstractValGraph{V, V_VALS}},
-            key::Symbol) where {V, V_VALS <: NamedTuple}
+function hasvertexkey(G::Type{<:AbstractValGraph}, key::Symbol)
 
-    return key in V_VALS.names
+    return hasfield(vertexvals_type(G), key)
 end
 
 function hasvertexkey(G::Type{<:AbstractValGraph}, key::Integer)
@@ -177,11 +173,9 @@ hasvertexkey_or_throw(g::AbstractValGraph, key) = hasvertexkey_or_throw(typeof(g
 #  hasgraphkey & hasgraphkey_or_throw
 #  ------------------------------------------------------
 
-function hasgraphkey(
-        G::Type{<:AbstractValGraph{V, V_VALS, E_VALS, G_VALS}},
-        key::Symbol) where {V, V_VALS, E_VALS, G_VALS <: NamedTuple}
+function hasgraphkey(G::Type{<:AbstractValGraph}, key::Symbol)
 
-    return key ∈ G_VALS.names
+    return hasfield(graphvals_type(G), key)
 end
 
 function hasgraphkey(G::Type{<:AbstractValGraph}, key::Integer)
