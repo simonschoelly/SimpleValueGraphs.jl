@@ -407,11 +407,9 @@ LG.ne(g::ValOutDiGraph) = g.ne
 #  add_edge!
 #  ------------------------------------------------------
 
-function LG.add_edge!(g::ValGraph{V, V_VALS, E_VALS},
-                   s::Integer,
-                   d::Integer,
-                   values) where {V, V_VALS, E_VALS}
+function LG.add_edge!(g::ValGraph, s::Integer, d::Integer, values)
 
+    E_VALS = edgevals_type(g)
     values = convert_to_tuple(E_VALS, values)
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
@@ -441,11 +439,9 @@ function LG.add_edge!(g::ValGraph{V, V_VALS, E_VALS},
     return true # edge successfully added
 end
 
-function LG.add_edge!(g::ValOutDiGraph{V, V_VALS, E_VALS},
-                   s::Integer,
-                   d::Integer,
-                   values) where {V, V_VALS, E_VALS}
+function LG.add_edge!(g::ValOutDiGraph, s::Integer, d::Integer, values)
 
+    E_VALS = edgevals_type(g)
     values = convert_to_tuple(E_VALS, values)
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
@@ -464,11 +460,9 @@ function LG.add_edge!(g::ValOutDiGraph{V, V_VALS, E_VALS},
     return true # edge successfully added
 end
 
-function LG.add_edge!(g::ValDiGraph{V, V_VALS, E_VALS},
-                   s::Integer,
-                   d::Integer,
-                   values) where {V, V_VALS, E_VALS}
+function LG.add_edge!(g::ValDiGraph, s::Integer, d::Integer, values)
 
+    E_VALS = edgevals_type(g)
     values = convert_to_tuple(E_VALS, values)
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
@@ -555,8 +549,11 @@ end
 #  add_vertex!
 #  ------------------------------------------------------
 
-function LG.add_vertex!(g::ValGraph{V, V_VALS, E_VALS}, values) where {V, V_VALS, E_VALS}
+function LG.add_vertex!(g::ValGraph, values)
 
+    V = eltype(g)
+    V_VALS = vertexvals_type(g)
+    E_VALS = edgevals_type(g)
     values = convert_to_tuple(V_VALS, values)
 
     if V != BigInt && nv(g) == typemax(V)
@@ -576,8 +573,11 @@ function LG.add_vertex!(g::ValGraph{V, V_VALS, E_VALS}, values) where {V, V_VALS
     return true
 end
 
-function LG.add_vertex!(g::ValOutDiGraph{V, V_VALS, E_VALS}, values) where {V, V_VALS, E_VALS}
+function LG.add_vertex!(g::ValOutDiGraph, values)
 
+    V = eltype(g)
+    V_VALS = vertexvals_type(g)
+    E_VALS = edgevals_type(g)
     values = convert_to_tuple(V_VALS, values)
 
     if V != BigInt && nv(g) == typemax(V)
@@ -597,8 +597,11 @@ function LG.add_vertex!(g::ValOutDiGraph{V, V_VALS, E_VALS}, values) where {V, V
     return true
 end
 
-function LG.add_vertex!(g::ValDiGraph{V, V_VALS, E_VALS}, values) where {V, V_VALS, E_VALS}
+function LG.add_vertex!(g::ValDiGraph, values)
 
+    V = eltype(g)
+    V_VALS = vertexvals_type(g)
+    E_VALS = edgevals_type(g)
     values = convert_to_tuple(V_VALS, values)
 
     if V != BigInt && nv(g) == typemax(V)
