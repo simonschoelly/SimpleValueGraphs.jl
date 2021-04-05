@@ -179,6 +179,12 @@ using LightGraphs: DefaultDistance
         @test weights(g) == DefaultDistance(nv(g))
     end
 
+    @testset "weights for graph with two edge values and no key specified" begin
+
+        @test_throws ArgumentError weights(ValGraph(3, edgeval_types=(a=Int, b=String)))
+        @test_throws ArgumentError weights(ValDiGraph(2, edgeval_types=(Int, String)); zerovalue=nothing)
+    end
+
     @testset "convert AdjacencyMatrix to SparseMatrixCSC" begin
 
         g1 = ValGraph{Int8}(4)

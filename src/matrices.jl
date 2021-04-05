@@ -315,12 +315,15 @@ without any edge values.
 """
 function weights end
 
-LG.weights(g::ZeroEdgeValGraph) = LG.DefaultDistance(nv(g))
-
-LG.weights(g::OneEdgeValGraph; kwargs...) = LG.weights(g, 1; kwargs...)
-
 function LG.weights(g::AbstractValGraph, key; zerovalue=zero(edgevals_type(g, key)))
 
     return ValMatrix(g, key, zerovalue)
 end
 
+function LG.weights(g::AbstractValGraph; kwargs...)
+
+    g isa ZeroEdgeValGraph && return LG.DefaultDistance(nv(g))
+    g isa OneEdgeValGraph && return weights(g, 1; kwargs...)
+
+    throw(ArgumentError("g has more than one edge value key. Must specify key."))
+end
