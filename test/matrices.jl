@@ -36,21 +36,37 @@ using LightGraphs: DefaultDistance
                 end
 
                 if !is_directed(g)
-                    @testset "ishermitian" begin
+                    @testset "ishermitian for undirected" begin
                         @test ishermitian(a)
                     end
 
-                    @testset "issymmetric" begin
+                    @testset "issymmetric for undirected" begin
                         @test issymmetric(a)
                     end
 
-                    @testset "adjoint is same matrix" begin
+                    @testset "adjoint is same matrix for undirected" begin
                         @test adjoint(a) === a
                     end
 
-                    @testset "transpose is same matrix" begin
+                    @testset "transpose is same matrix for undirected" begin
                         @test transpose(a) === a
                     end
+                end
+
+                @testset "ishermitian" begin
+                    @test ishermitian(a) == ishermitian(Matrix(a))
+                end
+
+                @testset "issymmetric" begin
+                    @test issymmetric(a) == issymmetric(Matrix(a))
+                end
+
+                @testset "adjoint" begin
+                    @test adjoint(a) == adjoint(Matrix(a))
+                end
+
+                @testset "transpose" begin
+                    @test transpose(a) == transpose(Matrix(a))
                 end
 
             end
@@ -106,27 +122,39 @@ using LightGraphs: DefaultDistance
                             end
                         end
 
-                        if fieldtype(E_VALS, key) <: Real && zv isa Real && !is_directed(g)
+                        if eltype(M) <: Union{Number, Missing}
                             @testset "ishermitian" begin
-                                @test ishermitian(M) == true
+                                 @test ishermitian(M) == ishermitian(Matrix(M))
                             end
                         end
 
-                        if !is_directed(g)
+                        if eltype(M)  <: Union{Number, Missing}
                             @testset "issymmetric" begin
-                                @test issymmetric(M) == true
+                                @test issymmetric(M) == issymmetric(Matrix(M))
                             end
                         end
 
-                        if fieldtype(E_VALS, key) <: Real && zv isa Real && !is_directed(g)
-                            @testset "isadjoint" begin
+                        if eltype(M) <: Real && !is_directed(g)
+                            @testset "adjoint for real, symmetric" begin
                                 @test adjoint(M) === M
                             end
                         end
 
+                        if eltype(M) <: Union{Number, Missing}
+                            @testset "adjoint" begin
+                                @test adjoint(M) == adjoint(Matrix(M))
+                            end
+                        end
+
                         if !is_directed(g)
-                            @testset "transpose" begin
+                            @testset "transpose for symmetric" begin
                                 @test transpose(M) === M
+                            end
+                        end
+
+                        if eltype(M) <: Union{Number, Missing}
+                            @testset "transpose" begin
+                                @test transpose(M) == transpose(Matrix(M))
                             end
                         end
 
