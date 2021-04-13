@@ -86,7 +86,7 @@ using LightGraphs: DefaultDistance
             gs     in make_testgraphs(is_directed(G) ? SimpleDiGraph{V} : SimpleGraph{V})
 
             g = DummyValGraph(G{V, Tuple{}, E_VALS}(gs.graph;
-                edgeval_init=(s, d) -> rand_sample(E_VALS
+                edgeval_init=(s, d) -> rand_sample(E_VALS)
             ))
 
             @testset "g::$(typeof(g))" begin
