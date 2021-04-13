@@ -84,11 +84,37 @@ LG.adjacency_matrix(g::AbstractValGraph) = AdjacencyMatrix(g)
 ##       LinearAlgebra
 ## ---------------------------------------------------------------
 
-LinearAlgebra.ishermitian(::AdjacencyMatrix{<:ValGraph}) = true
-LinearAlgebra.issymmetric(::AdjacencyMatrix{<:ValGraph}) = true
+function LinearAlgebra.ishermitian(matrix::AdjacencyMatrix)
 
-LinearAlgebra.adjoint(matrix::AdjacencyMatrix{<:ValGraph}) = matrix
-LinearAlgebra.transpose(matrix::AdjacencyMatrix{<:ValGraph}) = matrix
+    if !is_directed(matrix.graph)
+        return true
+    end
+    invoke(LinearAlgebra.ishermitian, Tuple{AbstractSparseMatrix{Bool, Int}}, matrix)
+end
+
+function LinearAlgebra.issymmetric(matrix::AdjacencyMatrix)
+
+    if !is_directed(matrix.graph)
+        return true
+    end
+    invoke(LinearAlgebra.issymmetric, Tuple{AbstractSparseMatrix{Bool, Int}}, matrix)
+end
+
+function LinearAlgebra.adjoint(matrix::AdjacencyMatrix)
+
+    if !is_directed(matrix.graph)
+        return matrix
+    end
+    invoke(LinearAlgebra.adjoint, Tuple{AbstractSparseMatrix{Bool, Int}}, matrix)
+end
+
+function LinearAlgebra.transpose(matrix::AdjacencyMatrix)
+
+    if !is_directed(matrix.graph)
+        return matrix
+    end
+    invoke(LinearAlgebra.transpose, Tuple{AbstractSparseMatrix{Bool, Int}}, matrix)
+end
 
 # TODO consider implementing matrix x matrix multiplication
 # TODO consider implementing the 5-argument version of mul! instead
@@ -111,7 +137,7 @@ function LinearAlgebra.mul!(y::AbstractVector, matrix::AdjacencyMatrix, b::Abstr
 end
 
 ##  ------------------------------------------------------
-##  AdjacencyMatrix ->SparseMatrixCSC
+##  AdjacencyMatrix -> SparseMatrixCSC
 ##  ------------------------------------------------------
 
 function SparseMatrixCSC(matrix::AdjacencyMatrix{<: Union{ValGraph, ValDiGraph}})
@@ -237,8 +263,40 @@ end
 LinearAlgebra.ishermitian(::ValMatrix{ <: Real, <: ValGraph}) = true
 LinearAlgebra.issymmetric(::ValMatrix{ <: Any, <: ValGraph}) = true
 
+function LinearAlgebra.ishermitian(matrix::ValMatrix{Tv}) where {Tv <: Real}
+
+    if !is_directed(matrix.graph)
+        return true
+    end
+    invoke(LinearAlgebra.ishermitian, Tuple{AbstractSparseMatrix{Tv, Int}}, matrix)
+end
+
+function LinearAlgebra.issymmetric(matrix::ValMatrix{Tv}) where {Tv}
+
+    if !is_directed(matrix.graph)
+        return true
+    end
+    invoke(LinearAlgebra.issymmetric, Tuple{AbstractSparseMatrix{Tv, Int}}, matrix)
+end
+
 LinearAlgebra.adjoint(matrix::ValMatrix{ <: Real, <: ValGraph}) = matrix
 LinearAlgebra.transpose(matrix::ValMatrix{ <: Any, <: ValGraph}) = matrix
+
+function LinearAlgebra.adjoint(matrix::ValMatrix{Tv}) where {Tv <: Real}
+
+    if !is_directed(matrix.graph)
+        return matrix
+    end
+    invoke(LinearAlgebra.adjoint, Tuple{AbstractSparseMatrix{Tv, Int}}, matrix)
+end
+
+function LinearAlgebra.transpose(matrix::ValMatrix{Tv}) where {Tv}
+
+    if !is_directed(matrix.graph)
+        return matrix
+    end
+    invoke(LinearAlgebra.transpose, Tuple{AbstractSparseMatrix{Tv, Int}}, matrix)
+end
 
 
 ##  ------------------------------------------------------

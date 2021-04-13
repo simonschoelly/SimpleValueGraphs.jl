@@ -7,14 +7,14 @@ using LightGraphs: DefaultDistance
 
     @testset "AdjacencyMatrix" begin
 
-        for G      in (ValGraph, ValOutDiGraph, ValDiGraph),
+        for G      in (ValGraph, ValDiGraph),
             V      in TEST_VERTEX_TYPES_SMALL,
             E_VALS in TEST_EDGEVAL_TYPES_SMALL,
             gs     in make_testgraphs(is_directed(G) ? SimpleDiGraph{V} : SimpleGraph{V})
 
-            g = G{V, Tuple{}, E_VALS}(gs.graph;
+            g = DummyValGraph(G{V, Tuple{}, E_VALS}(gs.graph;
                 edgeval_init=(s, d) -> rand_sample(E_VALS)
-            )
+            ))
 
             @testset "g::$(typeof(g))" begin
 
@@ -35,22 +35,38 @@ using LightGraphs: DefaultDistance
                     end
                 end
 
-                if g isa ValGraph
-                    @testset "ishermitian" begin
+                if !is_directed(g)
+                    @testset "ishermitian for undirected" begin
                         @test ishermitian(a)
                     end
 
-                    @testset "issymmetric" begin
+                    @testset "issymmetric for undirected" begin
                         @test issymmetric(a)
                     end
 
-                    @testset "adjoint is same matrix" begin
+                    @testset "adjoint is same matrix for undirected" begin
                         @test adjoint(a) === a
                     end
 
-                    @testset "transpose is same matrix" begin
+                    @testset "transpose is same matrix for undirected" begin
                         @test transpose(a) === a
                     end
+                end
+
+                @testset "ishermitian" begin
+                    @test ishermitian(a) == ishermitian(Matrix(a))
+                end
+
+                @testset "issymmetric" begin
+                    @test issymmetric(a) == issymmetric(Matrix(a))
+                end
+
+                @testset "adjoint" begin
+                    @test adjoint(a) == adjoint(Matrix(a))
+                end
+
+                @testset "transpose" begin
+                    @test transpose(a) == transpose(Matrix(a))
                 end
 
             end
@@ -60,7 +76,7 @@ using LightGraphs: DefaultDistance
 
     @testset "mul! with AdjacencyMatrix and Vector" begin
 
-        g1 = ValGraph{Int8}(6)
+        g1 = DummyValGraph(ValGraph{Int8}(6))
         add_edge!(g1, 2, 3)
         add_edge!(g1, 2, 4)
         add_edge!(g1, 5, 5)
@@ -68,7 +84,7 @@ using LightGraphs: DefaultDistance
         mul!(v1, adjacency_matrix(g1), [1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
         @test v1 == [0.0, 7.0, 2.0, 2.0, 5.0, 0.0]
 
-        g2 = ValDiGraph{Int16}(6)
+        g2 = DummyValGraph(ValDiGraph{Int16}(6))
         add_edge!(g2, 1, 1)
         add_edge!(g2, 2, 3)
         add_edge!(g2, 3, 4)
@@ -80,14 +96,14 @@ using LightGraphs: DefaultDistance
     end
 
     @testset "ValMatrix" begin
-        for G      in (ValGraph, ValOutDiGraph, ValDiGraph),
+        for G      in (ValGraph, ValDiGraph),
             V      in TEST_VERTEX_TYPES_SMALL,
             E_VALS in TEST_EDGEVAL_TYPES_SMALL,
             gs     in make_testgraphs(is_directed(G) ? SimpleDiGraph{V} : SimpleGraph{V})
 
-            g = G{V, Tuple{}, E_VALS}(gs.graph;
+            g = DummyValGraph(G{V, Tuple{}, E_VALS}(gs.graph;
                 edgeval_init=(s, d) -> rand_sample(E_VALS)
-            )
+            ))
 
             @testset "g::$(typeof(g))" begin
                 for key in allkeys_for_E_VALS(E_VALS)
@@ -106,27 +122,39 @@ using LightGraphs: DefaultDistance
                             end
                         end
 
-                        if fieldtype(E_VALS, key) <: Real && zv isa Real && g isa ValGraph
+                        if eltype(M) <: Union{Number, Missing}
                             @testset "ishermitian" begin
-                                @test ishermitian(M) == true
+                                 @test ishermitian(M) == ishermitian(Matrix(M))
                             end
                         end
 
-                        if g isa ValGraph
+                        if eltype(M)  <: Union{Number, Missing}
                             @testset "issymmetric" begin
-                                @test issymmetric(M) == true
+                                @test issymmetric(M) == issymmetric(Matrix(M))
                             end
                         end
 
-                        if fieldtype(E_VALS, key) <: Real && zv isa Real && g isa ValGraph
-                            @testset "isadjoint" begin
+                        if eltype(M) <: Real && !is_directed(g)
+                            @testset "adjoint for real, symmetric" begin
                                 @test adjoint(M) === M
                             end
                         end
 
-                        if g isa ValGraph
-                            @testset "transpose" begin
+                        if eltype(M) <: Union{Number, Missing}
+                            @testset "adjoint" begin
+                                @test adjoint(M) == adjoint(Matrix(M))
+                            end
+                        end
+
+                        if !is_directed(g)
+                            @testset "transpose for symmetric" begin
                                 @test transpose(M) === M
+                            end
+                        end
+
+                        if eltype(M) <: Union{Number, Missing}
+                            @testset "transpose" begin
+                                @test transpose(M) == transpose(Matrix(M))
                             end
                         end
 
@@ -167,13 +195,13 @@ using LightGraphs: DefaultDistance
     end
 
     @testset "weights for value graphs without values" for
-        G      in (ValGraph, ValOutDiGraph, ValDiGraph),
+        G      in (ValGraph, ValDiGraph),
         V      in TEST_VERTEX_TYPES_SMALL,
         E_VALS in (Tuple{}, NamedTuple{(), Tuple{}}),
         gs     in make_testgraphs(is_directed(G) ? SimpleDiGraph{V} : SimpleGraph{V})
 
-        g = G{V, Tuple{}, E_VALS}(gs.graph;
-            edgeval_init=(s, d) -> rand_sample(E_VALS)
+        g = DummyValGraph(G{V, Tuple{}, E_VALS}(gs.graph;
+            edgeval_init=(s, d) -> rand_sample(E_VALS))
         )
 
         @test weights(g) == DefaultDistance(nv(g))
@@ -181,8 +209,8 @@ using LightGraphs: DefaultDistance
 
     @testset "weights for graph with two edge values and no key specified" begin
 
-        @test_throws ArgumentError weights(ValGraph(3, edgeval_types=(a=Int, b=String)))
-        @test_throws ArgumentError weights(ValDiGraph(2, edgeval_types=(Int, String)); zerovalue=nothing)
+        @test_throws ArgumentError weights(DummyValGraph(ValGraph(3, edgeval_types=(a=Int, b=String))))
+        @test_throws ArgumentError weights(DummyValGraph(ValDiGraph(2, edgeval_types=(Int, String))); zerovalue=nothing)
     end
 
     @testset "convert AdjacencyMatrix to SparseMatrixCSC" begin
@@ -214,7 +242,7 @@ using LightGraphs: DefaultDistance
         @test SparseMatrixCSC(m3) isa SparseMatrixCSC{Bool, Int}
         @test SparseMatrixCSC(m3) == [1 0 1 0; 0 0 1 0; 1 0 0 0; 0 0 0 0]
 
-        g4 = ValGraph(0, graphvals=(1, 2, "xyz"))
+        g4 = DummyValGraph(ValGraph(0, graphvals=(1, 2, "xyz")))
         m4 = AdjacencyMatrix(g4)
         @test SparseMatrixCSC(m4) isa SparseMatrixCSC{Bool, Int}
         @test SparseMatrixCSC(m4) == Matrix{Bool}(undef, 0, 0)
