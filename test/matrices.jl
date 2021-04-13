@@ -35,7 +35,7 @@ using LightGraphs: DefaultDistance
                     end
                 end
 
-                if g isa ValGraph
+                if !is_directed(g)
                     @testset "ishermitian" begin
                         @test ishermitian(a)
                     end
@@ -86,7 +86,7 @@ using LightGraphs: DefaultDistance
             gs     in make_testgraphs(is_directed(G) ? SimpleDiGraph{V} : SimpleGraph{V})
 
             g = DummyValGraph(G{V, Tuple{}, E_VALS}(gs.graph;
-                edgeval_init=(s, d) -> rand_sample(E_VALS)
+                edgeval_init=(s, d) -> rand_sample(E_VALS
             ))
 
             @testset "g::$(typeof(g))" begin
@@ -106,25 +106,25 @@ using LightGraphs: DefaultDistance
                             end
                         end
 
-                        if fieldtype(E_VALS, key) <: Real && zv isa Real && g isa ValGraph
+                        if fieldtype(E_VALS, key) <: Real && zv isa Real && !is_directed(g)
                             @testset "ishermitian" begin
                                 @test ishermitian(M) == true
                             end
                         end
 
-                        if g isa ValGraph
+                        if !is_directed(g)
                             @testset "issymmetric" begin
                                 @test issymmetric(M) == true
                             end
                         end
 
-                        if fieldtype(E_VALS, key) <: Real && zv isa Real && g isa ValGraph
+                        if fieldtype(E_VALS, key) <: Real && zv isa Real && !is_directed(g)
                             @testset "isadjoint" begin
                                 @test adjoint(M) === M
                             end
                         end
 
-                        if g isa ValGraph
+                        if !is_directed(g)
                             @testset "transpose" begin
                                 @test transpose(M) === M
                             end
