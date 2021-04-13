@@ -187,7 +187,7 @@ using LightGraphs: DefaultDistance
 
     @testset "convert AdjacencyMatrix to SparseMatrixCSC" begin
 
-        g1 = DummyValGraph(ValGraph{Int8}(4))
+        g1 = ValGraph{Int8}(4)
         add_edge!(g1, 1, 2)
         add_edge!(g1, 2, 3)
         add_edge!(g1, 3, 3)
@@ -195,7 +195,7 @@ using LightGraphs: DefaultDistance
         @test SparseMatrixCSC(m1) isa SparseMatrixCSC{Bool, Int}
         @test SparseMatrixCSC(m1) == [0 1 0 0; 1 0 1 0; 0 1 1 0; 0 0 0 0]
 
-        g2 = DummyValGraph(ValDiGraph{Int16}(4; edgeval_types=(a=String, b=Int)))
+        g2 = ValDiGraph{Int16}(4; edgeval_types=(a=String, b=Int))
         add_edge!(g2, 1, 1, ("", 1))
         add_edge!(g2, 1, 2, ("", 2))
         add_edge!(g2, 1, 3, ("", 3))
@@ -205,7 +205,7 @@ using LightGraphs: DefaultDistance
         @test SparseMatrixCSC(m2) isa SparseMatrixCSC{Bool, Int}
         @test SparseMatrixCSC(m2) == [1 1 1 0; 1 0 0 0; 0 1 0 0; 0 0 0 0]
 
-        g3 = DummyValGraph(ValOutDiGraph{UInt32}(4; vertexval_types=(String, Int), vertexval_init=undef))
+        g3 = ValOutDiGraph{UInt32}(4; vertexval_types=(String, Int), vertexval_init=undef)
         add_edge!(g3, 1, 1)
         add_edge!(g3, 1, 3)
         add_edge!(g3, 2, 3)
@@ -223,7 +223,7 @@ using LightGraphs: DefaultDistance
 
     @testset "convert ValMatrix to SparseMatrixCSC" begin
 
-        g1 = DummyValGraph(ValGraph{Int8}(4, edgeval_types=(Int,)))
+        g1 = ValGraph{Int8}(4, edgeval_types=(Int,))
         add_edge!(g1, 1, 2, (12,))
         add_edge!(g1, 2, 3, (23,))
         add_edge!(g1, 3, 3, (33,))
@@ -232,7 +232,7 @@ using LightGraphs: DefaultDistance
         @test SparseMatrixCSC(m1) == [0 12 0 0; 12 0 23 0; 0 23 33 0; 0 0 0 0]
 
 
-        g2 = DummyValGraph(ValDiGraph{Int16}(4; edgeval_types=(a=String, b=Int)))
+        g2 = ValDiGraph{Int16}(4; edgeval_types=(a=String, b=Int))
         add_edge!(g2, 1, 1, ("", 11))
         add_edge!(g2, 1, 2, ("", 12))
         add_edge!(g2, 1, 3, ("", 13))
@@ -243,7 +243,7 @@ using LightGraphs: DefaultDistance
         @test SparseMatrixCSC(m2) == [11 12 13 0; 21 0 0 0; 0 32 0 0; 0 0 0 0]
 
 
-        g3 = DummyValGraph(ValOutDiGraph{UInt32}(4; edgeval_types=(Int, Float64)))
+        g3 = ValOutDiGraph{UInt32}(4; edgeval_types=(Int, Float64))
         add_edge!(g3, 1, 1, (11, 1.0))
         add_edge!(g3, 1, 3, (13, 1.3))
         add_edge!(g3, 2, 3, (23, 2.3))
@@ -253,7 +253,7 @@ using LightGraphs: DefaultDistance
         @test SparseMatrixCSC(m3) == [1.0 0 1.3 0; 0 0 2.3 0; 3.1 0 0 0; 0 0 0 0]
 
 
-        g4 = DummyValGraph(ValGraph(0, graphvals=(1, 2, "xyz"), edgeval_types=(Float64, String)))
+        g4 = ValGraph(0, graphvals=(1, 2, "xyz"), edgeval_types=(Float64, String))
         m4 = ValMatrix(g4, 1, 0.0)
         @test SparseMatrixCSC(m4) isa SparseMatrixCSC{Float64, Int}
         @test SparseMatrixCSC(m4) == Matrix{Float64}(undef, 0, 0)
