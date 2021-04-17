@@ -43,7 +43,6 @@ struct Reverse{V <: Integer, V_VALS, E_VALS, G_VALS, G<:AbstractValGraph{V, V_VA
     graph::G
 end
 
-
 """
     reverse(g::AbstractValGraph)
 
@@ -74,3 +73,5 @@ set_edgeval!(rg::Reverse, s::Integer, d::Integer, key::Integer, value) = set_edg
 set_edgeval!(rg::Reverse, s::Integer, d::Integer, key::Symbol, value) = set_edgeval!(rg.graph, d, s, key, value)
 set_edgeval!(rg::Reverse, s::Integer, d::Integer, ::Colon, values) = set_edgeval!(rg.graph, d, s, :, values)
 
+outneighbors(rg::Reverse, u) = inneighbors(wrapped_graph(g), u)
+inneighbors(rg::Reverse, v) = outneighbors(wrapped_graph(g), v)

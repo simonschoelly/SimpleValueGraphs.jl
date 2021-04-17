@@ -42,6 +42,11 @@ _DEFAULT_INCLUDE = [
 
 _EXTRA_INCLUDE = [
     :ne,
+    :outneighbors,
+    :inneighbors,
+    :outedgevals,
+    :inedgevals,
+    :edges
 ]
 
 """
@@ -187,9 +192,41 @@ function _generate_wrapped_function!(::Val{:set_graphval!}, GT)
     end
 end
 
-
-
 function _generate_wrapped_function!(::Val{:ne}, GT)
 
     return :(SimpleValueGraphs.ne(g::$GT) = ne(wrapped_graph(g)))
 end
+
+function _generate_wrapped_function!(::Val{:outneighbors}, GT)
+
+    return :(SimpleValueGraphs.outneighbors(g::$GT, u) = outneighbors(wrapped_graph(g), u))
+end
+
+function _generate_wrapped_function!(::Val{:inneighbors}, GT)
+
+    return :(SimpleValueGraphs.inneighbors(g::$GT, v) = inneighbors(wrapped_graph(g), v))
+end
+
+function _generate_wrapped_function!(::Val{:outedgevals}, GT)
+
+    return quote
+        SimpleValueGraphs.outedgevals(g::$GT, u, key::Integer) = outedgevals(wrapped_graph(g), u, key)
+        SimpleValueGraphs.outedgevals(g::$GT, u, key::Symbol) = outedgevals(wrapped_graph(g), u, key)
+        SimpleValueGraphs.outedgevals(g::$GT, u, ::Colon) = outedgevals(wrapped_graph(g), u, :)
+    end
+end
+
+function _generate_wrapped_function!(::Val{:inedgevals}, GT)
+
+    return quote
+        SimpleValueGraphs.inedgevals(g::$GT, v, key::Integer) = inedgevals(wrapped_graph(g), v, key)
+        SimpleValueGraphs.inedgevals(g::$GT, v, key::Symbol) = inedgevals(wrapped_graph(g), v, key)
+        SimpleValueGraphs.inedgevals(g::$GT, v, ::Colon) = inedgevals(wrapped_graph(g), v, :)
+    end
+end
+
+function _generate_wrapped_function!(::Val{:edges}, GT)
+
+    return :(SimpleValueGraphs.edges(g::$GT, key=nothing) = edges(wrapped_graph(g), key))
+end
+
