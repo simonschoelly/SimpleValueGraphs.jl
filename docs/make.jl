@@ -13,6 +13,7 @@ makedocs(
             "Accessing graphs" => "access.md",
             "Modifying graphs" => "modification.md",
             "Matrices" => "matrices.md",
+            "Comparison of graph types" => "comparison.md",
         ],
         "Custom Value Graph types" => "custom-valuegraph-types.md"
       #  "AbstractValGraph interface" => "abstractgraph.md",
@@ -23,7 +24,8 @@ makedocs(
     format = Documenter.HTML(
         prettyurls = get(ENV, "CI", nothing) == "true"
     ),
-    doctest = true
+    doctest = false
+    # doctest = true
 )
 
 deploydocs(;

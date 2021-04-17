@@ -1,5 +1,7 @@
 
 
+# test graph wrapper for testing @wrap_graph!,
+# should forward everything to the wrapped graph
 struct TestGraphWrapper{V <: Integer, V_VALS, E_VALS, G_VALS, GI <: AbstractValGraph{V, V_VALS, E_VALS, G_VALS}} <: AbstractValGraph{V, V_VALS, E_VALS, G_VALS}
 
     inner::GI
