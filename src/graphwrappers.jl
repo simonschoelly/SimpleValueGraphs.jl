@@ -82,7 +82,7 @@ method separately.
 """
 macro wrap_graph!(GT, args...)
 
-    functions_to_generate = _DEFAULT_INCLUDE
+    functions_to_generate = copy(_DEFAULT_INCLUDE)
 
     # TODO maybe we can somehow assert that GT is something like a type
     # for now we just use an `typeintersect`. If GT is not an `AbstractValGraph`
