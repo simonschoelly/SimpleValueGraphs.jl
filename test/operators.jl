@@ -63,6 +63,13 @@ end
     @test !has_edge(g2, 1, 6)
     @test ne(rg) == ne(g2) == 5
 
+    @test rem_edge!(rg, 1, 6) == true
+    @test !has_edge(rg, 1, 6)
+    @test !has_edge(g2, 6, 1)
+    @test ne(rg) == ne(g2) == 4
+    @test rem_edge!(rg, 1, 6) == false
+    @test ne(rg) == ne(g2) == 4
+
     @test get_graphval(rg) == get_graphval(g2) == 100
     set_graphval!(rg, 1, 200)
     @test get_graphval(rg, 1) == get_graphval(g2, 1) == 200
