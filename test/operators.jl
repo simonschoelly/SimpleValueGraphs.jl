@@ -63,6 +63,13 @@ end
     @test !has_edge(g2, 1, 6)
     @test ne(rg) == ne(g2) == 5
 
+    @test rem_edge!(rg, 1, 6) == true
+    @test !has_edge(rg, 1, 6)
+    @test !has_edge(g2, 6, 1)
+    @test ne(rg) == ne(g2) == 4
+    @test rem_edge!(rg, 1, 6) == false
+    @test ne(rg) == ne(g2) == 4
+
     @test get_graphval(rg) == get_graphval(g2) == 100
     set_graphval!(rg, 1, 200)
     @test get_graphval(rg, 1) == get_graphval(g2, 1) == 200
@@ -71,6 +78,27 @@ end
     set_graphval!(rg, :, (300,))
     @test get_graphval(rg, :) == get_graphval(g2, :) == (c=300,)
 
+    @test outneighbors(rg, 1) == inneighbors(g2, 1)
+    @test outneighbors(rg, 2) == inneighbors(g2, 2)
+    @test outneighbors(rg, 3) == inneighbors(g2, 3)
+    @test outneighbors(rg, 4) == inneighbors(g2, 4)
+
+    @test inneighbors(rg, 1) == outneighbors(g2, 1)
+    @test inneighbors(rg, 2) == outneighbors(g2, 2)
+    @test inneighbors(rg, 3) == outneighbors(g2, 3)
+    @test inneighbors(rg, 4) == outneighbors(g2, 4)
+
+    @test outedgevals(rg, 1, 1) == inedgevals(g2, 1, 1)
+    @test outedgevals(rg, 2, :b) == inedgevals(g2, 2, :b)
+    @test outedgevals(rg, 3, :) == inedgevals(g2, 3, :)
+
+    @test inedgevals(rg, 2, 1) == outedgevals(g2, 2, 1)
+    @test inedgevals(rg, 3, :b) == outedgevals(g2, 3, :b)
+    @test inedgevals(rg, 4, :) == outedgevals(g2, 4, :)
+
+    # TODO Tests currently disabled as we do not have zero implemented on ValDiGraph
+    # @test zero(typeof(rg)) isa typeof(rg)
+    # @test nv(zero(typeof(rg))) == 0
 end
 
 

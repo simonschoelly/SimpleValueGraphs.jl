@@ -13,7 +13,7 @@ const LG = LightGraphs
 
 import LightGraphs:
     nv, ne, is_directed,
-    eltype, vertices, add_vertex!, has_vertex,
+    eltype, vertices, add_vertex!, rem_vertex!, has_vertex,
     edgetype, edges, src, dst, reverse,
     weights,
     add_edge!, rem_edge!, has_edge,
@@ -88,6 +88,7 @@ export
     has_edge,
 
     add_vertex!,
+    rem_vertex!,
     has_vertex,
 
     inneighbors,
@@ -123,6 +124,7 @@ include("AbstractTuples.jl")
 include("utils.jl")
 
 include("abstractvaluegraph.jl")
+include("graphwrappers.jl")
 include("valueedge.jl")
 include("valuegraph.jl")
 include("matrices.jl")

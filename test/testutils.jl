@@ -445,3 +445,5 @@ SimpleValueGraphs.add_vertex!(g::DummyValGraph, values) = add_vertex!(g.wrapped,
 
 SimpleValueGraphs.add_edge!(g::DummyValGraph, s, d, values) = add_edge!(g.wrapped, s, d, values)
 
+SimpleValueGraphs.rem_edge!(g::DummyValGraph, s, d) = rem_edge!(g.wrapped, s, d)
+

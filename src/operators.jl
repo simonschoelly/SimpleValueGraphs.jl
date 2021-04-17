@@ -38,12 +38,10 @@ end
 Lazy wrapper for value graphs that reverses the directions of the graphs edges.
 If this object is mutated, the wrapped graph is mutated as well.
 """
-struct Reverse{V, V_VALS, E_VALS, G_VALS, G<:AbstractValGraph{V, V_VALS, E_VALS, G_VALS}} <: AbstractValGraph{V, V_VALS, E_VALS, G_VALS}
+struct Reverse{V <: Integer, V_VALS, E_VALS, G_VALS, G<:AbstractValGraph{V, V_VALS, E_VALS, G_VALS}} <: AbstractValGraph{V, V_VALS, E_VALS, G_VALS}
 
     graph::G
 end
-
-_graphtype(::Type{<:Reverse{V, V_VALS, E_VALS, G_VALS, G}}) where {V, V_VALS, E_VALS, G_VALS, G} = G
 
 """
     reverse(g::AbstractValGraph)
@@ -59,21 +57,15 @@ reverse(rg::Reverse) = rg.graph
 ##   Reverse
 ## ---------------------------------
 
-nv(rg::Reverse) = nv(rg.graph)
+wrapped_graph(g::Reverse) = g.graph
+wrapped_graph_type(::Type{<:Reverse{V, V_VALS, E_VALS, G_VALS, G}}) where {V, V_VALS, E_VALS, G_VALS, G} = G
+@wrap_graph! Reverse include=[ne] exclude=[has_edge, add_edge!, rem_edge!, get_edgeval, set_edgeval!]
+
+Base.zero(RG::Type{<:Reverse}) = Reverse(zero(wrapped_graph_type(RG)))
 
 has_edge(rg::Reverse, s::Integer, d::Integer) =  has_edge(rg.graph, d, s)
-
-LG.is_directed(RG::Type{<:Reverse}) = is_directed(_graphtype(RG))
-
-zero(RG::Type{<:Reverse}) = Reverse{_graphtype(RG)}(zero(RG))
-
-get_vertexval(rg::Reverse, v::Integer, key::Integer) = get_vertexval(rg.graph, v, key)
-get_vertexval(rg::Reverse, v::Integer, key::Symbol) = get_vertexval(rg.graph, v, key)
-get_vertexval(rg::Reverse, v::Integer, ::Colon) = get_vertexval(rg.graph, v, :)
-
-set_vertexval!(rg::Reverse, v::Integer, key::Integer, value) = set_vertexval!(rg.graph, v, key, value)
-set_vertexval!(rg::Reverse, v::Integer, key::Symbol, value) = set_vertexval!(rg.graph, v, key, value)
-set_vertexval!(rg::Reverse, v::Integer, ::Colon, values) = set_vertexval!(rg.graph, v, :, values)
+add_edge!(rg::Reverse, s::Integer, d::Integer, values) = add_edge!(rg.graph, d, s, values)
+rem_edge!(rg::Reverse, s::Integer, d::Integer) = rem_edge!(rg.graph, d, s)
 
 get_edgeval(rg::Reverse, s::Integer, d::Integer, key::Integer) = get_edgeval(rg.graph, d, s, key)
 get_edgeval(rg::Reverse, s::Integer, d::Integer, key::Symbol) = get_edgeval(rg.graph, d, s, key)
@@ -83,16 +75,15 @@ set_edgeval!(rg::Reverse, s::Integer, d::Integer, key::Integer, value) = set_edg
 set_edgeval!(rg::Reverse, s::Integer, d::Integer, key::Symbol, value) = set_edgeval!(rg.graph, d, s, key, value)
 set_edgeval!(rg::Reverse, s::Integer, d::Integer, ::Colon, values) = set_edgeval!(rg.graph, d, s, :, values)
 
-get_graphval(rg::Reverse, key::Integer) = get_graphval(rg.graph, key)
-get_graphval(rg::Reverse, key::Symbol) = get_graphval(rg.graph, key)
-get_graphval(rg::Reverse, ::Colon) = get_graphval(rg.graph, :)
+outneighbors(rg::Reverse, u) = inneighbors(wrapped_graph(rg), u)
+inneighbors(rg::Reverse, v) = outneighbors(wrapped_graph(rg), v)
 
-set_graphval!(rg::Reverse, key::Integer, value) = set_graphval!(rg.graph, key, value)
-set_graphval!(rg::Reverse, key::Symbol, value) = set_graphval!(rg.graph, key, value)
-set_graphval!(rg::Reverse, ::Colon, values) = set_graphval!(rg.graph, :, values)
+outedgevals(rg::Reverse, u, key::Integer) = inedgevals(wrapped_graph(rg), u, key)
+outedgevals(rg::Reverse, u, key::Symbol) = inedgevals(wrapped_graph(rg), u, key)
+outedgevals(rg::Reverse, u, ::Colon) = inedgevals(wrapped_graph(rg), u, :)
 
-add_vertex!(rg::Reverse, values) = add_vertex!(rg.graph, values)
+inedgevals(rg::Reverse, v, key::Integer) = outedgevals(wrapped_graph(rg), v, key)
+inedgevals(rg::Reverse, v, key::Symbol) = outedgevals(wrapped_graph(rg), v, key)
+inedgevals(rg::Reverse, v, ::Colon) = outedgevals(wrapped_graph(rg), v, :)
 
-add_edge!(rg::Reverse, s::Integer, d::Integer, values) = add_edge!(rg.graph, d, s, values)
-
-ne(rg::Reverse) = ne(rg.graph)
+# TODO implementing edges efficiently and with correct edge type
