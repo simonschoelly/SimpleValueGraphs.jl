@@ -61,6 +61,8 @@ wrapped_graph(g::Reverse) = g.graph
 wrapped_graph_type(::Type{<:Reverse{V, V_VALS, E_VALS, G_VALS, G}}) where {V, V_VALS, E_VALS, G_VALS, G} = G
 @wrap_graph! Reverse include=[ne] exclude=[has_edge, add_edge!, rem_edge!, get_edgeval, set_edgeval!]
 
+Base.zero(RG::Type{<:Reverse}) = Reverse(zero(wrapped_graph_type(RG)))
+
 has_edge(rg::Reverse, s::Integer, d::Integer) =  has_edge(rg.graph, d, s)
 add_edge!(rg::Reverse, s::Integer, d::Integer, values) = add_edge!(rg.graph, d, s, values)
 rem_edge!(rg::Reverse, s::Integer, d::Integer) = rem_edge!(rg.graph, d, s)
@@ -73,5 +75,15 @@ set_edgeval!(rg::Reverse, s::Integer, d::Integer, key::Integer, value) = set_edg
 set_edgeval!(rg::Reverse, s::Integer, d::Integer, key::Symbol, value) = set_edgeval!(rg.graph, d, s, key, value)
 set_edgeval!(rg::Reverse, s::Integer, d::Integer, ::Colon, values) = set_edgeval!(rg.graph, d, s, :, values)
 
-outneighbors(rg::Reverse, u) = inneighbors(wrapped_graph(g), u)
-inneighbors(rg::Reverse, v) = outneighbors(wrapped_graph(g), v)
+outneighbors(rg::Reverse, u) = inneighbors(wrapped_graph(rg), u)
+inneighbors(rg::Reverse, v) = outneighbors(wrapped_graph(rg), v)
+
+outedgevals(rg::Reverse, u, key::Integer) = inedgevals(wrapped_graph(rg), u, key)
+outedgevals(rg::Reverse, u, key::Symbol) = inedgevals(wrapped_graph(rg), u, key)
+outedgevals(rg::Reverse, u, ::Colon) = inedgevals(wrapped_graph(rg), u, :)
+
+inedgevals(rg::Reverse, v, key::Integer) = outedgevals(wrapped_graph(rg), v, key)
+inedgevals(rg::Reverse, v, key::Symbol) = outedgevals(wrapped_graph(rg), v, key)
+inedgevals(rg::Reverse, v, ::Colon) = outedgevals(wrapped_graph(rg), v, :)
+
+# TODO implementing edges efficiently and with correct edge type
