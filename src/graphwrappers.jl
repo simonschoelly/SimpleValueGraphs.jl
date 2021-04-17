@@ -26,7 +26,6 @@ function wrapped_graph_type(::Type) end
 _DEFAULT_INCLUDE = [
     :nv,
     :is_directed,
-    :zero,
     :has_edge,
     :get_graphval,
     :get_vertexval,
@@ -65,6 +64,11 @@ these methods all have a default implementation in terms of other functions. To 
 these additional methods, specify them in a `Vector` to the keyword argument `include`.
 The following methods can be additionally generated:
 $(join(map(s -> '`' * string(s) * '`', _EXTRA_INCLUDE), ", ")).
+
+Note: To completely implement the `SimpleValueGraphs` interface for some graph one
+would also have to implement `zero`. This macro currently cannot do that, as this
+would knowledge of how to construct a new graph wrapper. Therefore one has to implement this
+method separately.
 
 # Examples
 ```julia
@@ -117,11 +121,6 @@ end
 function _generate_wrapped_function!(::Val{:is_directed}, GT)
 
     return :(SimpleValueGraphs.is_directed(G::Type{<:$GT}) = is_directed(wrapped_graph_type(G)))
-end
-
-function _generate_wrapped_function!(::Val{:zero}, GT)
-
-    return :(SimpleValueGraphs.zero(G::Type{<:$GT}) = zero(wrapped_graph_type(G)))
 end
 
 function _generate_wrapped_function!(::Val{:has_edge}, GT)
