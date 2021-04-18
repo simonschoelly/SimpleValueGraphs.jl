@@ -680,7 +680,7 @@ function Base.eltype(::Type{<:ValEdgeIter{G, key}}) where {G, key}
     if key == ()
         # TODO it might better to return an empty named tuple type in case
         # E_VALS is a named tuple, but then we need to adjust the iterators
-        return E{V, Tuple{}}
+        return E{V, (E_VALS <: NamedTuple) ? @NamedTuple{} : Tuple{}}
     end
 
     return E{V, E_VALS}
