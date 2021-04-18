@@ -408,6 +408,21 @@ function get_edgeval(g::AbstractValGraph, s, d, ::Colon)
     return E_VALS(get_edgeval(g, s, d, i) for i in OneTo(length(E_VALS.types)))
 end
 
+
+function get_edgeval(g::AbstractValGraph, s, d, keys::Union{NTuple{N, Int} where N, NTuple{N, Symbol} where N})
+
+    # TODO should be cleaned up, maybe also a bit more optimized with regards to constant propagation
+    E_VALS = edgevals_type(g)
+    E_VALS_RESULT = if E_VALS <: Tuple
+        Tuple{map(i -> fieldtype(E_VALS, i), keys)...}
+    elseif keys isa NTuple{N, Int} where N
+        NamedTuple{map(i -> Base.fieldname(E_VALS, i), keys), Tuple{map(i -> fieldtype(E_VALS, i), keys)...}}
+    else
+        NamedTuple{keys, Tuple{map(i -> fieldtype(E_VALS, i), keys)...}}
+    end
+    return E_VALS_RESULT(get_edgeval(g, s, d, key) for key in keys)
+end
+
 #  -----------------------------------------------------
 #  get_edgeval_or
 #  -----------------------------------------------------
