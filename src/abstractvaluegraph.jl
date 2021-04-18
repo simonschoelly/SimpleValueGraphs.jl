@@ -222,12 +222,12 @@ LG.vertices(g::AbstractValGraph) = OneTo{eltype(g)}(nv(g))
 LG.has_vertex(g::AbstractValGraph, v) = v ∈ vertices(g)
 
 """
-    edges(g::AbstractValGraph[, key])
+    edges(g::AbstractValGraph, key=())
 
 Return the edges of `g`. By default add no edge values
 but when `key=:` then add edge values.
 """
-LG.edges(g::AbstractValGraph, key=nothing) = ValEdgeIter(g, key)
+LG.edges(g::AbstractValGraph, key=()) = ValEdgeIter(g, key)
 
 LG.edgetype(g::AbstractValGraph) = eltype(edges(g))
 
@@ -646,7 +646,7 @@ inedgevals(g::AbstractValGraph, v, ::Colon) =
 struct ValEdgeIter{G<:AbstractValGraph, key} <: AbstractEdgeIter
     graph::G
 
-    function ValEdgeIter{G}(g::G, key::Union{Colon, Nothing}) where {G}
+    function ValEdgeIter{G}(g::G, key::Union{Colon, Tuple{}}) where {G}
 
         return new{G, key}(g)
     end
@@ -662,7 +662,7 @@ function Base.eltype(::Type{<:ValEdgeIter{G, key}}) where {G, key}
     V = eltype(G)
     E_VALS = edgevals_type(G)
 
-    if key == nothing
+    if key == ()
         # TODO it might better to return an empty named tuple type in case
         # E_VALS is a named tuple, but then we need to adjust the iterators
         return E{V, Tuple{}}
@@ -713,11 +713,7 @@ function Base.iterate(iter::ValEdgeIter{G, key}, state) where {G, key}
     end
 
     v, outneighbors_state = outneighbors_next
-    edge = if key == nothing
-                eltype(iter)(u, v, ())
-            else
-                eltype(iter)(u, v, get_edgeval(g, u, v, :))
-            end
+    edge = eltype(iter)(u, v, get_edgeval(g, u, v, key))
 
     outneighbors_next = iterate(outneighbors_iter, outneighbors_state)
 
