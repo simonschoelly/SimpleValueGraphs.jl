@@ -237,6 +237,6 @@ end
 
 function _generate_wrapped_function!(::Val{:edges}, GT)
 
-    return :(SimpleValueGraphs.edges(g::$GT, key=nothing) = edges(wrapped_graph(g), key))
+    return :(SimpleValueGraphs.edges(g::$GT, key=()) = edges(wrapped_graph(g), key))
 end
 
