@@ -100,7 +100,10 @@ function edgevals_type(G::Type{<:AbstractValGraph}, key::Symbol)
     return fieldtype(edgevals_type(G), key)
 end
 
+function edgevals_type(G::Type{<:AbstractValGraph}, keys::MultiKeyTypes)
 
+    return subtuple_type(edgevals_type(G), keys)
+end
 #  ------------------------------------------------------
 #  graphvals_type
 #  ------------------------------------------------------
@@ -226,14 +229,15 @@ LG.vertices(g::AbstractValGraph) = OneTo{eltype(g)}(nv(g))
 LG.has_vertex(g::AbstractValGraph, v) = v ∈ vertices(g)
 
 """
-    edges(g::AbstractValGraph, key=())
+    edges(g::AbstractValGraph, keys=())
 
-Return the edges of `g`. By default add no edge values
-but when `key=:` then add edge values.
+Return the edges of `g`.
+The argument keys specifies which edge values to return. Can be either a tuple
+of `Int`'s or `Symbol`'s, or ':' to return all edge values.
 """
-LG.edges(g::AbstractValGraph, key=()) = ValEdgeIter(g, key)
+LG.edges(g::AbstractValGraph, keys=()) = ValEdgeIter(g, keys)
 
-LG.edgetype(g::AbstractValGraph) = eltype(edges(g))
+LG.edgetype(g::AbstractValGraph, keys=()) = eltype(edges(g, keys))
 
 LG.ne(g::AbstractValGraph) = length(edges(g))
 
@@ -381,11 +385,11 @@ get_edgeval(g::AbstractValGraph, s, d, key::Symbol) =
 get_edgeval(g::OneEdgeValGraph, s, d) = get_edgeval(g, s, d, 1)
 
 """
-    get_edgeval(g::AbstractValGraph, s, d, :)
+    get_edgeval(g::AbstractValGraph, s, d, keys)
 
-Return all values associated with the edge `s -> d` in `g`.
+Return multiple values associated with the edge `s -> d` in `g`.
 
-Throw an exception if the graph does not contain such an edge.
+Keys can either be a tuple of keys (`Int` or `Symbol`) or `:` to return all keys.
 
 ### See also
 [`get_edgeval_or`](@ref), [`set_edgeval!`](@ref)
@@ -639,12 +643,12 @@ outedgevals(g::AbstractValGraph, u, key::Integer) =
 
 
 """
-    outedgevals(g::AbstractValGraph, v, :)
+    outedgevals(g::AbstractValGraph, v, keys)
 
-Return an iterator of all edge values of outgoing edges from `v` to its neighbors.
+Return an iterator of all edge values for the specified `keys` of outgoing edges from `v` to its neighbors
 """
-outedgevals(g::AbstractValGraph, u, ::Colon) =
-    [get_edgeval(g, u, v, :) for v in outneighbors(g, u)]
+outedgevals(g::AbstractValGraph, u, keys::MultiKeyTypes) =
+    [get_edgeval(g, u, v, keys) for v in outneighbors(g, u)]
 
 #  ------------------------------------------------------
 #  inedgevals
@@ -669,12 +673,13 @@ inedgevals(g::AbstractValGraph, v, key::Integer) =
     [get_edgeval(g, u, v, key) for u in inneighbors(g, v)]
 
 """
-    inedgevals(g::AbstractValGraph, v, :)
+    inedgevals(g::AbstractValGraph, v, keys)
 
 Return an iterator of all edge values of ingoing edges from neighbors of `v`.
+Return an iterator of all edge values for the specified `keys` ingoing edges from neighbors of `v`.
 """
-inedgevals(g::AbstractValGraph, v, ::Colon) =
-    [get_edgeval(g, u, v, :) for u in inneighbors(g, v)]
+inedgevals(g::AbstractValGraph, v, keys::MultiKeyTypes) =
+    [get_edgeval(g, u, v, keys) for u in inneighbors(g, v)]
 
 # ======================================================
 # Edge Iterator
