@@ -297,7 +297,7 @@ end
     g2 = DummyValGraph(ValDiGraph{UInt8}(0; edgeval_types=(a=UInt16, b=UInt32)))
 
     @test edgetype(g1) == ValEdge{Int8, Tuple{}}
-    @test edgetype(g2) == ValDiEdge{UInt8, Tuple{}}
+    @test edgetype(g2) == ValDiEdge{UInt8, @NamedTuple{}}
 end
 
 @testset "ne" begin

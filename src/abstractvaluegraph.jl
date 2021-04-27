@@ -1,4 +1,8 @@
 
+
+# TODO might move that somewhere else
+const MultiKeyTypes = Union{Colon, NTuple{N, Int} where N, NTuple{N, Symbol} where N}
+
 # ======================================================
 # AbstractValGraph structure
 # ======================================================
@@ -96,7 +100,10 @@ function edgevals_type(G::Type{<:AbstractValGraph}, key::Symbol)
     return fieldtype(edgevals_type(G), key)
 end
 
+function edgevals_type(G::Type{<:AbstractValGraph}, keys::MultiKeyTypes)
 
+    return subtuple_type(edgevals_type(G), keys)
+end
 #  ------------------------------------------------------
 #  graphvals_type
 #  ------------------------------------------------------
@@ -222,14 +229,15 @@ LG.vertices(g::AbstractValGraph) = OneTo{eltype(g)}(nv(g))
 LG.has_vertex(g::AbstractValGraph, v) = v ∈ vertices(g)
 
 """
-    edges(g::AbstractValGraph[, key])
+    edges(g::AbstractValGraph, keys=())
 
-Return the edges of `g`. By default add no edge values
-but when `key=:` then add edge values.
+Return the edges of `g`.
+The argument keys specifies which edge values to return. Can be either a tuple
+of `Int`'s or `Symbol`'s, or ':' to return all edge values.
 """
-LG.edges(g::AbstractValGraph, key=nothing) = ValEdgeIter(g, key)
+LG.edges(g::AbstractValGraph, keys=()) = ValEdgeIter(g, keys)
 
-LG.edgetype(g::AbstractValGraph) = eltype(edges(g))
+LG.edgetype(g::AbstractValGraph, keys=()) = eltype(edges(g, keys))
 
 LG.ne(g::AbstractValGraph) = length(edges(g))
 
@@ -377,11 +385,11 @@ get_edgeval(g::AbstractValGraph, s, d, key::Symbol) =
 get_edgeval(g::OneEdgeValGraph, s, d) = get_edgeval(g, s, d, 1)
 
 """
-    get_edgeval(g::AbstractValGraph, s, d, :)
+    get_edgeval(g::AbstractValGraph, s, d, keys)
 
-Return all values associated with the edge `s -> d` in `g`.
+Return multiple values associated with the edge `s -> d` in `g`.
 
-Throw an exception if the graph does not contain such an edge.
+Keys can either be a tuple of keys (`Int` or `Symbol`) or `:` to return all keys.
 
 ### See also
 [`get_edgeval_or`](@ref), [`set_edgeval!`](@ref)
@@ -406,6 +414,40 @@ function get_edgeval(g::AbstractValGraph, s, d, ::Colon)
 
     E_VALS = edgevals_type(g)
     return E_VALS(get_edgeval(g, s, d, i) for i in OneTo(length(E_VALS.types)))
+end
+
+
+function subtuple_type(T::Union{Type{<:Tuple}, Type{<:NamedTuple}}, ::Colon)
+
+    return T
+end
+
+function subtuple_type(T::Type{<:Tuple}, keys::NTuple{N, Int} where N)
+
+    return Tuple{map(i -> fieldtype(T, i), keys)...}
+end
+
+function subtuple_type(T::Type{<:NamedTuple}, keys::NTuple{0})
+
+    return @NamedTuple{}
+end
+
+function subtuple_type(T::Type{<:NamedTuple}, keys::NTuple{N, Int} where N)
+
+    return NamedTuple{map(i -> Base.fieldname(T, i), keys), Tuple{map(i -> fieldtype(T, i), keys)...}}
+end
+
+function subtuple_type(T::Type{<:NamedTuple}, keys::NTuple{N, Symbol} where N)
+
+    return NamedTuple{keys, Tuple{map(i -> fieldtype(T, i), keys)...}}
+end
+
+
+function get_edgeval(g::AbstractValGraph, s, d, keys::Union{NTuple{N, Int} where N, NTuple{N, Symbol} where N})
+
+    # TODO should be cleaned up, maybe also a bit more optimized with regards to constant propagation
+    E_VALS = subtuple_type(edgevals_type(g), keys)
+    return E_VALS(get_edgeval(g, s, d, key) for key in keys)
 end
 
 #  -----------------------------------------------------
@@ -601,12 +643,12 @@ outedgevals(g::AbstractValGraph, u, key::Integer) =
 
 
 """
-    outedgevals(g::AbstractValGraph, v, :)
+    outedgevals(g::AbstractValGraph, v, keys)
 
-Return an iterator of all edge values of outgoing edges from `v` to its neighbors.
+Return an iterator of all edge values for the specified `keys` of outgoing edges from `v` to its neighbors
 """
-outedgevals(g::AbstractValGraph, u, ::Colon) =
-    [get_edgeval(g, u, v, :) for v in outneighbors(g, u)]
+outedgevals(g::AbstractValGraph, u, keys::MultiKeyTypes) =
+    [get_edgeval(g, u, v, keys) for v in outneighbors(g, u)]
 
 #  ------------------------------------------------------
 #  inedgevals
@@ -631,12 +673,13 @@ inedgevals(g::AbstractValGraph, v, key::Integer) =
     [get_edgeval(g, u, v, key) for u in inneighbors(g, v)]
 
 """
-    inedgevals(g::AbstractValGraph, v, :)
+    inedgevals(g::AbstractValGraph, v, keys)
 
 Return an iterator of all edge values of ingoing edges from neighbors of `v`.
+Return an iterator of all edge values for the specified `keys` ingoing edges from neighbors of `v`.
 """
-inedgevals(g::AbstractValGraph, v, ::Colon) =
-    [get_edgeval(g, u, v, :) for u in inneighbors(g, v)]
+inedgevals(g::AbstractValGraph, v, keys::MultiKeyTypes) =
+    [get_edgeval(g, u, v, keys) for u in inneighbors(g, v)]
 
 # ======================================================
 # Edge Iterator
@@ -646,7 +689,7 @@ inedgevals(g::AbstractValGraph, v, ::Colon) =
 struct ValEdgeIter{G<:AbstractValGraph, key} <: AbstractEdgeIter
     graph::G
 
-    function ValEdgeIter{G}(g::G, key::Union{Colon, Nothing}) where {G}
+    function ValEdgeIter{G}(g::G, key::MultiKeyTypes) where {G}
 
         return new{G, key}(g)
     end
@@ -660,13 +703,7 @@ function Base.eltype(::Type{<:ValEdgeIter{G, key}}) where {G, key}
 
     E = is_directed(G) ? ValDiEdge : ValEdge
     V = eltype(G)
-    E_VALS = edgevals_type(G)
-
-    if key == nothing
-        # TODO it might better to return an empty named tuple type in case
-        # E_VALS is a named tuple, but then we need to adjust the iterators
-        return E{V, Tuple{}}
-    end
+    E_VALS = subtuple_type(edgevals_type(G), key)
 
     return E{V, E_VALS}
 end
@@ -713,11 +750,7 @@ function Base.iterate(iter::ValEdgeIter{G, key}, state) where {G, key}
     end
 
     v, outneighbors_state = outneighbors_next
-    edge = if key == nothing
-                eltype(iter)(u, v, ())
-            else
-                eltype(iter)(u, v, get_edgeval(g, u, v, :))
-            end
+    edge = eltype(iter)(u, v, get_edgeval(g, u, v, key))
 
     outneighbors_next = iterate(outneighbors_iter, outneighbors_state)
 
