@@ -1238,7 +1238,8 @@ inedgevals(g::ValDiGraph, v::Integer, key::Integer) = g.redgevals[key][v]
 # Iterators
 # ====================================================================
 
-
+# TODO temporarily commented out
+#=
 @inline function Base.iterate(eit::ValEdgeIter{<:ValGraph, key}, state=(one(eltype(eit.graph)), 1)) where {key}
 
     g = eit.graph
@@ -1255,11 +1256,14 @@ inedgevals(g::ValDiGraph, v::Integer, key::Integer) = g.redgevals[key][v]
             i = searchsortedfirst(fadjlist[u], u)
             continue
         end
+        e = eltype(eit)(u, v, get_edgeval(g, u, v, key))
+        #=
         e = if key == nothing
                 ValEdge(u, list_u[i], ())
             else
                 ValEdge(u, list_u[i], values_for_index(edgevals, edgevals_type(g), u, i))
             end
+        =#
 
         state = (u, i + 1)
         return e, state
@@ -1269,7 +1273,8 @@ inedgevals(g::ValDiGraph, v::Integer, key::Integer) = g.redgevals[key][v]
 
     @inbounds (n == 0 || i > length(fadjlist[n])) && return nothing
 
-    e = ValEdge(n, n, values_for_index(edgevals, edgevals_type(g), u, i))
+   # e = ValEdge(n, n, values_for_index(edgevals, edgevals_type(g), u, i))
+    e = eltype(eit)(u, v, get_edgeval(g, u, v, key))
     state = (u, i + 1)
     return e, state
 end
@@ -1293,15 +1298,19 @@ function Base.iterate(
             i = 1
             continue
         end
+        #=
         e = if key == nothing
                 ValDiEdge(u, fadjlist[u][i], ())
             else
                 ValDiEdge(u, fadjlist[u][i], values_for_index(edgevals, edgevals_type(g), u, i))
             end
+        =#
+        e = eltype(iter)(u, v, get_edgeval(g, u, v, key))
         return e, (u, i + 1)
     end
 
     return nothing
 end
+=#
 
 

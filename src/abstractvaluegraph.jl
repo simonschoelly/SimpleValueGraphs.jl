@@ -1,4 +1,8 @@
 
+
+# TODO might move that somewhere else
+const MultiKeyTypes = Union{Colon, NTuple{N, Int} where N, NTuple{N, Symbol} where N}
+
 # ======================================================
 # AbstractValGraph structure
 # ======================================================
@@ -409,18 +413,37 @@ function get_edgeval(g::AbstractValGraph, s, d, ::Colon)
 end
 
 
+function subtuple_type(T::Union{Type{<:Tuple}, Type{<:NamedTuple}}, ::Colon)
+
+    return T
+end
+
+function subtuple_type(T::Type{<:Tuple}, keys::NTuple{N, Int} where N)
+
+    return Tuple{map(i -> fieldtype(T, i), keys)...}
+end
+
+function subtuple_type(T::Type{<:NamedTuple}, keys::NTuple{0})
+
+    return @NamedTuple{}
+end
+
+function subtuple_type(T::Type{<:NamedTuple}, keys::NTuple{N, Int} where N)
+
+    return NamedTuple{map(i -> Base.fieldname(T, i), keys), Tuple{map(i -> fieldtype(T, i), keys)...}}
+end
+
+function subtuple_type(T::Type{<:NamedTuple}, keys::NTuple{N, Symbol} where N)
+
+    return NamedTuple{keys, Tuple{map(i -> fieldtype(T, i), keys)...}}
+end
+
+
 function get_edgeval(g::AbstractValGraph, s, d, keys::Union{NTuple{N, Int} where N, NTuple{N, Symbol} where N})
 
     # TODO should be cleaned up, maybe also a bit more optimized with regards to constant propagation
-    E_VALS = edgevals_type(g)
-    E_VALS_RESULT = if E_VALS <: Tuple
-        Tuple{map(i -> fieldtype(E_VALS, i), keys)...}
-    elseif keys isa NTuple{N, Int} where N
-        NamedTuple{map(i -> Base.fieldname(E_VALS, i), keys), Tuple{map(i -> fieldtype(E_VALS, i), keys)...}}
-    else
-        NamedTuple{keys, Tuple{map(i -> fieldtype(E_VALS, i), keys)...}}
-    end
-    return E_VALS_RESULT(get_edgeval(g, s, d, key) for key in keys)
+    E_VALS = subtuple_type(edgevals_type(g), keys)
+    return E_VALS(get_edgeval(g, s, d, key) for key in keys)
 end
 
 #  -----------------------------------------------------
@@ -661,7 +684,7 @@ inedgevals(g::AbstractValGraph, v, ::Colon) =
 struct ValEdgeIter{G<:AbstractValGraph, key} <: AbstractEdgeIter
     graph::G
 
-    function ValEdgeIter{G}(g::G, key::Union{Colon, Tuple{}}) where {G}
+    function ValEdgeIter{G}(g::G, key::MultiKeyTypes) where {G}
 
         return new{G, key}(g)
     end
@@ -675,13 +698,7 @@ function Base.eltype(::Type{<:ValEdgeIter{G, key}}) where {G, key}
 
     E = is_directed(G) ? ValDiEdge : ValEdge
     V = eltype(G)
-    E_VALS = edgevals_type(G)
-
-    if key == ()
-        # TODO it might better to return an empty named tuple type in case
-        # E_VALS is a named tuple, but then we need to adjust the iterators
-        return E{V, (E_VALS <: NamedTuple) ? @NamedTuple{} : Tuple{}}
-    end
+    E_VALS = subtuple_type(edgevals_type(G), key)
 
     return E{V, E_VALS}
 end
