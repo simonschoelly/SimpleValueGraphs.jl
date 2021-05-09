@@ -628,7 +628,57 @@ end
 #  rem_vertex!
 #  ------------------------------------------------------
 
-# TODO
+function LG.rem_vertex!(g::ValGraph, v::Integer)
+    # Procedure: swap v and n, then remove n
+    v in vertices(g) || return false
+    n = nv(g)
+    self_loop_n = false  # true if n is self-looped (see #820)
+
+    # Swap the vertex values of v and n
+    if v != n
+        for i in 1:length(g.vertexvals)
+            g.vertexvals[i][v] = g.vertexvals[i][n]
+        end
+    end
+
+    # Swap the edges and edge values of v and n
+
+    # remove the in_edges incident to v
+    neigs_v = copy(inneighbors(g, v))
+    for s in neigs_v
+        rem_edge!(g, s, v)
+    end
+    values_selfloop = nothing # TODO: fix this type instability
+    if v != n
+        neigs_n = copy(inneighbors(g, n))
+        for s in neigs_n
+            values = get_edgeval(g, s, n, :)
+            # remove the edges incident to the last vertex
+            rem_edge!(g, s, n)
+            # add them back as incident to v
+            if s != n
+                add_edge!(g, s, v, values)
+            else  # don't add an edge to the last vertex yet - see LG #820.
+                self_loop_n = true
+                values_selfloop = copy(values)
+            end
+        end
+    end
+
+    if self_loop_n
+        add_edge!(g, v, v, values_selfloop)
+    end
+
+    pop!(g.fadjlist)
+    for i in 1:length(g.vertexvals)
+        pop!(g.vertexvals[i])
+    end
+    for i in 1:length(g.edgevals)
+        pop!(g.edgevals[i])
+    end
+
+    return true
+end
 
 #  ------------------------------------------------------
 #  has_edge
