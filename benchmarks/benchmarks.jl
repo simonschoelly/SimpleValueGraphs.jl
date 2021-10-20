@@ -1,5 +1,5 @@
 using BenchmarkTools
-using SimpleValueGraphs, LightGraphs
+using SimpleValueGraphs, Graphs
 using SimpleWeightedGraphs, MetaGraphs
 using SNAPDatasets: loadsnap, snap_graphs
 using SparseArrays

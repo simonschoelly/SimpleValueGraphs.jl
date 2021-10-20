@@ -1,6 +1,6 @@
 using Documenter, SimpleValueGraphs
 
-DocMeta.setdocmeta!(SimpleValueGraphs, :DocTestSetup, :(using SimpleValueGraphs, LightGraphs, Random); recursive=true)
+DocMeta.setdocmeta!(SimpleValueGraphs, :DocTestSetup, :(using SimpleValueGraphs, Graphs, Random); recursive=true)
 makedocs(
     sitename = "SimpleValueGraphs.jl",
     authors = "Simon Schoelly",

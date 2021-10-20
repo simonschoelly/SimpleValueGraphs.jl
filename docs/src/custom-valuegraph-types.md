@@ -3,14 +3,14 @@
 While this package provides some concrete graph types, one is often interested in creating
 their own graph types. This section will explain how one can create a custom graph type that
 will work well with the methods from as package as well as the ones from
-[LightGraphs.jl](https://github.com/JuliaGraphs/LightGraphs.jl)
+[Graphs.jl](https://github.com/JuliaGraphs/Graphs.jl)
 
 ## The AbstractValGraph type
 
 All value graphs should be subtypes of *AbstractValGraph* that has the signature
 
 ```julia
-    AbstractValGraph{V <: Integer, V_VALS, E_VALS, G_VALS} <: LightGraphs.AbstractGraph{V}
+    AbstractValGraph{V <: Integer, V_VALS, E_VALS, G_VALS} <: Graphs.AbstractGraph{V}
 ```
 where the parameters have the following meaning:
 - `V` is the type used for indexing vertices, called the *eltype* of the graph. Should
@@ -29,8 +29,8 @@ MyGraphType{W} <: AbstractValGraph{Int, Tuple{}, Tuple{Int, W}, Tuple{}}
 is a graph  type that has neither vertex nor graph values and two edge values,
 one of them of type `Int` and the other of type `W`.
 
-As a subtype of `LightGraphs.AbstractGraph`, an `AbstractValGraph` should implement the
-[methods required by LightGraphs](https://github.com/JuliaGraphs/LightGraphs.jl) as well as some
+As a subtype of `Graphs.AbstractGraph`, an `AbstractValGraph` should implement the
+[methods required by Graphs.jl](https://github.com/JuliaGraphs/Graphs.jl) as well as some
 other methods. Luckily a lot of the methods required for `AbstractGraph` already have a default
 implementation, so the number of necessary methods is actually much shorter.
 

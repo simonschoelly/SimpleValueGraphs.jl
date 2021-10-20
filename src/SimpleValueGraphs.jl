@@ -1,17 +1,16 @@
 module SimpleValueGraphs
 
-using LightGraphs: AbstractGraph, AbstractEdgeIter, AbstractEdge, num_self_loops
+using Graphs: AbstractGraph, AbstractEdgeIter, AbstractEdge, num_self_loops
 
-using LightGraphs.SimpleGraphs: AbstractSimpleGraph, AbstractSimpleEdge,
+using Graphs.SimpleGraphs: AbstractSimpleGraph, AbstractSimpleEdge,
     SimpleGraph, SimpleDiGraph, SimpleEdge, IsDirected
 
 using Base: OneTo
 
 
-import LightGraphs
-const LG = LightGraphs
+import Graphs
 
-import LightGraphs:
+import Graphs:
     nv, ne, is_directed,
     eltype, vertices, add_vertex!, rem_vertex!, has_vertex,
     edgetype, edges, src, dst, reverse,
@@ -67,7 +66,7 @@ export
     AdjacencyMatrix,
     ValMatrix,
 
-    # overridden methods from LightGraphs
+    # overridden methods from Graphs.jl
     nv,
     ne,
     is_directed,

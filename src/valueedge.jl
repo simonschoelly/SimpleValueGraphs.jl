@@ -110,8 +110,8 @@ ValDiEdge{V}(s, d, values=()) where {V} = ValDiEdge{V, typeof(values)}(s, d, val
 #  src & dst
 #  ------------------------------------------------------
 
-LG.src(e::AbstractValEdge) = e.src
-LG.dst(e::AbstractValEdge) = e.dst
+Graphs.src(e::AbstractValEdge) = e.src
+Graphs.dst(e::AbstractValEdge) = e.dst
 
 
 #  ------------------------------------------------------
@@ -163,17 +163,17 @@ get_edgeval(e::AbstractValEdge, key) = e.values[key]
 #  reverse
 #  ------------------------------------------------------
 
-LG.reverse(e::ValEdge) = e
-LG.reverse(e::ValDiEdge) = ValDiEdge(dst(e), src(e), get_edgeval(e, :))
+Graphs.reverse(e::ValEdge) = e
+Graphs.reverse(e::ValDiEdge) = ValDiEdge(dst(e), src(e), get_edgeval(e, :))
 
 
 #  ------------------------------------------------------
 #  is_directed
 #  ------------------------------------------------------
 
-LG.is_directed(::Type{<:ValEdge}) = false
-LG.is_directed(::Type{<:ValDiEdge}) = true
-LG.is_directed(e::AbstractValEdge) = is_directed(typeof(e))
+Graphs.is_directed(::Type{<:ValEdge}) = false
+Graphs.is_directed(::Type{<:ValDiEdge}) = true
+Graphs.is_directed(e::AbstractValEdge) = is_directed(typeof(e))
 
 #  ------------------------------------------------------
 #  ==
