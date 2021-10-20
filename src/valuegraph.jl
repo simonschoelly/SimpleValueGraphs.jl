@@ -391,23 +391,23 @@ ValOutDiGraph(g::ValGraph) = ValOutDiGraph{eltype(g)}(g)
 #  nv
 #  ------------------------------------------------------
 
-LG.nv(g::ValGraph) = eltype(g)(length(g.fadjlist))
-LG.nv(g::ValOutDiGraph) = eltype(g)(length(g.fadjlist))
-LG.nv(g::ValDiGraph) = eltype(g)(length(g.fadjlist))
+Graphs.nv(g::ValGraph) = eltype(g)(length(g.fadjlist))
+Graphs.nv(g::ValOutDiGraph) = eltype(g)(length(g.fadjlist))
+Graphs.nv(g::ValDiGraph) = eltype(g)(length(g.fadjlist))
 
 #  ------------------------------------------------------
 #  ne
 #  ------------------------------------------------------
 
-LG.ne(g::ValGraph) = g.ne
-LG.ne(g::ValDiGraph) = g.ne
-LG.ne(g::ValOutDiGraph) = g.ne
+Graphs.ne(g::ValGraph) = g.ne
+Graphs.ne(g::ValDiGraph) = g.ne
+Graphs.ne(g::ValOutDiGraph) = g.ne
 
 #  ------------------------------------------------------
 #  add_edge!
 #  ------------------------------------------------------
 
-function LG.add_edge!(g::ValGraph, s::Integer, d::Integer, values)
+function Graphs.add_edge!(g::ValGraph, s::Integer, d::Integer, values)
 
     E_VALS = edgevals_type(g)
     values = convert_to_tuple(E_VALS, values)
@@ -439,7 +439,7 @@ function LG.add_edge!(g::ValGraph, s::Integer, d::Integer, values)
     return true # edge successfully added
 end
 
-function LG.add_edge!(g::ValOutDiGraph, s::Integer, d::Integer, values)
+function Graphs.add_edge!(g::ValOutDiGraph, s::Integer, d::Integer, values)
 
     E_VALS = edgevals_type(g)
     values = convert_to_tuple(E_VALS, values)
@@ -460,7 +460,7 @@ function LG.add_edge!(g::ValOutDiGraph, s::Integer, d::Integer, values)
     return true # edge successfully added
 end
 
-function LG.add_edge!(g::ValDiGraph, s::Integer, d::Integer, values)
+function Graphs.add_edge!(g::ValDiGraph, s::Integer, d::Integer, values)
 
     E_VALS = edgevals_type(g)
     values = convert_to_tuple(E_VALS, values)
@@ -490,7 +490,7 @@ end
 #  rem_edge!
 #  ------------------------------------------------------
 
-function LG.rem_edge!(g::ValGraph, s::Integer, d::Integer)
+function Graphs.rem_edge!(g::ValGraph, s::Integer, d::Integer)
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
     edgevals = g.edgevals
@@ -511,7 +511,7 @@ function LG.rem_edge!(g::ValGraph, s::Integer, d::Integer)
     return true
 end
 
-function LG.rem_edge!(g::ValOutDiGraph, s::Integer, d::Integer)
+function Graphs.rem_edge!(g::ValOutDiGraph, s::Integer, d::Integer)
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
     edgevals = g.edgevals
@@ -526,7 +526,7 @@ function LG.rem_edge!(g::ValOutDiGraph, s::Integer, d::Integer)
 end
 
 
-function LG.rem_edge!(g::ValDiGraph, s::Integer, d::Integer)
+function Graphs.rem_edge!(g::ValDiGraph, s::Integer, d::Integer)
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
     @inbounds list = g.fadjlist[s]
@@ -549,7 +549,7 @@ end
 #  add_vertex!
 #  ------------------------------------------------------
 
-function LG.add_vertex!(g::ValGraph, values)
+function Graphs.add_vertex!(g::ValGraph, values)
 
     V = eltype(g)
     V_VALS = vertexvals_type(g)
@@ -573,7 +573,7 @@ function LG.add_vertex!(g::ValGraph, values)
     return true
 end
 
-function LG.add_vertex!(g::ValOutDiGraph, values)
+function Graphs.add_vertex!(g::ValOutDiGraph, values)
 
     V = eltype(g)
     V_VALS = vertexvals_type(g)
@@ -597,7 +597,7 @@ function LG.add_vertex!(g::ValOutDiGraph, values)
     return true
 end
 
-function LG.add_vertex!(g::ValDiGraph, values)
+function Graphs.add_vertex!(g::ValDiGraph, values)
 
     V = eltype(g)
     V_VALS = vertexvals_type(g)
@@ -634,7 +634,7 @@ end
 #  has_edge
 #  ------------------------------------------------------
 
-function LG.has_edge(g::ValGraph, s::Integer, d::Integer)
+function Graphs.has_edge(g::ValGraph, s::Integer, d::Integer)
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
     @inbounds list_s = g.fadjlist[s]
@@ -643,18 +643,18 @@ function LG.has_edge(g::ValGraph, s::Integer, d::Integer)
         d = s
         list_s = list_d
     end
-    return LightGraphs.insorted(d, list_s)
+    return Graphs.insorted(d, list_s)
 end
 
-function LG.has_edge(g::ValOutDiGraph, s::Integer, d::Integer)
+function Graphs.has_edge(g::ValOutDiGraph, s::Integer, d::Integer)
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
     @inbounds list_s = g.fadjlist[s]
 
-    return LightGraphs.insorted(d, list_s)
+    return Graphs.insorted(d, list_s)
 end
 
-function LG.has_edge(g::ValDiGraph, s::Integer, d::Integer)
+function Graphs.has_edge(g::ValDiGraph, s::Integer, d::Integer)
     verts = vertices(g)
     (s in verts && d in verts) || return false # edge out of bounds
     @inbounds list_fadj = g.fadjlist[s]
@@ -663,7 +663,7 @@ function LG.has_edge(g::ValDiGraph, s::Integer, d::Integer)
         d = s
         list_fadj = list_badj
     end
-    return LightGraphs.insorted(d, list_fadj)
+    return Graphs.insorted(d, list_fadj)
 end
 
 #  ------------------------------------------------------
@@ -1198,24 +1198,24 @@ end
 #  is_directed
 #  ------------------------------------------------------
 
-LG.is_directed(::Type{<:ValGraph}) = false
-LG.is_directed(::Type{<:ValOutDiGraph}) = true
-LG.is_directed(::Type{<:ValDiGraph}) = true
+Graphs.is_directed(::Type{<:ValGraph}) = false
+Graphs.is_directed(::Type{<:ValOutDiGraph}) = true
+Graphs.is_directed(::Type{<:ValDiGraph}) = true
 
 #  ------------------------------------------------------
 #  outneighbors
 #  ------------------------------------------------------
 
-LG.outneighbors(g::ValGraph, v::Integer) = g.fadjlist[v]
-LG.outneighbors(g::ValDiGraph, v::Integer) = g.fadjlist[v]
-LG.outneighbors(g::ValOutDiGraph, v::Integer) = g.fadjlist[v]
+Graphs.outneighbors(g::ValGraph, v::Integer) = g.fadjlist[v]
+Graphs.outneighbors(g::ValDiGraph, v::Integer) = g.fadjlist[v]
+Graphs.outneighbors(g::ValOutDiGraph, v::Integer) = g.fadjlist[v]
 
 #  ------------------------------------------------------
 #  inneighbors
 #  ------------------------------------------------------
 
-LG.inneighbors(g::ValGraph, v::Integer) = outneighbors(g, v)
-LG.inneighbors(g::ValDiGraph, v::Integer) = g.badjlist[v]
+Graphs.inneighbors(g::ValGraph, v::Integer) = outneighbors(g, v)
+Graphs.inneighbors(g::ValDiGraph, v::Integer) = g.badjlist[v]
 
 #  ------------------------------------------------------
 #  outedgevals

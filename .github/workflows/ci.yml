@@ -61,7 +61,7 @@ jobs:
           julia --project=docs -e '
             using Documenter: DocMeta, doctest
             using SimpleValueGraphs
-            DocMeta.setdocmeta!(SimpleValueGraphs, :DocTestSetup, :(using SimpleValueGraphs, LightGraphs, Random); recursive=true)
+            DocMeta.setdocmeta!(SimpleValueGraphs, :DocTestSetup, :(using SimpleValueGraphs, Graphs, Random); recursive=true)
             doctest(SimpleValueGraphs)' # change MYPACKAGE to the name of your package
       - run: julia --project=docs docs/make.jl
         env:

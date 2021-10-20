@@ -16,8 +16,8 @@ begin
 	using SparseArrays
 
 	# We are going to test our new packages with some functions
-	# from LightGraphs and GraphsRecipes
-	using LightGraphs
+	# from Graphs.jl and GraphsRecipes
+	using Graphs
 	using GraphRecipes, Plots
 	pyplot() # gr backend has issues showing edge labels so we use pyplot instead
 end
@@ -46,7 +46,7 @@ where
 * `E_VALS` are the types of the edge values
 * `G_VALS` are the types of the edge values
 
-As this type of `LightGraphs.AbstractGraph`, it can also be used with LightGraphs functions as long as we correctly implement the `AbstractGraph` interface.
+As this type of `Graphs.AbstractGraph`, it can also be used with Graphs functions as long as we correctly implement the `AbstractGraph` interface.
 
 In our case the vertex type will be `Int` as this type is also used for indexing rows and columns in a matrix.
 
@@ -73,7 +73,7 @@ md"""
 
 ## Implementing the AbstractValGraph interface
 
-To be able to do anything meaningful with that graph, we have to implement the interface for `LightGraphs.AbstractGraph` as well as the interface for `SimpleGraphs.AbstractValGraph`. Luckily, SimpleValueGraphs provides already some sensible defaults (that can be overriden for performance or other reasons) for a lot of LightGraphs functions so that what we will have to implement is less than is usually required by LightGraphs. Nevertheless we need to implement the following functions:
+To be able to do anything meaningful with that graph, we have to implement the interface for `Graphs.AbstractGraph` as well as the interface for `SimpleGraphs.AbstractValGraph`. Luckily, SimpleValueGraphs provides already some sensible defaults (that can be overriden for performance or other reasons) for a lot of Graphs.jl functions so that what we will have to implement is less than is usually required by Graphs.jl. Nevertheless we need to implement the following functions:
 
 * `nv(::GraphView)`
 * `is_directed(::Type{<:GraphView})`
@@ -134,7 +134,7 @@ SimpleValueGraphs.get_edgeval(g::GraphView, u, v, key::Integer) = weight=g.matri
 # ╔═╡ ed96451c-5596-11eb-1c39-8b28c0e661af
 md"""
 ##### zero
-This function is a bit of an anomaly and should in my opinion not be part of the LightGraphs interface. It is also rarely used in LightGraphs, so it might not be a very big issue to omit it. Nevertheless we implement it here for the sake of completeness.
+This function is a bit of an anomaly and should in my opinion not be part of the Graphs.jl interface. It is also rarely used in Graphs.jl, so it might not be a very big issue to omit it. Nevertheless we implement it here for the sake of completeness.
 
 `zero(G)` should create a graph with zero vertices, given a graph type. We do this here by trying to create a matrix of size (0, 0) and the correct matrix type, and then wrap a `GraphView` around it:
 """
@@ -235,7 +235,7 @@ md"""
 ### Shortest paths
 
 
-Let's use some functions from LightGraphs to find the shortest path from vertex `2` to `5`:
+Let's use some functions from Graphs.jl to find the shortest path from vertex `2` to `5`:
 """
 
 # ╔═╡ 1147357a-2095-11eb-224e-61ad831db786

@@ -1,5 +1,5 @@
 
-#  This file contains value graph constructors from LightGraphs simple graphs.
+#  This file contains value graph constructors from Graphs.jl simple graphs.
 
 """
     ValGraph{V, V_VALS, E_VALS}(
@@ -20,7 +20,7 @@
 Construct a `ValGraph` with the same structure as `g`.
 
 # Arguments
-- `g`: A `LightGraphs.SimpleGraph`
+- `g`: A `Graphs.SimpleGraph`
 
 # Keywords
 - `vertexval_init`: How the vertex values of this graph should be initialized.
@@ -111,7 +111,7 @@ ValGraph(g::SimpleGraph; kwargs...) = ValGraph{eltype(g)}(g; kwargs...)
 Construct a `ValOutDiGraph` with the same structure as `g`.
 
 # Arguments
-- `g`: A `LightGraphs.SimpleDiGraph`
+- `g`: A `Graphs.SimpleDiGraph`
 
 # Keywords
 - `vertexval_init`: How the vertex values of this graph should be initialized.
@@ -195,7 +195,7 @@ ValOutDiGraph(g::SimpleDiGraph; kwargs...) = ValOutDiGraph{eltype(g)}(g; kwargs.
 Construct a `ValDiGraph` with the same structure as `g`.
 
 # Arguments
-- `g`: A `LightGraphs.SimpleDiGraph`
+- `g`: A `Graphs.SimpleDiGraph`
 
 # Keywords
 - `vertexval_init`: How the vertex values of this graph should be initialized.

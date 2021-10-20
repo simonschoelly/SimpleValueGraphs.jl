@@ -39,11 +39,11 @@ ZeroGraphValGraph{V, V_VALS, E_VALS} = AbstractValGraph{V, V_VALS, E_VALS, <: Ab
 #  eltype
 #  ------------------------------------------------------
 
-LG.eltype(::Type{<:AbstractValGraph{V}}) where {V} = V
+Graphs.eltype(::Type{<:AbstractValGraph{V}}) where {V} = V
 
 # This should not be necessary, as Base implements `eltype(x) = eltype(typeof(x))`
-# but unfortunately LightGraphs redefines `eltype(::AbstractGraph)` as not defined
-LG.eltype(g::AbstractValGraph) = eltype(typeof(g))
+# but unfortunately Graphs.jl redefines `eltype(::AbstractGraph)` as not defined
+Graphs.eltype(g::AbstractValGraph) = eltype(typeof(g))
 
 
 #  ------------------------------------------------------
@@ -214,12 +214,12 @@ end
 
 
 # ======================================================
-# Partial default implementation of LightGraphs interface
+# Partial default implementation of Graphs.jl interface
 # ======================================================
 
-LG.vertices(g::AbstractValGraph) = OneTo{eltype(g)}(nv(g))
+Graphs.vertices(g::AbstractValGraph) = OneTo{eltype(g)}(nv(g))
 
-LG.has_vertex(g::AbstractValGraph, v) = v ∈ vertices(g)
+Graphs.has_vertex(g::AbstractValGraph, v) = v ∈ vertices(g)
 
 """
     edges(g::AbstractValGraph[, key])
@@ -227,17 +227,17 @@ LG.has_vertex(g::AbstractValGraph, v) = v ∈ vertices(g)
 Return the edges of `g`. By default add no edge values
 but when `key=:` then add edge values.
 """
-LG.edges(g::AbstractValGraph, key=nothing) = ValEdgeIter(g, key)
+Graphs.edges(g::AbstractValGraph, key=nothing) = ValEdgeIter(g, key)
 
-LG.edgetype(g::AbstractValGraph) = eltype(edges(g))
+Graphs.edgetype(g::AbstractValGraph) = eltype(edges(g))
 
-LG.ne(g::AbstractValGraph) = length(edges(g))
+Graphs.ne(g::AbstractValGraph) = length(edges(g))
 
 # TODO a Base.Generator would be better here, but it causes problems with sort. Maybe
 # add a custom iterator
-LG.outneighbors(g::AbstractValGraph, u) = [v for v ∈ vertices(g) if has_edge(g, u, v)]
+Graphs.outneighbors(g::AbstractValGraph, u) = [v for v ∈ vertices(g) if has_edge(g, u, v)]
 
-LG.inneighbors(g::AbstractValGraph, v) = is_directed(g) ? [u for u ∈ vertices(g) if has_edge(g, u, v)] : outneighbors(g, v)
+Graphs.inneighbors(g::AbstractValGraph, v) = is_directed(g) ? [u for u ∈ vertices(g) if has_edge(g, u, v)] : outneighbors(g, v)
 
 
 # ======================================================
@@ -264,9 +264,9 @@ If the edge already exists, return `false` but still change the edge values.
 """
 function add_edge! end
 
-LG.add_edge!(g::ZeroEdgeValGraph, s, d) = add_edge!(g, s, d, ())
+Graphs.add_edge!(g::ZeroEdgeValGraph, s, d) = add_edge!(g, s, d, ())
 
-LG.add_edge!(g::OneEdgeValGraph, s, d; val) = add_edge!(g, s, d, tuple(val))
+Graphs.add_edge!(g::OneEdgeValGraph, s, d; val) = add_edge!(g, s, d, tuple(val))
 
 
 #  -----------------------------------------------------
@@ -288,9 +288,9 @@ Return `true` if the vertex was added successfully, otherwise return `false`.
 """
 function add_vertex! end
 
-LG.add_vertex!(g::ZeroVertexValGraph) = add_vertex!(g, ())
+Graphs.add_vertex!(g::ZeroVertexValGraph) = add_vertex!(g, ())
 
-LG.add_vertex!(g::OneVertexValGraph; val) = add_vertex!(g, tuple(val))
+Graphs.add_vertex!(g::OneVertexValGraph; val) = add_vertex!(g, tuple(val))
 
 
 # ======================================================

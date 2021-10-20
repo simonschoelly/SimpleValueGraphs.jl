@@ -1,6 +1,6 @@
 [deps]
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
-LightGraphs = "093fc24a-ae57-5d10-9952-331d41423f4d"
+Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
 MetaGraphs = "626554b9-1ddb-594c-aa3c-2596fe9399a5"
 SNAPDatasets = "fc66bc1b-447b-53fc-8f09-bc9cfb0b0c10"
 SimpleValueGraphs = "b43c691f-cac2-5415-8122-396fe16a49fc"

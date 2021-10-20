@@ -78,7 +78,7 @@ julia> adjacency_matrix(gv)
  1  0  0  0
 ```
 """
-LG.adjacency_matrix(g::AbstractValGraph) = AdjacencyMatrix(g)
+Graphs.adjacency_matrix(g::AbstractValGraph) = AdjacencyMatrix(g)
 
 ## ---------------------------------------------------------------
 ##       LinearAlgebra
@@ -373,14 +373,14 @@ without any edge values.
 """
 function weights end
 
-function LG.weights(g::AbstractValGraph, key; zerovalue=zero(edgevals_type(g, key)))
+function Graphs.weights(g::AbstractValGraph, key; zerovalue=zero(edgevals_type(g, key)))
 
     return ValMatrix(g, key, zerovalue)
 end
 
-function LG.weights(g::AbstractValGraph; kwargs...)
+function Graphs.weights(g::AbstractValGraph; kwargs...)
 
-    g isa ZeroEdgeValGraph && return LG.DefaultDistance(nv(g))
+    g isa ZeroEdgeValGraph && return Graphs.DefaultDistance(nv(g))
     g isa OneEdgeValGraph && return weights(g, 1; kwargs...)
 
     throw(ArgumentError("g has more than one edge value key. Must specify key."))

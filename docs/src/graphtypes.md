@@ -8,7 +8,7 @@ and three concrete implementations.
 The abstract type `AbstractValGraph` denotes a graph that can have multiple vertex
 and edge values. It has the signature 
 ```julia
-    AbstractValGraph{V, V_VALS, E_VALS} <: LightGraphs.AbstractGraph{V}
+    AbstractValGraph{V, V_VALS, E_VALS} <: Graphs.AbstractGraph{V}
 ```
 where the parameters have the following meaning:
 - `V` is the type used for indexing vertices, called the *eltype* of the graph. Should
@@ -116,7 +116,7 @@ Graphs without any values an be created with
 ```julia
     ValGraph{V = Int32}(n)
 ```
-where `n` is the number of vertices. One notable difference to LightGraphs is that the
+where `n` is the number of vertices. One notable difference to Graphs.jl is that the
 eltype is not bases on the type of `n` but is always taken from the parameter `V`.
 
 ```julia
@@ -185,9 +185,9 @@ julia> g2 = ValDiGraph{Int8}(4;
     edge value types: ()
 ```
 
-#### Graph from LightGraphs SimpleGraphs
+#### Graph from Graphs.jl SimpleGraphs
 
-One can also initialize a graph from a LightGraphs `SimpleGraph` or `SimpleDiGraph`. If
+One can also initialize a graph from a Graphs.jl `SimpleGraph` or `SimpleDiGraph`. If
 edge values are specified (with the `edgeval_types` keyword) we also need an initializer for
 edge values. We do that by using the `edgeval_init` keyword argument which can be
 either `undef` or a function `(s, d) -> values` that takes a source and target vertex and
@@ -199,7 +199,7 @@ Furthermore, if the eltype is not specified as a parameter, it is taken from the
 graph.
 
 ```julia
-julia> using LightGraphs: smallgraph, PathDiGraph
+julia> using Graphs.jl: smallgraph, PathDiGraph
 
 julia> g_simple = smallgraph(:house)
 {5, 6} undirected simple Int64 graph

@@ -6,12 +6,12 @@ that contain the topology of the graph.
 ## Adjacency matrices
 
 The `adjacency_matrix` function creates an adjacency matrix from a value graph . In contrast
-to LightGraphs, this is just a immutable *matrix view* of the graph, i.e if the graph
+to Graphs.jl, this is just a immutable *matrix view* of the graph, i.e if the graph
 changes, then so does this matrix. Therefore to get a mutable adjacency matrix one has to convert
 it before to some other matrix type.
 
 It is also possible to use the constructor `AdjacencyMatrix` to create a view of any
-`LightGraphs.AbstractGraph`.
+`Graphs.AbstractGraph`.
 
 ```julia
 julia> g1 = SimpleValueGraphs.swissmetro_graph();
@@ -65,8 +65,8 @@ julia> ValMatrix(g, :b, nothing)
  "xyz"    nothing  nothing
 ```
  
-One can also use the `LightGraphs.weights` function to obtain this matrix. If the graph
-does not have any edge values, this returns a `LightGraphs.DefaultDistance` instead.
+One can also use the `Graphs.weights` function to obtain this matrix. If the graph
+does not have any edge values, this returns a `Graphs.DefaultDistance` instead.
  
 ```julia
  julia> weights(g1, :a)

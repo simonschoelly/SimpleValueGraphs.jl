@@ -6,7 +6,7 @@ This module contains experimental stuff that does not respect SemVer
 """
 module Experimental
 
-using LightGraphs: AbstractGraph, weights, nv, vertices, outneighbors, DijkstraState, DefaultDistance
+using Graphs: AbstractGraph, weights, nv, vertices, outneighbors, DijkstraState, DefaultDistance
 using DataStructures: PriorityQueue, dequeue!
 using SimpleValueGraphs: ValGraph, edgevals_type, outedgevals
 using SimpleWeightedGraphs: SimpleWeightedGraph, weighttype

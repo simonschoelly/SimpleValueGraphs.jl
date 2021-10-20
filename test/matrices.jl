@@ -1,7 +1,7 @@
 using LinearAlgebra: ishermitian, issymmetric, mul!
 using SparseArrays: AbstractSparseMatrix
 using SimpleValueGraphs: OneEdgeValGraph
-using LightGraphs: DefaultDistance
+using Graphs: DefaultDistance
 
 @testset "matrices" begin
 

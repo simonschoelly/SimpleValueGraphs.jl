@@ -8,7 +8,7 @@
 [![codecov](https://codecov.io/gh/simonschoelly/SimpleValueGraphs.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/simonschoelly/SimpleValueGraphs.jl)
 [![](https://img.shields.io/badge/chat-Zulip%23graphs-yellow)](https://julialang.zulipchat.com/#narrow/stream/228745-graphs)
 
-SimpleValueGraphs is as [LightGraphs.jl](https://github.com/JuliaGraphs/LightGraphs.jl) compatible package for graphs with multiple, homogeneous vertex, edge and graph metadata. In particular it provides:
+SimpleValueGraphs is a [Graphs.jl](https://github.com/JuliaGraphs/Graphs.jl) compatible package for graphs with multiple, homogeneous vertex, edge and graph metadata. In particular it provides:
 - an abstract interface for graphs with metadata
 - concrete implementations of mutable graphs with metadata
 
@@ -26,12 +26,12 @@ Compared to [MetaGraphs.jl](https://github.com/JuliaGraphs/MetaGraphs.jl) it has
 ```julia
 using SimpleValueGraphs
 
-using LightGraphs: smallgraph
+using Graphs: smallgraph
 using Plots
 using GraphRecipes: graphplot
 using Colors: RGB, Color
 
-# Load a LightGraphs.SimpleGraph
+# Load a Graphs.SimpleGraph
 gs = smallgraph(:house)
 
 # Convert to a ValGraph with vertex and edge values
@@ -58,25 +58,25 @@ graphplot(gv;
 
 ## Benchmarks
 
-This is a comparison of running `LightGraphs.dijkstra_shortest_paths` on the [egonets-Facebook](https://snap.stanford.edu/data/egonets-Facebook.html) graph for multiple graph types.
+This is a comparison of running `Graphs.dijkstra_shortest_paths` on the [egonets-Facebook](https://snap.stanford.edu/data/egonets-Facebook.html) graph for multiple graph types.
 
 | graph type                                        | time (ms) |
 | ------------------------------------------------- | --------- |
-| LightGraphs.SimpleGraph + Matrix weights          | 6.5       |
-| LightGraphs.SimpleGraph + SparseMatrixCSC weights | 11.4      |
+| Graphs.SimpleGraph + Matrix weights               | 6.5       |
+| Graphs.SimpleGraph + SparseMatrixCSC weights      | 11.4      |
 | SimpleWeightedGraphs.SimpleWeightedGraph          | 11.7      |
 | MetaGraphs.MetaGraph                              | 141.9     |
 | SimpleValueGraphs.ValGraph                        | 12.4      |
 
-Currently a lot of LightGraphs algorithm do not optimally work with graphs that store edge metadata
+Currently a lot of Graphs.jl algorithms do not optimally work with graphs that store edge metadata
 internally. The next benchmark is an optimized version of the same algorithm that can be found
 in `SimpleValueGraphs.Experimental.dijkstra_shortests_pasts`. Clearly, this is a huge improvement for
 `ValGraph` and `SimpleWeightedGraph`.
 
 | graph type                                        | time (ms) |
 | ------------------------------------------------- | --------- |
-| LightGraphs.SimpleGraph + Matrix weights          | 6.8       |
-| LightGraphs.SimpleGraph + SparseMatrixCSC weights | 10.8      |
+| Graphs.SimpleGraph + Matrix weights               | 6.8       |
+| Graphs.SimpleGraph + SparseMatrixCSC weights      | 10.8      |
 | SimpleWeightedGraphs.SimpleWeightedGraph          | 2.9       |
 | MetaGraphs.MetaGraph                              | 147.3     |
 | SimpleValueGraphs.ValGraph                        | 3.1       |
