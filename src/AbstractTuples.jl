@@ -133,7 +133,7 @@ function typetuple_to_type end
 
 typetuple_to_type(tup::TypeTuple) = Tuple{ (T for T in tup)... }
 typetuple_to_type(tup::NamedTypeTuple) =
-    NamedTuple{ Tuple(typeof(tup).names), Tuple{ (T for T in tup)... }}
+    NamedTuple{propertynames(tup), Tuple{ (T for T in tup)... }}
 
 """
     typetuple(::Type{<:Tuple})
@@ -161,7 +161,7 @@ end
 
 function typetuple(TT::Type{<:NamedTuple})
 
-    return NamedTuple{Tuple(TT.names)}(TT.types)
+    return NamedTuple{fieldnames(TT)}(TT.types)
 end
 
 # ======================================================

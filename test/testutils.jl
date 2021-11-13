@@ -398,9 +398,9 @@ function testset_topological_equivalent(g::SimpleDiGraph, gv::ValDiGraph)
 end
 
 
-allkeys_for_E_VALS(E_VALS::Type{<:Tuple}) = 1:length(E_VALS.types)
-allkeys_for_E_VALS(E_VALS::Type{<:NamedTuple}) = E_VALS.names ∪
-                                                 (1:length(E_VALS.names))
+allkeys_for_E_VALS(E_VALS::Type{<:Tuple}) = 1:fieldcount(E_VALS)
+allkeys_for_E_VALS(E_VALS::Type{<:NamedTuple}) = fieldnames(E_VALS) ∪
+                                                    (1:fieldcount(E_VALS))
 
 
 # ========================================
