@@ -84,7 +84,7 @@ end
 
 # TODO check if still correct
 @generated function edgevals_container_type(::Val{E_VAL}) where {E_VAL <:NamedTuple}
-    R = NamedTuple{ Tuple(E_VAL.names), Tuple{( Adjlist{T} for T in E_VAL.types )...}}
+    R = NamedTuple{ fieldnames(E_VAL), Tuple{( Adjlist{T} for T in E_VAL.types )...}}
     return :($R)
 end
 
